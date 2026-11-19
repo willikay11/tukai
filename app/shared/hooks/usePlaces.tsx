@@ -12,7 +12,6 @@ import {
   cancelPlaceBookingRequest,
   claimPlaceOwnership,
   createAvailabilityException,
-  createAvailabilityRule,
   createPlace,
   createPlaceBookingRequest,
   createPlaceProperty,
@@ -22,7 +21,6 @@ import {
   createReservationProfile,
   declinePlaceBookingRequest,
   deleteAvailabilityException,
-  deleteAvailabilityRule,
   deletePlaceOwnership,
   deletePlacePhoto,
   deletePlaceProperty,
@@ -62,6 +60,7 @@ import { PlaceEditDraft } from '@/types/placeEdit';
 import {
   CreatePlaceAvailabilityException,
   CreatePlaceBookingRequest,
+  PlaceReservationProfile,
   ReservationSettingsDraft,
 } from '@/types/placeReservation';
 import { placePhotosAsUploads } from '@/utils/place-photo-uploads';
@@ -670,45 +669,39 @@ export const useSavePlaceEdits = (placeId: string) => {
  * deletes rules but does not update them - so a day whose times changed is
  * removed and written again.
  */
+/**
+ * One reservation profile, with where its income is paid out
+ * (`payoutAccount`), which only the single read carries.
+ */
+export const usePlaceReservationProfile = (
+  placeId: string,
+  profileId: string | undefined,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: ['placeReservationProfile', placeId, profileId],
+    queryFn: async () =>
+      (await fetchPlaceReservationProfile(placeId, profileId!)).data as PlaceReservationProfile,
+    enabled: enabled && Boolean(placeId && profileId),
+  });
+
 export const useSaveReservationSettings = (placeId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (draft: ReservationSettingsDraft) => {
-      const { profileId, profile, rules, existingRules, isActive, placePhotos = [] } = draft;
+      const { profileId, profile, rules, isActive, placePhotos = [] } = draft;
 
+      // The profile, its payment terms and the whole weekly schedule go in one
+      // request: availability_rules replaces what was there, so a half-saved
+      // schedule can't happen (DEV-462)
+      const payload = { ...profile, availabilityRules: rules };
       const saved = profileId
-        ? await updateReservationProfile(placeId, profileId, profile)
-        : await createReservationProfile(placeId, profile);
+        ? await updateReservationProfile(placeId, profileId, payload)
+        : await createReservationProfile(placeId, payload);
 
       const id: string | undefined = profileId ?? saved.data?.id;
       if (!id) throw new Error('The reservation profile could not be created');
-
-      // Every rule whose day is gone, or whose times moved, is rewritten
-      const keptDays = new Set(rules.map((rule) => rule.dayOfWeek));
-      for (const existing of existingRules) {
-        const replacement = rules.find((rule) => rule.dayOfWeek === existing.dayOfWeek);
-        const isUnchanged =
-          replacement &&
-          replacement.openTime === existing.openTime &&
-          replacement.closeTime === existing.closeTime &&
-          (replacement.slotIntervalMinutes ?? null) === (existing.slotIntervalMinutes ?? null);
-
-        if (!keptDays.has(existing.dayOfWeek) || !isUnchanged) {
-          await deleteAvailabilityRule(placeId, id, existing.id);
-        }
-      }
-
-      for (const rule of rules) {
-        const existing = existingRules.find((entry) => entry.dayOfWeek === rule.dayOfWeek);
-        const isUnchanged =
-          existing &&
-          existing.openTime === rule.openTime &&
-          existing.closeTime === rule.closeTime &&
-          (existing.slotIntervalMinutes ?? null) === (rule.slotIntervalMinutes ?? null);
-
-        if (!isUnchanged) await createAvailabilityRule(placeId, id, rule);
-      }
 
       // A draft profile is invisible to diners, so saving settings opens it, once it has a photo
       if (!isActive) {
@@ -718,6 +711,7 @@ export const useSaveReservationSettings = (placeId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReservationProfiles', placeId] });
+      queryClient.invalidateQueries({ queryKey: ['placeReservationProfile', placeId] });
       queryClient.invalidateQueries({ queryKey: ['placeAvailability', placeId] });
     },
   });

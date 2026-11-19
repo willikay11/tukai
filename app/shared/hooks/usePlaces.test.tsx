@@ -606,9 +606,12 @@ describe('useSaveReservationSettings', () => {
   const uploads = [new File(['bytes'], 'reservation-anchor-0.jpg', { type: 'image/jpeg' })];
 
   const draft = (extra: Partial<ReservationSettingsDraft> = {}): ReservationSettingsDraft => ({
-    profile: { reservationType: 'restaurant_reservation', seatingCapacity: 30 },
+    profile: {
+      reservationType: 'restaurant_reservation',
+      seatingCapacity: 30,
+      paymentType: 'free',
+    },
     rules: [],
-    existingRules: [],
     isActive: false,
     placePhotos,
     ...extra,

@@ -3,7 +3,9 @@
 import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { isPaidReservation } from '@/app/shared/components/Places/ReservationSettings/schemas';
 import { useReservationSettingsForm } from '@/app/shared/components/Places/ReservationSettings/useReservationSettingsForm';
+import { usePlaceReservationProfile } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -11,10 +13,12 @@ import { Place } from '@/types/place';
 import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
 import { formatTimeTo12Hour } from '@/utils/date-utils';
 
-import { ReservationSettingsForm } from './ReservationSettingsForm';
+import { PAYMENT_TYPES, ReservationSettingsForm, hoursLabel } from './ReservationSettingsForm';
+import { ReservationWallet, WalletLines } from './ReservationWallet';
 import { activeDays, openingHours, slotInterval } from './reservation-summary';
 
-const hoursLabel = (hours: string): string => `${hours} ${hours === '1' ? 'hour' : 'hours'}`;
+const money = (amount: { amount: string; currency: string }) =>
+  `${amount.currency} ${Number(amount.amount).toLocaleString('en-KE')}`;
 
 const Row = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col gap-2 border-t border-surface-muted py-[18px]">{children}</div>
@@ -42,9 +46,11 @@ const Fact = ({ label, children }: { label: string; children: React.ReactNode })
 );
 
 const STEPS = [
-  { id: 'type', label: 'Reservation type', icon: 'CalendarAdd01Icon', isDisabled: false },
-  { id: 'wallet', label: 'Wallet details', icon: 'Wallet02Icon', isDisabled: true },
+  { id: 'type', label: 'Reservation type', icon: 'CalendarAdd01Icon' },
+  { id: 'wallet', label: 'Wallet details', icon: 'Wallet02Icon' },
 ] as const;
+
+type Step = (typeof STEPS)[number]['id'];
 
 const STATUS_LINES: Record<string, (name: string) => string> = {
   active: (name) => `Live. Guests can send reservation requests to ${name}.`,
@@ -52,10 +58,8 @@ const STATUS_LINES: Record<string, (name: string) => string> = {
   draft: (name) => `Not live yet. ${name} is set up but closed to guests.`,
 };
 
-// Deposit and entry fees - and so the wallet step they would need - have no
-// backing fields on the API yet; see the reservation_settings_backend_gaps
-// memory. Max party size and the answer-by window are built, but kept
-// local-only for the same reason (no field to save them to).
+const NO_WALLET_LINE = 'Not live yet. Add your wallet details so guests can pay.';
+
 export const PlaceReservationSettings = ({
   place,
   profile,
@@ -69,13 +73,27 @@ export const PlaceReservationSettings = ({
 }) => {
   const { toast } = useToast();
   const [mode, setMode] = useState<'view' | 'edit'>(profile ? 'view' : 'edit');
-  const { values, errors, errorSummary, localOnly, set, reset, submit, isSaving } =
+  const [step, setStep] = useState<Step>('type');
+  const { values, errors, errorSummary, currency, set, reset, validate, submit, isSaving } =
     useReservationSettingsForm({
       placeId: place.id,
       profile,
       rules,
       placePhotos: place.photos,
     });
+
+  // Where the money goes is only on the single read (DEV-450)
+  const {
+    data: detail,
+    isLoading: isWalletLoading,
+    refetch: refetchWallet,
+  } = usePlaceReservationProfile(place.id, profile?.id);
+  const payoutAccount = detail?.payoutAccount;
+  const hasWallet = (payoutAccount?.wallets.length ?? 0) > 0;
+
+  const isPaidDraft = isPaidReservation(values.paymentType);
+  const savedPaymentType = profile?.paymentType ?? 'free';
+  const isPaidSaved = isPaidReservation(savedPaymentType);
 
   const days = activeDays(rules);
   const hours = openingHours(rules);
@@ -92,10 +110,11 @@ export const PlaceReservationSettings = ({
       return;
     }
     reset();
+    setStep('type');
     setMode('view');
   };
 
-  const save = () =>
+  const save = (next: 'view' | 'wallet') =>
     submit(() => {
       toast({
         title: 'Settings saved',
@@ -103,8 +122,29 @@ export const PlaceReservationSettings = ({
         variant: 'success',
       });
       reset();
+      if (next === 'wallet') {
+        setStep('wallet');
+        return;
+      }
+      setStep('type');
       setMode('view');
     });
+
+  // The wallet step is only for paid types, and only once the type step is
+  // complete - trying it early shows what is missing, as the save would
+  const openStep = (target: Step) => {
+    if (target === step) return;
+    if (target === 'wallet' && (!isPaidDraft || !validate())) return;
+    setStep(target);
+  };
+
+  const statusLine =
+    isPaidSaved && !isWalletLoading && !hasWallet
+      ? NO_WALLET_LINE
+      : (STATUS_LINES[status] ?? STATUS_LINES.draft)(place.title);
+  const isLive = status === 'active' && statusLine !== NO_WALLET_LINE;
+  const savedType =
+    PAYMENT_TYPES.find((type) => type.value === savedPaymentType) ?? PAYMENT_TYPES[0];
 
   return (
     <>
@@ -126,26 +166,28 @@ export const PlaceReservationSettings = ({
               aria-label="Steps"
               className="-mt-2 flex gap-2 overflow-x-auto [scrollbar-width:none]"
             >
-              {STEPS.map((step) => {
-                const isOn = step.id === 'type';
+              {STEPS.map((entry) => {
+                const isOn = entry.id === step;
+                const isDisabled = entry.id === 'wallet' && !isPaidDraft;
 
                 return (
                   <button
-                    key={step.id}
+                    key={entry.id}
                     type="button"
                     role="tab"
                     aria-selected={isOn}
-                    aria-disabled={step.isDisabled}
-                    aria-describedby={step.isDisabled ? 'rs-wallet-tab-note' : undefined}
+                    aria-disabled={isDisabled}
+                    aria-describedby={isDisabled ? 'rs-wallet-tab-note' : undefined}
+                    onClick={() => !isDisabled && openStep(entry.id)}
                     className={cn(
                       'inline-flex h-12 flex-none items-center gap-2 whitespace-nowrap rounded-full pl-4 pr-5 text-[14.5px] font-semibold',
                       isOn && 'bg-surface-brand text-brand',
-                      !isOn && !step.isDisabled && 'bg-surface text-gray-800',
-                      step.isDisabled && 'cursor-not-allowed bg-surface text-ink-subtle',
+                      !isOn && !isDisabled && 'bg-surface text-gray-800',
+                      isDisabled && 'cursor-not-allowed bg-surface text-ink-subtle',
                     )}
                   >
-                    <IconComponent iconName={step.icon} size={19} color="currentColor" />
-                    {step.label}
+                    <IconComponent iconName={entry.icon} size={19} color="currentColor" />
+                    {entry.label}
                   </button>
                 );
               })}
@@ -155,12 +197,22 @@ export const PlaceReservationSettings = ({
               </p>
             </div>
 
-            <ReservationSettingsForm
-              values={values}
-              errors={errors}
-              errorSummary={errorSummary}
-              set={set}
-            />
+            {step === 'wallet' ? (
+              <ReservationWallet
+                placeTitle={place.title}
+                payoutAccount={payoutAccount}
+                isLoading={Boolean(profile) && isWalletLoading}
+                onChanged={() => refetchWallet()}
+              />
+            ) : (
+              <ReservationSettingsForm
+                values={values}
+                errors={errors}
+                errorSummary={errorSummary}
+                currency={currency}
+                set={set}
+              />
+            )}
           </>
         ) : (
           <div className="-mt-1.5 flex flex-col">
@@ -168,16 +220,16 @@ export const PlaceReservationSettings = ({
               <p
                 className={cn(
                   'mb-[18px] flex items-start gap-2 rounded-xl px-3.5 py-3 text-sm font-semibold leading-[1.45]',
-                  status === 'active' ? 'bg-surface-brand text-brand' : 'bg-warn-surface text-warn',
+                  isLive ? 'bg-surface-brand text-brand' : 'bg-warn-surface text-warn',
                 )}
               >
                 <IconComponent
-                  iconName={status === 'active' ? 'Tick02Icon' : 'InformationCircleIcon'}
+                  iconName={isLive ? 'Tick02Icon' : 'InformationCircleIcon'}
                   size={17}
                   color="currentColor"
                   className="mt-0.5 flex-shrink-0"
                 />
-                {(STATUS_LINES[status] ?? STATUS_LINES.draft)(place.title)}
+                {statusLine}
               </p>
             ) : (
               <p className="rounded-xl bg-surface px-3.5 py-3 text-sm leading-[1.45] text-gray-800">
@@ -189,18 +241,37 @@ export const PlaceReservationSettings = ({
               <>
                 <Row>
                   <Label>Reservation type and fees</Label>
-                  <Value>Free reservation</Value>
-                  <span className="text-sm text-ink-muted">Guests pay nothing to book</span>
+                  <Value>{savedType.label}</Value>
+                  <span className="text-sm text-ink-muted">
+                    {savedPaymentType === 'deposit' && profile.depositAmount
+                      ? `${money(profile.depositAmount)} per guest, paid once you accept and taken off the final bill`
+                      : savedPaymentType === 'entry_fee'
+                        ? 'Per person by guest type, paid once you accept'
+                        : 'Guests pay nothing to book'}
+                  </span>
+                  {savedPaymentType === 'entry_fee' && (profile.entryFees?.length ?? 0) > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {profile.entryFees!.map((fee) => (
+                        <span
+                          key={fee.id ?? fee.guestType}
+                          className="inline-flex flex-col gap-px rounded-xl bg-surface px-4 py-2.5 text-sm text-gray-800"
+                        >
+                          <span className="font-semibold">{fee.guestType}</span>
+                          <span className="text-[13px] text-ink-muted">{money(fee.price)}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </Row>
 
-                {(profile.seatingCapacity !== undefined || localOnly.partySize) && (
+                {(profile.seatingCapacity || profile.maxPartySize) && (
                   <GridRow>
-                    {profile.seatingCapacity !== undefined && (
+                    {profile.seatingCapacity ? (
                       <Fact label="Total seating capacity">{profile.seatingCapacity} guests</Fact>
-                    )}
-                    {localOnly.partySize && (
-                      <Fact label="Max party size per booking">{localOnly.partySize} guests</Fact>
-                    )}
+                    ) : null}
+                    {profile.maxPartySize ? (
+                      <Fact label="Max party size per booking">{profile.maxPartySize} guests</Fact>
+                    ) : null}
                   </GridRow>
                 )}
 
@@ -249,17 +320,30 @@ export const PlaceReservationSettings = ({
                     {interval !== null ? `${interval} minutes` : 'No buffer'}
                   </Fact>
                   <Fact label="Requests expire">
-                    {hoursLabel(localOnly.expiryHours)} before the booking time
+                    {hoursLabel(values.respondWithinHours)} after they come in
                   </Fact>
+                  {isPaidSaved && (
+                    <Fact label="Time to pay">
+                      {hoursLabel(values.payWithinHours)} after you accept
+                    </Fact>
+                  )}
                   {closeTime12 && <Fact label="No-shows">At closing time, {closeTime12}</Fact>}
                 </GridRow>
 
                 <Row>
                   <Label>Wallet details</Label>
-                  <span className="text-sm leading-normal text-ink-muted">
-                    Not needed for free reservations. You add one if you switch to a deposit or
-                    entry fees.
-                  </span>
+                  {!isPaidSaved ? (
+                    <span className="text-sm leading-normal text-ink-muted">
+                      Not needed for free reservations. You add one if you switch to a deposit or
+                      entry fees.
+                    </span>
+                  ) : hasWallet ? (
+                    <WalletLines wallets={payoutAccount!.wallets} />
+                  ) : (
+                    <span className="text-sm leading-normal text-ink-muted">
+                      {isWalletLoading ? 'Loading…' : 'No payout method yet.'}
+                    </span>
+                  )}
                 </Row>
               </>
             )}
@@ -278,15 +362,27 @@ export const PlaceReservationSettings = ({
               Cancel
             </button>
             <span className="flex-1" aria-hidden="true" />
-            <Button
-              type="button"
-              variant="lime"
-              isLoading={isSaving}
-              onClick={save}
-              className="h-12 rounded-full px-6 text-[15px] font-semibold"
-            >
-              Save changes
-            </Button>
+            {step === 'type' && isPaidDraft ? (
+              <Button
+                type="button"
+                variant="lime"
+                isLoading={isSaving}
+                onClick={() => save('wallet')}
+                className="h-12 rounded-full px-6 text-[15px] font-semibold"
+              >
+                Save &amp; continue
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="lime"
+                isLoading={isSaving}
+                onClick={() => save('view')}
+                className="h-12 rounded-full px-6 text-[15px] font-semibold"
+              >
+                Save changes
+              </Button>
+            )}
           </>
         ) : (
           <Button

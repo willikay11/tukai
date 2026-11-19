@@ -1,5 +1,34 @@
+import { MoneyAmount } from '@/types/payment';
 import { Photo } from '@/types/photo';
 import { LinkedUser } from '@/types/user';
+
+/** What guests pay to confirm a reservation. */
+export type ReservationPaymentType = 'free' | 'deposit' | 'entry_fee';
+
+/** One guest category and its entry fee, e.g. Adults at KES 1,500. */
+export type PlaceEntryFee = {
+  id?: string;
+  guestType: string;
+  price: MoneyAmount;
+};
+
+/**
+ * Where a place's booking income is paid out (DEV-450): the payout wallets of
+ * the host who earns it - the owning community's owner. Only shown to the
+ * place's managers.
+ */
+export type ReservationPayoutAccount = {
+  host: { id: string; firstName?: string; lastName?: string; displayName?: string } | null;
+  wallets: {
+    id: string;
+    walletType: 'phone' | 'bank' | 'paybill' | string;
+    /** Masked: "•••6826" */
+    destination: string;
+    bankName?: string;
+    accountHolderName?: string;
+    isVerified?: boolean;
+  }[];
+};
 
 /** A place's bookability configuration, set up by its owning community. */
 export type PlaceReservationProfile = {
@@ -8,6 +37,18 @@ export type PlaceReservationProfile = {
   reservationType: 'restaurant_reservation' | 'cinema_reservation';
   status: 'draft' | 'active' | 'paused';
   seatingCapacity?: number;
+  /** Largest group on one booking; a bigger request is refused */
+  maxPartySize?: number | null;
+  /** How long the host has to answer a request (default 48) */
+  respondWithinHours?: number | null;
+  /** How long a guest has to pay once accepted (default 24) */
+  payWithinHours?: number | null;
+  paymentType?: ReservationPaymentType | null;
+  /** Per guest, when paymentType is deposit */
+  depositAmount?: MoneyAmount | null;
+  entryFees?: PlaceEntryFee[];
+  /** On the single-profile read only, for the place's managers */
+  payoutAccount?: ReservationPayoutAccount | null;
   // Creating a profile auto-provisions a draft "anchor" experience; bookings
   // hang off it server-side. Diners never see it.
   experienceId?: string;
@@ -99,10 +140,8 @@ export type CreatePlaceBookingRequest = {
 };
 
 /**
- * What the reservation settings screen sends when it saves.
- *
- * `existingRules` comes along so the save can work out which weekly hours have
- * to be rewritten: the API creates and deletes rules but never updates one.
+ * What the reservation settings screen sends when it saves: the profile, its
+ * payment terms and its weekly hours, in one request.
  */
 export type ReservationSettingsDraft = {
   /** Absent until the place has been opened to reservations at all */
@@ -110,14 +149,20 @@ export type ReservationSettingsDraft = {
   profile: {
     reservationType: PlaceReservationProfile['reservationType'];
     seatingCapacity?: number;
+    maxPartySize?: number;
+    respondWithinHours?: number;
+    payWithinHours?: number;
+    paymentType: ReservationPaymentType;
+    depositAmount?: MoneyAmount | null;
+    entryFees?: { guestType: string; price: MoneyAmount }[];
   };
+  /** The whole weekly schedule; saving replaces what was there */
   rules: {
     dayOfWeek: number;
     openTime: string;
     closeTime: string;
     slotIntervalMinutes?: number;
   }[];
-  existingRules: PlaceAvailabilityRule[];
   isActive: boolean;
   /** Lent to the profile's anchor experience when it has none, so activation can go through */
   placePhotos?: Photo[];

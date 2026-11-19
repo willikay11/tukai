@@ -1077,6 +1077,21 @@ export async function deletePlaceSocialLink(
 export type ReservationProfilePayload = {
   reservationType: 'restaurant_reservation' | 'cinema_reservation';
   seatingCapacity?: number;
+  maxPartySize?: number;
+  respondWithinHours?: number;
+  payWithinHours?: number;
+  /** free, deposit (needs depositAmount) or entry_fee (needs entryFees) */
+  paymentType?: 'free' | 'deposit' | 'entry_fee';
+  depositAmount?: { amount: string; currency: string } | null;
+  /** Replaces the whole list */
+  entryFees?: { guestType: string; price: { amount: string; currency: string } }[];
+  /** The whole weekly schedule; replaces what was there (DEV-462) */
+  availabilityRules?: {
+    dayOfWeek: number;
+    openTime: string;
+    closeTime: string;
+    slotIntervalMinutes?: number;
+  }[];
   experienceTitle?: string;
   experienceDescription?: string;
 };

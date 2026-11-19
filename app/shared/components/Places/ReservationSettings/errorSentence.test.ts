@@ -3,13 +3,17 @@ import { ReservationSettingsValues } from './schemas';
 
 const BASE: ReservationSettingsValues = {
   reservationType: 'restaurant_reservation',
+  paymentType: 'free',
+  depositAmount: '',
+  entryFees: [],
   seatingCapacity: '45',
   partySize: '15',
   days: ['Monday'],
   opensAt: '08:00',
   closesAt: '18:00',
   bufferMinutes: '',
-  expiryHours: '2',
+  respondWithinHours: '2',
+  payWithinHours: '3',
 };
 
 describe('reservationErrorSentence', () => {
@@ -34,9 +38,7 @@ describe('reservationErrorSentence', () => {
 
   it('flags a party size above capacity instead of a missing one', () => {
     const values: ReservationSettingsValues = { ...BASE, seatingCapacity: '10', partySize: '15' };
-    expect(reservationErrorSentence(values)).toBe(
-      'Add a party size no bigger than your capacity.',
-    );
+    expect(reservationErrorSentence(values)).toBe('Add a party size no bigger than your capacity.');
   });
 
   it('flags only the missing capacity, not an unenforceable party-size cap', () => {
@@ -56,5 +58,20 @@ describe('reservationErrorSentence', () => {
     expect(reservationErrorSentence(values)).toBe(
       'Add your seating capacity and a max party size.',
     );
+  });
+
+  it('asks for the deposit or the guest categories first, for a paid type', () => {
+    expect(reservationErrorSentence({ ...BASE, paymentType: 'deposit', depositAmount: '0' })).toBe(
+      'Add a deposit per guest.',
+    );
+    expect(
+      reservationErrorSentence({ ...BASE, paymentType: 'entry_fee', seatingCapacity: '' }),
+    ).toBe('Add at least one guest category with a price and your seating capacity.');
+  });
+
+  it('ignores a deposit left over once the type is free again', () => {
+    expect(
+      reservationErrorSentence({ ...BASE, paymentType: 'free', depositAmount: '' }),
+    ).toBeNull();
   });
 });
