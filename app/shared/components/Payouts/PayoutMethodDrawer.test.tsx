@@ -101,7 +101,21 @@ describe('payout method settings', () => {
     await userEvent.click(saveButton());
 
     expect(createPhone).toHaveBeenCalledWith(
-      { phone: '254712345678', accountHolderName: 'Wanjiku Maina' },
+      { phone: '+254712345678', accountHolderName: 'Wanjiku Maina' },
+      expect.anything(),
+    );
+  });
+
+  // Sent with the + and country code, as the API stores it; a leading 0 is dropped
+  it('sends a number typed with its leading 0 as +254', async () => {
+    renderDrawer();
+
+    await userEvent.type(screen.getByLabelText('M-Pesa number'), '0712 345 678');
+    await userEvent.type(screen.getByLabelText('Name on the M-Pesa account'), 'Wanjiku Maina');
+    await userEvent.click(saveButton());
+
+    expect(createPhone).toHaveBeenCalledWith(
+      { phone: '+254712345678', accountHolderName: 'Wanjiku Maina' },
       expect.anything(),
     );
   });
@@ -116,7 +130,7 @@ describe('payout method settings', () => {
     await userEvent.click(saveButton());
 
     expect(patchPhone).toHaveBeenCalledWith(
-      { walletId: 'w1', phone: '254798765432', accountHolderName: 'Wanjiku Maina' },
+      { walletId: 'w1', phone: '+254798765432', accountHolderName: 'Wanjiku Maina' },
       expect.anything(),
     );
   });
