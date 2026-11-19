@@ -118,6 +118,10 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
   const missing: string[] = [];
   if (!dateType.community) missing.push('a host community');
   if (!about.title?.trim()) missing.push('a title');
+  // These previews are on this device only: the upload didn't go through (DEV-510)
+  if (about.photos.some((photo) => photo.file)) {
+    missing.push('the photos that have not uploaded yet (go back to About to add them)');
+  }
   if (!isItinerary && !about.location?.trim() && !about.placeId) {
     missing.push('where the experience takes place');
   }

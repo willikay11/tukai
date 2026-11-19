@@ -538,7 +538,11 @@ export const addExperiencePhotos = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+      // A file refused before sending ("Invalid image file(s): ...") has no
+      // response - its own message is the reason, not "unexpected"
+      message: error.response
+        ? parseApiError(error.response.data, 'An unexpected error occurred')
+        : error.message || 'An unexpected error occurred',
     };
   }
 };

@@ -14,6 +14,7 @@ import {
   buildPreviewExperience,
   mapGeocodeResultToLocation,
 } from '@/app/(experiences)/experiences/create/utils/preview-utils';
+import { matchUploadedPhotos } from '@/app/(experiences)/experiences/create/utils/uploaded-photos';
 import {
   useCreateBankWallet,
   useCreatePhoneWallet,
@@ -1181,12 +1182,64 @@ export const useCreateExperienceFlow = ({
     updateItineraryDays(itineraryDays);
   };
 
+  /**
+   * Uploads the About photos that are still only on this device, then swaps
+   * each for the server's copy (its id, no local file), so a later save
+   * doesn't upload it again. On failure it says why and returns false: the
+   * photos stay as they were, to try again.
+   */
+  const uploadPendingPhotos = useCallback(
+    async (targetExperienceId: string): Promise<boolean> => {
+      const pending = formData.about.photos.filter((photo) => photo.file);
+      if (pending.length === 0) return true;
+
+      try {
+        const response = await addExperiencePhotos(
+          targetExperienceId,
+          pending.map((photo) => photo.file!),
+        );
+
+        const serverFor = matchUploadedPhotos(
+          pending,
+          response?.data?.photos ?? [],
+          new Set(formData.about.photos.map((photo) => photo.id)),
+        );
+
+        setFormData((prev) => ({
+          ...prev,
+          about: {
+            ...prev.about,
+            photos: prev.about.photos.map((photo) => {
+              if (!serverFor.has(photo.id)) return photo;
+              const server = serverFor.get(photo.id);
+              // The preview stays local: the server stores the file a few
+              // seconds after it answers
+              return server
+                ? { ...photo, id: server.id, file: undefined, isTempId: false }
+                : { ...photo, file: undefined };
+            }),
+          },
+        }));
+        return true;
+      } catch (photoError: any) {
+        console.error('[handleSaveAbout] Photo upload failed:', photoError);
+        const reason = parseApiError(photoError, 'Something went wrong.');
+        setApiError(reason);
+        toast({
+          title: "Your photos didn't upload",
+          description: `${reason} Everything else is saved. Try adding the photos again.`,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [formData.about.photos, toast],
+  );
+
   const handleSaveAbout = useCallback(async () => {
     setIsSavingExperience(true);
     setApiError(null);
     try {
-      const photoFiles = formData.about.photos.filter((p) => p.file).map((p) => p.file!);
-
       const isItinerary = formData.dateType.experienceType === 'itinerary';
 
       // The form's local dates and times as the UTC instants the API stores
@@ -1238,26 +1291,9 @@ export const useCreateExperienceFlow = ({
         await updateExperienceAsync(payload);
         console.log('[handleSaveAbout] updateExperienceAsync completed');
 
-        // Upload photos separately if present
-        if (photoFiles && photoFiles.length > 0) {
-          try {
-            console.log(
-              '[handleSaveAbout] Uploading',
-              photoFiles.length,
-              'photos to experience',
-              experienceId,
-            );
-            const photoResponse = await addExperiencePhotos(experienceId, photoFiles);
-            console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
-          } catch (photoError: any) {
-            console.error('[handleSaveAbout] Photo upload failed:', photoError);
-            toast({
-              title: 'Warning',
-              description: 'Photos failed to upload. You can add them again from the review page.',
-              variant: 'default',
-            });
-          }
-        }
+        // Photos go up on their own. If they don't, the host stays on About
+        // to try again rather than moving on without them (DEV-510)
+        if (!(await uploadPendingPhotos(experienceId))) return false;
 
         // Sync slot templates for recurring experiences
         if (formData.dateType.isRecurring) {
@@ -1293,21 +1329,9 @@ export const useCreateExperienceFlow = ({
           throw new Error('Failed to create experience: No ID returned from server');
         }
 
-        // Upload photos separately if present
-        if (photoFiles && photoFiles.length > 0) {
-          try {
-            await addExperiencePhotos(newExperienceId, photoFiles);
-          } catch (photoError: any) {
-            console.error('[handleSaveAbout] Photo upload failed:', photoError);
-            toast({
-              title: 'Warning',
-              description:
-                'Experience saved but photos failed to upload. You can add them again from the review page.',
-              variant: 'default',
-            });
-            // Don't block advancement - experience was already created
-          }
-        }
+        // Photos go up on their own. The experience exists now either way;
+        // if they don't upload, the host stays on About to try again
+        const photosUploaded = await uploadPendingPhotos(newExperienceId);
 
         // Create slot templates for recurring experiences
         if (formData.dateType.isRecurring) {
@@ -1378,6 +1402,10 @@ export const useCreateExperienceFlow = ({
 
         const nextStep = isItinerary ? 'itinerary-days' : 'tickets';
 
+        if (!photosUploaded) {
+          handleExperienceCreated(newExperienceId, 'about');
+          return false;
+        }
         handleExperienceCreated(newExperienceId, nextStep);
       }
 
@@ -1429,6 +1457,7 @@ export const useCreateExperienceFlow = ({
     timeZone,
     toast,
     planLimitAction,
+    uploadPendingPhotos,
   ]);
 
   const handleAddPhotos = useCallback(

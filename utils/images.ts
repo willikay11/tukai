@@ -1,3 +1,5 @@
+const HEIF_BRANDS = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1', 'msf1'];
+
 const hasImageSignature = (headerBytes: Uint8Array) => {
   const startsWith = (signature: number[]) =>
     signature.every((byte, index) => headerBytes[index] === byte);
@@ -13,8 +15,13 @@ const hasImageSignature = (headerBytes: Uint8Array) => {
     headerBytes[11] === 0x50;
   const isBmp = startsWith([0x42, 0x4d]);
   const isTiff = startsWith([0x49, 0x49, 0x2a, 0x00]) || startsWith([0x4d, 0x4d, 0x00, 0x2a]);
+  // HEIC/HEIF, the default on iPhones and Macs: an ISO box "ftyp" at byte 4,
+  // then a HEIF brand. The API reads these and turns them into JPEG (DEV-510).
+  const isHeif =
+    String.fromCharCode(...Array.from(headerBytes.slice(4, 8))) === 'ftyp' &&
+    HEIF_BRANDS.includes(String.fromCharCode(...Array.from(headerBytes.slice(8, 12))));
 
-  return isJpeg || isPng || isGif || isWebp || isBmp || isTiff;
+  return isJpeg || isPng || isGif || isWebp || isBmp || isTiff || isHeif;
 };
 
 const isSvgContent = async (file: File) => {
