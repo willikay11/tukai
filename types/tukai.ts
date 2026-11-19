@@ -120,13 +120,15 @@ export type TukaiPlanName = 'free' | 'tukai' | 'business';
 
 export type TukaiAccess = {
   plan: TukaiPlanName;
-  freeChatsUsed: number;
+  /** Free messages used this month, counted by the server */
+  freeMessagesUsed: number;
   /** ISO date, the TukAI plan only. */
   renewsAt?: string;
 };
 
 /** Why the paywall is showing: its title and text follow from this. */
-export type TukaiPaywallReason = 'chats' | 'cap' | 'upgrade' | 'helper';
+/** Why the paywall opened: the month's free messages ran out, an upgrade prompt, or a writing helper. */
+export type TukaiPaywallReason = 'allowance' | 'upgrade' | 'helper';
 
 /**
  * Something the agent proposes or did, from `actions` in its replies. Untyped

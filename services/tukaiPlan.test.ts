@@ -1,6 +1,7 @@
 import { apiWithToken } from './apiService';
 import {
   confirmTukaiSubscription,
+  fetchTukaiAllowance,
   fetchTukaiPlan,
   fetchTukaiSubscription,
   startTukaiCheckout,
@@ -102,5 +103,27 @@ describe('paying for TukAI (DEV-373)', () => {
 
     api.get.mockResolvedValueOnce({ data: { id: 'sub-new', status: 'cancelled' } });
     await expect(confirmTukaiSubscription('sub-new')).resolves.toBeNull();
+  });
+
+  // DEV-374: this month's free messages, from the server
+  it('reads the free allowance', async () => {
+    api.get.mockResolvedValue({
+      data: {
+        unlimited: false,
+        limit: 20,
+        used: 2,
+        remaining: 18,
+        resets_at: '2026-12-01T00:00:00Z',
+      },
+    });
+
+    await expect(fetchTukaiAllowance()).resolves.toEqual({
+      unlimited: false,
+      limit: 20,
+      used: 2,
+      remaining: 18,
+      resetsAt: '2026-12-01T00:00:00Z',
+    });
+    expect(api.get).toHaveBeenCalledWith('/v1/tukai/allowance/');
   });
 });

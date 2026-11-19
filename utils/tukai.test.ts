@@ -3,6 +3,7 @@ import type { TukaiItem, TukaiMessage } from '@/types/tukai';
 import {
   chatTitleFrom,
   cleanTukaiText,
+  freeMessagesText,
   idsInReply,
   parseTukaiReply,
   stopEnd,
@@ -202,5 +203,17 @@ describe('tukaiPins', () => {
     expect(numbers).toEqual({ p1: 1, e1: 2 });
     expect(pins[0]).toMatchObject({ id: 'p1', day: 1, when: 'Day 1 · 10:00 AM - 11:00 AM' });
     expect(pins[1]).toMatchObject({ id: 'e1', day: 2, when: 'Day 2' });
+  });
+});
+
+// DEV-374: the server's monthly free messages, not 2 chats of 10
+describe('freeMessagesText', () => {
+  it.each([
+    [18, '18 free messages left this month'],
+    [1, '1 free message left this month'],
+    [0, 'No free messages left this month'],
+    [null, 'Free messages this month'],
+  ])('writes %s as "%s"', (left, text) => {
+    expect(freeMessagesText(left)).toBe(text);
   });
 });

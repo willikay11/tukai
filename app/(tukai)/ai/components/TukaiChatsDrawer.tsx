@@ -7,7 +7,7 @@ import { PlainImage } from '@/app/shared/components/Images';
 import { Drawer } from '@/components/ui/drawer';
 import { useTukai } from '@/context/TukaiContext';
 import { cn } from '@/lib/utils';
-import { countUserMessages, planStopCount, plural } from '@/utils/tukai';
+import { countUserMessages, freeMessagesText, planStopCount, plural } from '@/utils/tukai';
 
 const SectionHead = ({ title }: { title: string }) => (
   <div className="sticky top-0 z-[1] -mx-6 flex min-h-11 items-center bg-surface-sticky px-6 py-2">
@@ -31,7 +31,7 @@ export const TukaiChatsDrawer = () => {
     showOnMap,
     access,
     isUnlocked,
-    freeChatsLeft,
+    freeMessagesLeft,
     showPaywall,
   } = useTukai();
   const [query, setQuery] = useState('');
@@ -80,13 +80,8 @@ export const TukaiChatsDrawer = () => {
           line: `Unlimited chats and writing help in forms.${renews ? ` Renews on ${renews}.` : ''}`,
         }
     : {
-        title:
-          freeChatsLeft === 2
-            ? '2 free chats left'
-            : freeChatsLeft === 1
-              ? '1 free chat left'
-              : 'No free chats left',
-        line: 'Each free chat holds up to 10 messages. Get TukAI for unlimited chats and writing help in forms.',
+        title: freeMessagesText(freeMessagesLeft),
+        line: 'Free messages reset at the start of each month. Get TukAI for unlimited messages and writing help in forms.',
       };
 
   return (

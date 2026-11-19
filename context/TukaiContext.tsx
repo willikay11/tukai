@@ -22,6 +22,7 @@ import { useHostingPlan } from '@/context/HostingPlanContext';
 import { confirmTukaiAction, deleteTukaiSession, sendTukaiMessage } from '@/services/tukai';
 import {
   confirmTukaiSubscription,
+  fetchTukaiAllowance,
   fetchTukaiPlan,
   fetchTukaiSubscription,
   startTukaiCheckout,
@@ -42,13 +43,7 @@ import type {
   TukaiPaywallReason,
   TukaiReply,
 } from '@/types/tukai';
-import {
-  TUKAI_FREE_CHATS,
-  TUKAI_FREE_MESSAGES,
-  TUKAI_PRICE_LABEL,
-  chatTitleFrom,
-  countUserMessages,
-} from '@/utils/tukai';
+import { TUKAI_PRICE_LABEL, chatTitleFrom, freeMessagesText } from '@/utils/tukai';
 
 export const TUKAI_ROUTE = '/ai';
 
@@ -95,8 +90,14 @@ type TukaiContextValue = {
   access: TukaiAccess;
   /** Unlimited chats, writing helpers and Create with TukAI. */
   isUnlocked: boolean;
-  freeChatsLeft: number;
-  /** "2 free chats left", "TukAI plan", "Included in your Business plan". */
+  /**
+   * Free messages left this month, from the server (DEV-374). Null when
+   * TukAI is unlimited, or before the count has loaded.
+   */
+  freeMessagesLeft: number | null;
+  /** When the free messages come back: the start of next month. */
+  freeMessagesResetAt: string | null;
+  /** "18 free messages left this month", "TukAI plan", "Included in your Business plan". */
   statusLine: string;
 
   chats: TukaiChat[];
@@ -119,9 +120,8 @@ type TukaiContextValue = {
   openChat: (chatId: string) => void;
   deleteChat: (chatId: string) => void;
 
-  /** Composer locked at 10 messages, or no free chats left with nothing open. */
+  /** No free messages left this month and no TukAI plan: the composer locks. */
   isCapped: boolean;
-  hasNoFreeChats: boolean;
 
   showPaywall: (reason: TukaiPaywallReason) => void;
   goToPay: () => void;
@@ -180,7 +180,6 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
   // Another account's chats are never shown, even before the slice resets
   const mine = Boolean(userId) && stored?.ownerId === userId;
   const chats = useMemo(() => (mine ? stored.chats : []), [mine, stored?.chats]);
-  const freeChatsUsed = mine ? stored.freeChatsUsed : 0;
 
   // The TukAI plan and the account's live TukAI subscription, from the API.
   // Access follows the subscription, so it's the same on every device.
@@ -196,6 +195,16 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
     queryFn: fetchTukaiSubscription,
     enabled: Boolean(userId),
   });
+  // This month's free messages, counted by the server on every device
+  const { data: allowance } = useQuery({
+    queryKey: ['tukai-allowance', userId],
+    queryFn: fetchTukaiAllowance,
+    enabled: Boolean(userId),
+  });
+  const refreshAllowance = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ['tukai-allowance'] }),
+    [queryClient],
+  );
   const planRenewsAt = tukaiSubscription?.renewsAt ?? null;
   const priceLabel = tukaiPlan?.priceLabel ?? TUKAI_PRICE_LABEL;
 
@@ -233,29 +242,22 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
 
   const access: TukaiAccess = {
     plan: hasTukaiPlan ? 'tukai' : businessPlan ? 'business' : 'free',
-    freeChatsUsed,
+    freeMessagesUsed: allowance?.used ?? 0,
     renewsAt: hasTukaiPlan ? planRenewsAt! : undefined,
   };
-  const isUnlocked = access.plan !== 'free';
-  const freeChatsLeft = isUnlocked
-    ? TUKAI_FREE_CHATS
-    : Math.max(0, TUKAI_FREE_CHATS - freeChatsUsed);
+  // A live TukAI subscription also shows as an unlimited allowance
+  const isUnlocked = access.plan !== 'free' || Boolean(allowance?.unlimited);
+  const freeMessagesLeft = isUnlocked ? null : (allowance?.remaining ?? null);
+  const freeMessagesResetAt = allowance?.resetsAt ?? null;
   const statusLine = isUnlocked
     ? access.plan === 'business'
       ? 'Included in your Business plan'
       : 'TukAI plan'
-    : freeChatsLeft === 2
-      ? '2 free chats left'
-      : freeChatsLeft === 1
-        ? '1 free chat left'
-        : 'No free chats left';
+    : freeMessagesText(freeMessagesLeft);
 
   const currentChat = chats.find((c) => c.id === currentChatId) ?? null;
-  const isCapped =
-    !isUnlocked &&
-    Boolean(currentChat) &&
-    countUserMessages(currentChat!.messages) >= TUKAI_FREE_MESSAGES;
-  const hasNoFreeChats = !isUnlocked && !currentChat && freeChatsLeft <= 0;
+  // Locked only once the server says none are left, never on a guess
+  const isCapped = !isUnlocked && freeMessagesLeft === 0;
 
   const setInput = useCallback((value: string) => setInputState(value.slice(0, 2000)), []);
 
@@ -267,10 +269,23 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
 
   /** Waits on one call to TukAI and adds its reply to the chat. */
   const reply = useCallback(
-    async (chatId: string, call: () => Promise<ApiResponse<TukaiReply>>) => {
+    async (
+      chatId: string,
+      call: () => Promise<ApiResponse<TukaiReply>>,
+      onAllowanceUsedUp?: () => void,
+    ) => {
       busyRef.current = true;
       setBusy(true);
-      const message = toAiMessage(await call());
+      const result = await call();
+      // Every reply may have used one of the month's free messages
+      void refreshAllowance();
+      if (result.status === 402 && onAllowanceUsedUp) {
+        busyRef.current = false;
+        setBusy(false);
+        onAllowanceUsedUp();
+        return null;
+      }
+      const message = toAiMessage(result);
       dispatch(addTukaiMessage({ chatId, message }));
       // A new reply takes the map, unless the person picked an older one
       setMapMessageId(null);
@@ -279,7 +294,23 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       setBusy(false);
       return message;
     },
-    [dispatch],
+    [dispatch, refreshAllowance],
+  );
+
+  /**
+   * The server refused a message: this month's free messages are used up.
+   * It wasn't recorded, so it comes back out of the chat and waits; the
+   * paywall opens, and once TukAI is paid the message goes.
+   */
+  const holdForPayment = useCallback(
+    (chatId: string, messageId: string, text: string) => {
+      dispatch(removeTukaiMessage({ chatId, messageId }));
+      setPending(text);
+      setPaywallReason('allowance');
+      setView('paywall');
+      if (pathname !== TUKAI_ROUTE) router.push(TUKAI_ROUTE);
+    },
+    [dispatch, pathname, router],
   );
 
   /**
@@ -288,10 +319,15 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
    */
   const run = useCallback(
     (chatId: string, messages: TukaiMessage[]) => {
-      const message = [...messages].reverse().find((m) => m.role === 'user')?.text ?? '';
-      return reply(chatId, () => sendTukaiMessage({ sessionId: chatId, message }));
+      const last = [...messages].reverse().find((m) => m.role === 'user');
+      const message = last?.text ?? '';
+      return reply(
+        chatId,
+        () => sendTukaiMessage({ sessionId: chatId, message }),
+        last ? () => holdForPayment(chatId, last.id, message) : undefined,
+      );
     },
-    [reply],
+    [holdForPayment, reply],
   );
 
   const ask = useCallback(
@@ -299,26 +335,27 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       const text = String(raw || '').trim();
       if (!text || busyRef.current || !userId) return;
 
+      if (isCapped) {
+        // No free messages left this month: it waits for payment and goes
+        // once TukAI is unlocked
+        setPending(text);
+        setPaywallReason('allowance');
+        setView('paywall');
+        if (pathname !== TUKAI_ROUTE) router.push(TUKAI_ROUTE);
+        return;
+      }
+
       let chat = currentChat;
       if (!chat) {
-        if (!isUnlocked && freeChatsUsed >= TUKAI_FREE_CHATS) {
-          // The message waits for payment and goes once TukAI is unlocked
-          setPending(text);
-          setPaywallReason('chats');
-          setView('paywall');
-          if (pathname !== TUKAI_ROUTE) router.push(TUKAI_ROUTE);
-          return;
-        }
         chat = {
           id: newId('ch'),
           title: chatTitleFrom(text),
           createdAt: new Date().toISOString(),
           messages: [],
         };
-        dispatch(startTukaiChat({ ownerId: userId, chat, countsAsFree: !isUnlocked }));
+        dispatch(startTukaiChat({ ownerId: userId, chat, countsAsFree: false }));
         setCurrentChatId(chat.id);
       }
-      if (!isUnlocked && countUserMessages(chat.messages) >= TUKAI_FREE_MESSAGES) return;
 
       const message: TukaiMessage = {
         id: newId('m'),
@@ -332,7 +369,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       if (pathname !== TUKAI_ROUTE) router.push(TUKAI_ROUTE);
       run(chat.id, [...chat.messages, message]);
     },
-    [currentChat, dispatch, freeChatsUsed, isUnlocked, pathname, router, run, userId],
+    [currentChat, dispatch, isCapped, pathname, router, run, userId],
   );
   askRef.current = ask;
 
@@ -357,8 +394,9 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       const message = await reply(chatId, () =>
         confirmTukaiAction({ sessionId: chatId, confirmed }),
       );
-      // Failed: the question stays open so the person can answer again
-      if (message.error) {
+      // Failed: the question stays open so the person can answer again.
+      // (No allowance handler here, so a reply always comes back.)
+      if (message?.error) {
         dispatch(removeTukaiMessage({ chatId, messageId: message.id }));
         dispatch(patchTukaiMessage({ chatId, messageId, patch: { confirmation: undefined } }));
         toast({ description: ERROR_TEXT });
@@ -374,8 +412,8 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const newChat = useCallback(() => {
-    if (!isUnlocked && freeChatsUsed >= TUKAI_FREE_CHATS) {
-      showPaywall('chats');
+    if (isCapped) {
+      showPaywall('allowance');
       return;
     }
     setCurrentChatId(null);
@@ -385,7 +423,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
     setMapSheetOpen(false);
     setSelectedPinId(null);
     setFocusRequest((n) => n + 1);
-  }, [freeChatsUsed, isUnlocked, showPaywall]);
+  }, [isCapped, showPaywall]);
 
   const openChat = useCallback((chatId: string) => {
     setCurrentChatId(chatId);
@@ -509,7 +547,8 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       firstName: String(session?.user?.name || '').split(' ')[0],
       access,
       isUnlocked,
-      freeChatsLeft,
+      freeMessagesLeft,
+      freeMessagesResetAt,
       statusLine,
       chats,
       currentChat,
@@ -527,7 +566,6 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       openChat,
       deleteChat,
       isCapped,
-      hasNoFreeChats,
       showPaywall,
       goToPay,
       backFromPaywall,
@@ -556,10 +594,11 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       userId,
       session?.user?.name,
       access.plan,
-      access.freeChatsUsed,
+      access.freeMessagesUsed,
       access.renewsAt,
       isUnlocked,
-      freeChatsLeft,
+      freeMessagesLeft,
+      freeMessagesResetAt,
       statusLine,
       chats,
       currentChat,
@@ -577,7 +616,6 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       openChat,
       deleteChat,
       isCapped,
-      hasNoFreeChats,
       showPaywall,
       goToPay,
       backFromPaywall,
