@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 
 import { getAuthSession } from '@/lib/auth';
-import type { TukaiAction, TukaiReply } from '@/types/tukai';
+import type { TukaiAction, TukaiRecommendationCard, TukaiReply } from '@/types/tukai';
+import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { cleanTukaiText } from '@/utils/tukai';
+import { cardToItem } from '@/utils/tukai-saved-chats';
 
 /**
  * The TukAI agent service (services/tukai-ai.json), called only from these
@@ -62,24 +64,41 @@ export type TukaiAgentReply = {
   reply: string;
   requires_confirmation?: boolean;
   actions?: TukaiAction[];
+  /**
+   * Cards for the places and experiences the reply recommends, as the API
+   * builds them when it saves the reply (DEV-477). Snake case, as sent.
+   */
+  recommendations?: Record<string, unknown>[];
+};
+
+/** The reply's recommendation cards, as the chat's cards and items. */
+const cardsFrom = (recommendations: unknown) => {
+  const cards = (Array.isArray(recommendations) ? recommendations : [])
+    .map((card) => parseSnakeToCamel(card) as TukaiRecommendationCard)
+    .filter((card) => card?.id && (card.type === 'place' || card.type === 'experience'));
+  return {
+    cards: cards.map((card) => card.id),
+    items: Object.fromEntries(cards.map((card) => [card.id, cardToItem(card)])),
+  };
 };
 
 /**
- * The agent's reply in the shape the chat renders. The agent sends text and
- * untyped `actions` for now, so cards, plans, drafts and writing options stay
- * empty until those actions have a defined shape to map from.
+ * The agent's reply in the shape the chat renders: its text, and a card for
+ * each place or experience it recommends (DEV-477). Plans, drafts and writing
+ * options stay empty until the agent's `actions` have a defined shape.
  */
 export const toTukaiReply = (data: TukaiAgentReply | null): TukaiReply => {
   const text = cleanTukaiText(data?.reply);
+  const { cards, items } = text ? cardsFrom(data?.recommendations) : { cards: [], items: {} };
   return {
     text: text || 'TukAI could not answer just now.',
     error: !text || undefined,
-    cards: [],
+    cards,
     plan: null,
     draft: null,
     writing: null,
     suggestions: [],
-    items: {},
+    items,
     requiresConfirmation: Boolean(data?.requires_confirmation),
     actions: Array.isArray(data?.actions) ? data!.actions : [],
   };

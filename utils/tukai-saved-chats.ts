@@ -6,6 +6,7 @@ import type {
   TukaiMessage,
   TukaiRecommendationCard,
 } from '@/types/tukai';
+import { richTextItems } from '@/utils/rich-text-items';
 import { cleanTukaiText, plural, shortDay } from '@/utils/tukai';
 
 /**
@@ -25,7 +26,8 @@ export const cardToItem = (card: TukaiRecommendationCard): TukaiItem => {
     photos: card.photos
       .map((photo) => photo.mdUrl ?? photo.thumbUrl)
       .filter((url): url is string => Boolean(url)),
-    about: card.blurb,
+    // Descriptions are rich-text HTML, cut short by the API: read as text
+    about: richTextItems(card.blurb).join(' '),
     detail: '',
     lat: card.latitude,
     lng: card.longitude,

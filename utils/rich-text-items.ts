@@ -8,7 +8,12 @@
  * so `&amp;` reads as "&" (DEV-511).
  */
 export const richTextItems = (value?: string | null): string[] => {
-  const text = (value ?? '').trim();
+  // Text cut short can end part-way through a tag or an entity
+  const text = (value ?? '')
+    .trim()
+    .replace(/<[^>]*$/, '')
+    .replace(/&[a-z0-9#]*$/i, '')
+    .trim();
   if (!text) return [];
   if (!/<[a-z][\s\S]*>/i.test(text)) return splitLines(text);
 

@@ -35,6 +35,21 @@ const catalogue: Record<string, TukaiItem> = {
 };
 
 describe('cleanTukaiText', () => {
+  // DEV-486: replies are shown as text, so a markdown image read as raw text
+  it('drops markdown images, and the list lines they leave empty', () => {
+    expect(
+      cleanTukaiText(
+        'Two picks:\n\n- ![Lavy](https://cdn/a.jpg)\n- Lavy, Kilimani\n\n![x](u)\n\nEnjoy',
+      ),
+    ).toBe('Two picks:\n\n- Lavy, Kilimani\n\nEnjoy');
+  });
+
+  it('keeps an ordinary link', () => {
+    expect(cleanTukaiText('See [Lavy](https://tukai.co/places/lavy)')).toBe(
+      'See [Lavy](https://tukai.co/places/lavy)',
+    );
+  });
+
   it('turns long dashes into hyphens between numbers and commas elsewhere, and drops bold', () => {
     expect(cleanTukaiText('Open 9–17 — **lovely**')).toBe('Open 9 - 17, lovely');
   });
