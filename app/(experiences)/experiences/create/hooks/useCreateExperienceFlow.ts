@@ -20,7 +20,9 @@ import {
   useGetWallets,
   usePatchBankWallet,
   usePatchPhoneWallet,
+  useSetActiveWallet,
 } from '@/app/(experiences)/hooks/usePayment';
+import { savedPayoutAccounts } from '@/app/shared/components/Payouts/payoutAccounts';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
   useAddExperiencePhotos,
@@ -250,7 +252,10 @@ export interface FormData {
   };
   wallet: {
     paymentMethod: 'phone' | 'bank';
+    /** The saved payout account picked for this experience */
     selectedWallet?: Wallet;
+    /** "Add new account" is picked: the form shows, not a saved account */
+    isAddingNew: boolean;
     phoneNumber: string;
   };
   itineraryDays: ItineraryDayFormValue[];
@@ -317,6 +322,7 @@ const initialFormData: FormData = {
   },
   wallet: {
     selectedWallet: undefined,
+    isAddingNew: false,
     paymentMethod: 'phone',
     phoneNumber: '',
   },
@@ -411,6 +417,7 @@ export const useCreateExperienceFlow = ({
   const { mutate: createPhoneWallet, isPending: isCreatingPhoneWallet } = useCreatePhoneWallet();
   const { mutate: patchBankWallet, isPending: isPatchingBankWallet } = usePatchBankWallet();
   const { mutate: patchPhoneWallet, isPending: isPatchingPhoneWallet } = usePatchPhoneWallet();
+  const { mutateAsync: setActiveWalletAsync } = useSetActiveWallet();
 
   // Experience API hooks
   const { mutateAsync: createExperienceAsync } = useCreateExperience();
@@ -450,8 +457,10 @@ export const useCreateExperienceFlow = ({
   }, []);
 
   const experience = experienceResponse?.data;
-  const wallets: Wallet[] = walletsResponse?.data?.results ?? [];
-  const hasSavedWallets = wallets.length > 0;
+  const wallets: Wallet[] = useMemo(() => walletsResponse?.data?.results ?? [], [walletsResponse]);
+  // Complete accounts only, the one payouts go to now first
+  const savedWallets = useMemo(() => savedPayoutAccounts(wallets), [wallets]);
+  const hasSavedWallets = savedWallets.length > 0;
   const hasCreatedCommunity = (createdCommunitiesResponse?.data?.results?.length ?? 0) > 0;
   const isCheckingCommunityAccess =
     sessionStatus === 'loading' ||
@@ -889,12 +898,24 @@ export const useCreateExperienceFlow = ({
     );
   }, []);
 
+  // The account payouts go to now is picked at first. Once the host has
+  // picked one, or chosen Add new account, a change to the list (a wallet
+  // just added or verified) keeps their pick and only refreshes it.
   useEffect(() => {
-    updateWalletFormData({
-      selectedWallet: wallets.find((w) => w.isActive),
-      paymentMethod: wallets.find((w) => w.isActive)?.walletType,
+    setFormData((prev) => {
+      const current = prev.wallet.selectedWallet;
+      if (prev.wallet.isAddingNew) return prev;
+      const next = current
+        ? (savedWallets.find((wallet) => wallet.id === current.id) ?? savedWallets[0])
+        : savedWallets[0];
+      if (!next || next === current) return prev;
+      return {
+        ...prev,
+        wallet: { ...prev.wallet, selectedWallet: next, paymentMethod: next.walletType },
+      };
     });
-  }, [wallets.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletsResponse]);
 
   // ─── Preview step ────────────────────────────────────────────────────────
   // The form never stores coordinates, and the detail view renders a map from
@@ -999,11 +1020,11 @@ export const useCreateExperienceFlow = ({
   }, [formData.dateType.experiencePricing, formData.dateType.experienceType, formData.tickets]);
 
   const validateWallet = useCallback((): boolean => {
-    const schema = buildWalletSchema({ hasSavedWallets: wallets.length > 0 });
+    const schema = buildWalletSchema({ hasSavedWallets });
     const result = schema.safeParse(formData.wallet);
     setWalletErrors(result.success ? {} : zodErrorsToMap(result.error));
     return result.success;
-  }, [wallets.length, formData.wallet]);
+  }, [hasSavedWallets, formData.wallet]);
 
   const updateInviteFormData = useCallback((data: Partial<FormData['invite']>) => {
     setFormData((prev) => ({
@@ -1622,6 +1643,18 @@ export const useCreateExperienceFlow = ({
       if (!experienceId) {
         throw new Error('Experience ID is required to publish');
       }
+      // Payouts go to the host's one active wallet, for every experience they
+      // host - so the account picked here becomes it, once this publishes
+      const picked = formData.wallet.selectedWallet;
+      const pickedNow = picked && wallets.find((wallet) => wallet.id === picked.id);
+      if (
+        formData.dateType.experiencePricing === 'paid' &&
+        !formData.wallet.isAddingNew &&
+        pickedNow &&
+        !pickedNow.isActive
+      ) {
+        await setActiveWalletAsync(pickedNow.id);
+      }
       await publishAsync();
       return true;
     } catch (error: any) {
@@ -1639,7 +1672,16 @@ export const useCreateExperienceFlow = ({
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, publishAsync, toast, planLimitAction]);
+  }, [
+    experienceId,
+    publishAsync,
+    toast,
+    planLimitAction,
+    formData.wallet,
+    formData.dateType.experiencePricing,
+    wallets,
+    setActiveWalletAsync,
+  ]);
 
   /**
    * PATCHes fees_allocation on its own. Fired as soon as the picker is clicked,
@@ -1759,6 +1801,7 @@ export const useCreateExperienceFlow = ({
 
     // Wallet state and mutations
     wallets,
+    savedWallets,
     isWalletsLoading,
     hasSavedWallets,
     walletErrors,

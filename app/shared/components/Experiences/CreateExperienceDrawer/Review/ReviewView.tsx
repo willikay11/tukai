@@ -3,9 +3,11 @@
 import { format, isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
+import { buildWalletSchema } from '@/app/(experiences)/experiences/create/schemas';
 import { OpenInMapsLink } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PlainImage } from '@/app/shared/components/Images';
+import { payoutAccountLabel } from '@/app/shared/components/Payouts/payoutAccounts';
 import { itineraryDayDate } from '@/types/itinerary';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
@@ -155,9 +157,16 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
   );
   if (!hasValidTicket)
     missing.push(isPaid ? 'a ticket with a price and quantity' : 'the number of spaces');
-  if (isPaid && !flow.hasSavedWallets && !wallet.selectedWallet && !wallet.phoneNumber?.trim()) {
-    missing.push('payout details');
-  }
+  const hasPayoutAccount = buildWalletSchema({ hasSavedWallets: flow.hasSavedWallets }).safeParse(
+    wallet,
+  ).success;
+  if (isPaid && !hasPayoutAccount) missing.push('payout details');
+  // A saved account is named as it was in the list; a new one by its details
+  const pickedWallet =
+    !wallet.isAddingNew && wallet.selectedWallet
+      ? (flow.savedWallets.find((saved) => saved.id === wallet.selectedWallet?.id) ??
+        wallet.selectedWallet)
+      : undefined;
 
   // ---- Date line ---------------------------------------------------------
   const dateLine = (() => {
@@ -601,13 +610,11 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
         <RvSection title="Wallet details" gap="gap-1.5">
           <p className="text-[13.5px] italic text-ink-muted">Only you can see this.</p>
           <p className="text-15 font-semibold text-gray-800">
-            {wallet.paymentMethod === 'bank' && wallet.selectedWallet?.walletType === 'bank'
-              ? `${wallet.selectedWallet.bankName ?? 'Bank'}, ${wallet.selectedWallet.bankBranch ?? ''}, account ending ${(wallet.selectedWallet.accountNumber ?? '').slice(-4)}`
-              : wallet.selectedWallet?.phone
-                ? `M-Pesa number: ${wallet.selectedWallet.phone}`
-                : wallet.phoneNumber
-                  ? `M-Pesa number: ${wallet.phoneNumber}`
-                  : 'Not added yet'}
+            {pickedWallet
+              ? payoutAccountLabel(pickedWallet)
+              : wallet.paymentMethod === 'phone' && wallet.phoneNumber
+                ? `M-Pesa number: ${wallet.phoneNumber}`
+                : 'Not added yet'}
           </p>
         </RvSection>
       )}

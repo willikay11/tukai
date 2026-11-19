@@ -282,24 +282,35 @@ export const buildTicketsSchema = ({ experiencePricing, experienceType }: Ticket
 const walletShape = z.object({
   paymentMethod: z.enum(['phone', 'bank']),
   selectedWallet: z.custom<unknown>().optional(),
+  isAddingNew: z.boolean().optional(),
   phoneNumber: z.string(),
 });
 
 export type WalletFormValues = z.infer<typeof walletShape>;
 
 /**
- * A wallet already saved on the account satisfies this step, so the check needs
- * to know whether any exist rather than looking only at the form.
+ * The step is done once a saved payout account is picked, or - with Add new
+ * account, or none saved yet - once the new one is in: an M-Pesa number with
+ * 9+ digits (it saves itself as the host leaves the field) or a saved bank
+ * account.
  */
 export const buildWalletSchema = ({ hasSavedWallets }: { hasSavedWallets: boolean }) =>
   z.custom<WalletFormValues>().superRefine((value, ctx) => {
-    if (!hasSavedWallets && !value.selectedWallet && !value.phoneNumber) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['wallet'],
-        message: 'Please set up a payment method before continuing.',
-      });
-    }
+    // A saved account is picked: the one chosen, or the active one by default
+    if (hasSavedWallets && !value.isAddingNew) return;
+    // One just added, before the list has caught up with it
+    if (value.selectedWallet && !value.isAddingNew) return;
+    const typedPhone =
+      value.paymentMethod === 'phone' && value.phoneNumber.replace(/\D/g, '').length >= 9;
+    if (typedPhone) return;
+
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['wallet'],
+      message: hasSavedWallets
+        ? 'Add the new account, or pick one of your saved accounts.'
+        : 'Please set up a payment method before continuing.',
+    });
   });
 
 // ─── A single ticket being edited in the Tickets step ───────────────────────
