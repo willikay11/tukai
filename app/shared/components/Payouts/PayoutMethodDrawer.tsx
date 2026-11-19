@@ -16,6 +16,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Drawer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { Wallet } from '@/types/payment';
+import { toKenyanE164 } from '@/utils/phone';
 
 type Method = 'mpesa' | 'bank';
 
@@ -141,7 +142,9 @@ export const PayoutMethodDrawer = ({
     const onError = (failure: Error) => setError(failure.message);
 
     if (isMp) {
-      const phone = `254${digits(draft.phone)}`;
+      // With the + and country code, as the API stores it: "+254712345678".
+      // A number typed with its leading 0 loses it
+      const phone = toKenyanE164(draft.phone);
       const message = `Payout method saved. Withdrawals go to M-Pesa ending ${digits(draft.phone).slice(-3)} from now on.`;
 
       // A new or changed number comes back unverified: make it the payout
@@ -150,7 +153,7 @@ export const PayoutMethodDrawer = ({
         const walletId = saved?.id;
         if (walletId && saved?.isVerified === false) {
           if (walletId !== active?.id) makeActive(walletId);
-          setVerifying({ walletId, phone: `+${phone}`, sendOnOpen: true });
+          setVerifying({ walletId, phone, sendOnOpen: true });
           return;
         }
         activateThenFinish(walletId, message);
@@ -164,7 +167,7 @@ export const PayoutMethodDrawer = ({
             // verified. Changing the number clears it, so a changed number is
             // unverified unless the response says otherwise.
             onSuccess: (response) => {
-              const changedNumber = digits(phoneWallet.phone ?? '') !== phone;
+              const changedNumber = digits(phoneWallet.phone ?? '') !== digits(phone);
               afterSave({
                 ...phoneWallet,
                 ...response?.data,
