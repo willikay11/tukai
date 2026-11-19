@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage, PlainImage } from '@/app/shared/components/Images';
+import { TukaiReviewHelper } from '@/app/shared/components/TukAI/TukaiReviewHelper';
 import {
   useCreatePlaceReview,
   useDeletePlaceReviewImage,
@@ -189,6 +190,15 @@ export const PlaceReviewForm = ({ place, onDone }: { place: Place; onDone: () =>
           rows={10}
           className="mt-3 resize-none rounded-xl border-line text-[15px]"
         />
+        <div className="mt-3">
+          <TukaiReviewHelper
+            subjectType="place"
+            subjectId={place.id}
+            rating={rating}
+            text={text}
+            onText={setText}
+          />
+        </div>
       </div>
 
       <div className="space-y-3">

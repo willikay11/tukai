@@ -11,6 +11,10 @@ const uploadImages = jest.fn();
 let createState: Record<string, unknown> = { isPending: false, isSuccess: false, data: undefined };
 let uploadState: Record<string, unknown> = { isSuccess: false };
 
+// TukAI's writing help has its own tests (TukaiReviewHelper.test.tsx)
+jest.mock('@/app/shared/components/TukAI/TukaiReviewHelper', () => ({
+  TukaiReviewHelper: () => null,
+}));
 jest.mock('next-auth/react', () => ({ useSession: () => ({ data: { user: { id: 'u1' } } }) }));
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useCreatePlaceReview: () => ({ mutate: createReview, ...createState }),

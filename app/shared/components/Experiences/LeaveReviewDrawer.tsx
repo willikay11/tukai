@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { attendedAgo } from '@/app/(profile)/hooks/calendar-agenda';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { TukaiReviewHelper } from '@/app/shared/components/TukAI/TukaiReviewHelper';
 import { useCreateExperienceRating } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Drawer } from '@/components/ui/drawer';
@@ -214,13 +215,24 @@ export const LeaveReviewDrawer = ({
               placeholder="What was it like? The host, the pace, the group..."
               className="w-full resize-y rounded-xl border border-line bg-white px-4 py-3.5 text-[15px] leading-normal text-gray-900 outline-none placeholder:text-ink-subtle focus:border-brand focus:ring-[3px] focus:ring-surface-brand"
             />
+            <TukaiReviewHelper
+              subjectType="experience"
+              subjectId={experienceId}
+              rating={score}
+              text={text}
+              onText={(draft) => {
+                setText(draft.slice(0, TEXT_MAX));
+                setError(null);
+              }}
+            />
           </div>
 
           <Divider />
 
           <div className="flex flex-col gap-3">
             <span className="text-[15px] font-semibold text-gray-900">
-              Photos <span className="font-normal text-ink-muted">(optional, up to {PHOTOS_MAX})</span>
+              Photos{' '}
+              <span className="font-normal text-ink-muted">(optional, up to {PHOTOS_MAX})</span>
             </span>
 
             <div className="flex flex-wrap gap-2">
