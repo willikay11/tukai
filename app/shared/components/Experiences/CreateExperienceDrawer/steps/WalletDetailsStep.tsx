@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
-import { SelectField } from '@/app/shared/components/Forms';
+import { IntlPhoneField, SelectField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
 import {
   VerifyMpesaWallet,
@@ -14,6 +14,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Wallet } from '@/types/payment';
+import { toE164 } from '@/utils/dial-codes';
 import { toKenyanE164 } from '@/utils/phone';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
@@ -27,6 +28,9 @@ const COUNTRIES = [
   { value: 'Uganda', label: 'Uganda' },
   { value: 'Tanzania', label: 'Tanzania' },
 ];
+
+// The bank phone's calling code starts on the bank's own country
+const COUNTRY_ISO: Record<string, string> = { Kenya: 'KE', Uganda: 'UG', Tanzania: 'TZ' };
 
 const PayoutPill = ({
   active,
@@ -227,7 +231,10 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
     postcode: '',
     townCity: '',
     phoneNumber: '',
+    // Empty until the host picks one: then it follows the bank's country
+    phoneCountry: '',
   });
+  const bankPhoneCountry = bank.phoneCountry || COUNTRY_ISO[bank.country] || 'KE';
   const [bankErrors, setBankErrors] = useState<Record<string, string>>({});
 
   // An M-Pesa number needs a texted code before payouts can go to it
@@ -298,7 +305,8 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       swiftCode: bank.swiftCode.trim().toUpperCase(),
       postcode: bank.postcode.trim(),
       town: bank.townCity.trim(),
-      contactPhone: toKenyanE164(bank.phoneNumber),
+      // Any country's number (DEV-508), with its own calling code
+      contactPhone: toE164(bankPhoneCountry, bank.phoneNumber),
     };
     const already = matchingPayoutAccount(flow.wallets, {
       walletType: 'bank',
@@ -536,14 +544,18 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
               <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />
 
               {/* Bank-only "Phone number": the account holder's contact number
-              (`contact_phone`), not where payouts go. Optional. */}
-              <Field label="Phone number">
-                <PhoneInput
+              (`contact_phone`), not where payouts go. Optional. From any
+              country, unlike the M-Pesa number (DEV-508). A div, not the
+              Field label: the code picker inside is a button of its own. */}
+              <div className="flex flex-col gap-2">
+                <span className="text-15 font-semibold text-gray-800">Phone number</span>
+                <IntlPhoneField
+                  country={bankPhoneCountry}
+                  onCountryChange={(phoneCountry) => setBank((p) => ({ ...p, phoneCountry }))}
                   value={bank.phoneNumber}
                   onChange={(phoneNumber) => setBank((p) => ({ ...p, phoneNumber }))}
-                  placeholder="Enter phone number"
                 />
-              </Field>
+              </div>
 
               <button
                 type="button"
