@@ -2,11 +2,13 @@ import { PlaceBookingRequest } from '@/types/placeReservation';
 
 import {
   awaitingAnswerCount,
+  canMarkNoShow,
   daysAwaitingAnswer,
   hostReservations,
   inGroup,
   isAdmittable,
   isAwaitingAnswer,
+  isNoShow,
   liveCountsByDay,
   matchesGuest,
   paymentLine,
@@ -38,7 +40,7 @@ describe('hostReservations', () => {
       request('a', 'requested', NOV_3),
       request('b', 'completed', NOV_3),
       request('c', 'redeemed', NOV_3),
-      request('d', 'declined', NOV_3),
+      request('d', 'completed', NOV_3, { bookingStatus: 'no_show' }),
     ]);
 
     expect(reservations.map((r) => [r.id, r.group, r.dayKey])).toEqual([
@@ -56,12 +58,33 @@ describe('hostReservations', () => {
     },
   );
 
+  // DEV-407: No show is for confirmed guests the host marked, read off
+  // booking_status - not declined, cancelled or expired requests
+  it('lists a guest marked as a no-show under no show', () => {
+    expect(first([request('a', 'completed', NOV_3, { bookingStatus: 'no_show' })]).group).toBe(
+      'no-show',
+    );
+    // A row without booking_status still counts its no_show_at
+    expect(
+      first([request('a', 'completed', NOV_3, { noShowAt: '2026-11-03T20:00:00Z' })]).group,
+    ).toBe('no-show');
+  });
+
   it.each(['declined', 'cancelled', 'expired'] as const)(
-    'lists a %s request under no show',
+    'leaves out a %s request, which nobody is coming for',
     (status) => {
-      expect(first([request('a', status, NOV_3)]).group).toBe('no-show');
+      expect(hostReservations([request('a', status, NOV_3)])).toEqual([]);
     },
   );
+
+  it('leaves out a booking the guest did not pay for in time', () => {
+    expect(
+      hostReservations([
+        request('a', 'expired', NOV_3, { bookingStatus: 'not_paid_in_time' }),
+        request('b', 'expired', NOV_3, { payBy: '2026-11-02T10:00:00Z' }),
+      ]),
+    ).toEqual([]);
+  });
 
   it('leaves out a failed or refunded request, which the host cannot act on', () => {
     expect(
@@ -130,6 +153,24 @@ describe('what the host can do with a reservation', () => {
     expect(isAdmittable(of('requested'))).toBe(false);
     expect(isAdmittable(of('accepted'))).toBe(false);
     expect(isAdmittable(of('pending'))).toBe(false);
+  });
+
+  it('marks a no-show only for a confirmed guest whose time has come', () => {
+    const after = new Date('2026-11-03T19:00:00');
+    const before = new Date('2026-11-03T17:00:00');
+
+    expect(canMarkNoShow(of('completed'), after)).toBe(true);
+    expect(canMarkNoShow(of('completed'), before)).toBe(false);
+    expect(canMarkNoShow(of('redeemed'), after)).toBe(false);
+    expect(canMarkNoShow(of('accepted'), after)).toBe(false);
+  });
+
+  it('knows a guest already marked as a no-show', () => {
+    const marked = first([request('a', 'completed', NOV_3, { bookingStatus: 'no_show' })]);
+
+    expect(isNoShow(marked)).toBe(true);
+    expect(isAdmittable(marked)).toBe(false);
+    expect(canMarkNoShow(marked, new Date('2026-11-04'))).toBe(false);
   });
 
   it('says what an unsettled booking is waiting on', () => {
@@ -204,7 +245,9 @@ describe('summaryTabOf', () => {
 
   it('keeps admitted and missed bookings under their own names', () => {
     expect(summaryTabOf(first([request('a', 'redeemed', NOV_3)]))).toBe('admitted');
-    expect(summaryTabOf(first([request('a', 'declined', NOV_3)]))).toBe('no-show');
+    expect(
+      summaryTabOf(first([request('a', 'completed', NOV_3, { bookingStatus: 'no_show' })])),
+    ).toBe('no-show');
   });
 });
 
@@ -216,7 +259,8 @@ describe('summaryCounts', () => {
         request('b', 'requested', NOV_3),
         request('c', 'completed', NOV_3),
         request('d', 'redeemed', NOV_3),
-        request('e', 'expired', NOV_3),
+        request('e', 'completed', NOV_3, { bookingStatus: 'no_show' }),
+        request('f', 'expired', NOV_3),
       ]),
     );
 

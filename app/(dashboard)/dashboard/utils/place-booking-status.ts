@@ -1,4 +1,4 @@
-import { PlaceBookingRequest } from '@/types/placeReservation';
+import { PlaceBookingStatus } from '@/types/placeReservation';
 
 export interface PlaceBookingAction {
   key: 'pay' | 'change' | 'cancel' | 'rebook';
@@ -16,18 +16,15 @@ export interface PlaceBookingStatusVm {
 }
 
 /**
- * Maps the real `PlaceBookingRequest.status` enum onto the handoff's 8 pill
- * states.
- *
- * ⚠️ The two don't line up 1:1 - there is no `confirmed`/`no_show`/
- * `not_paid_in_time` value on the wire, so this is an approximation:
- * `completed`→Confirmed, `redeemed`→Visited, `failed`→Released (the handoff's
- * "Not paid in time"), `pending`→treated like `requested`. `cancelled` and
- * `refunded` return null - cancelled bookings never show per the handoff, and
- * `refunded` has no clear home yet. Flagged in the Dashboard backend-gaps note.
+ * A booking's `booking_status` (read with `bookingStatusOf`) as the handoff's
+ * 8 pill states. The API now sends the three it lacked - `confirmed`,
+ * `no_show` and `not_paid_in_time` (DEV-407) - so only `pending` is
+ * approximated (shown like a request still waiting), and `failed` (a payment
+ * that didn't go through) reads as Released. Cancelled and refunded bookings
+ * don't show.
  */
 export const mapPlaceBookingStatus = (
-  status: PlaceBookingRequest['status'],
+  status: PlaceBookingStatus,
   payAmountLabel: string,
 ): PlaceBookingStatusVm | null => {
   switch (status) {
@@ -54,15 +51,13 @@ export const mapPlaceBookingStatus = (
           { key: 'cancel', label: 'Cancel booking', icon: 'Delete01Icon', tone: 'danger' },
         ],
       };
-    case 'completed':
+    case 'confirmed':
       return {
         label: 'Confirmed',
         bg: 'bg-surface-brand',
         fg: 'text-brand',
         icon: 'CheckmarkCircle02Icon',
-        actions: [
-          { key: 'cancel', label: 'Cancel booking', icon: 'Delete01Icon', tone: 'danger' },
-        ],
+        actions: [{ key: 'cancel', label: 'Cancel booking', icon: 'Delete01Icon', tone: 'danger' }],
       };
     case 'redeemed':
       return {
@@ -70,6 +65,14 @@ export const mapPlaceBookingStatus = (
         bg: 'bg-surface-brand',
         fg: 'text-brand',
         icon: 'CheckmarkCircle02Icon',
+        actions: [],
+      };
+    case 'no_show':
+      return {
+        label: 'Missed',
+        bg: 'bg-surface',
+        fg: 'text-ink',
+        icon: 'Clock01Icon',
         actions: [],
       };
     case 'declined':
@@ -92,6 +95,7 @@ export const mapPlaceBookingStatus = (
           { key: 'rebook', label: 'Book another time', icon: 'CalendarAdd01Icon', tone: 'default' },
         ],
       };
+    case 'not_paid_in_time':
     case 'failed':
       return {
         label: 'Released',

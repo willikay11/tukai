@@ -97,6 +97,25 @@ export type RestaurantReservationDetail = {
  * A table request. The API returns a Purchase, so a reservation carries the
  * same lifecycle as a ticket - the venue's owner accepts or declines it.
  */
+/**
+ * `status` as a host dashboard shows it (DEV-407): `completed` splits into
+ * `confirmed` and `no_show`, and an expiry after acceptance (the guest didn't
+ * pay) is `not_paid_in_time` rather than `expired` (the host never answered).
+ */
+export type PlaceBookingStatus =
+  | 'requested'
+  | 'accepted'
+  | 'declined'
+  | 'pending'
+  | 'confirmed'
+  | 'no_show'
+  | 'failed'
+  | 'redeemed'
+  | 'cancelled'
+  | 'expired'
+  | 'not_paid_in_time'
+  | 'refunded';
+
 export type PlaceBookingRequest = {
   id: string;
   purchaseNumber?: string;
@@ -111,6 +130,10 @@ export type PlaceBookingRequest = {
     | 'cancelled'
     | 'expired'
     | 'refunded';
+  /** Read this, not `status`, for what to show */
+  bookingStatus?: PlaceBookingStatus;
+  /** When the host marked the guest as a no-show */
+  noShowAt?: string | null;
   restaurantDetail?: RestaurantReservationDetail;
   occurrence?: { id: string; startDate?: string; endDate?: string };
   user?: LinkedUser;
@@ -166,4 +189,17 @@ export type ReservationSettingsDraft = {
   isActive: boolean;
   /** Lent to the profile's anchor experience when it has none, so activation can go through */
   placePhotos?: Photo[];
+};
+
+/**
+ * A booking's `booking_status`, or the same worked out from `status` for a
+ * row that doesn't carry it.
+ */
+export const bookingStatusOf = (
+  request: Pick<PlaceBookingRequest, 'status' | 'bookingStatus' | 'noShowAt' | 'payBy'>,
+): PlaceBookingStatus => {
+  if (request.bookingStatus) return request.bookingStatus;
+  if (request.status === 'completed') return request.noShowAt ? 'no_show' : 'confirmed';
+  if (request.status === 'expired' && request.payBy) return 'not_paid_in_time';
+  return request.status as PlaceBookingStatus;
 };

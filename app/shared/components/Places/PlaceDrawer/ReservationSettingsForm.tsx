@@ -452,8 +452,10 @@ export const ReservationSettingsForm = ({
           color="#066349"
           className="mt-0.5 flex-shrink-0"
         />
-        Confirmed guests you haven&apos;t admitted move to No show at closing time
-        {values.closesAt ? `, ${formatTimeTo12Hour(values.closesAt)}` : ''}.
+        {/* No-shows are marked by the host, not moved at closing time as the
+            design had it: the API has no automatic no-show (DEV-407) */}
+        Once a booking&apos;s time has passed, you can mark a confirmed guest who didn&apos;t come
+        as a no-show from Reservations.
       </p>
 
       {errorSummary && <ErrorSummary message={errorSummary} />}

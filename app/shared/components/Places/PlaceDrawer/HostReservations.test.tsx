@@ -11,6 +11,7 @@ const usePlaceBookingRequests = jest.fn();
 const acceptRequest = jest.fn();
 const declineRequest = jest.fn();
 const admitGuest = jest.fn();
+const markNoShow = jest.fn();
 const toast = jest.fn();
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
@@ -18,6 +19,7 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useAcceptPlaceBookingRequest: () => ({ mutate: acceptRequest, isPending: false }),
   useDeclinePlaceBookingRequest: () => ({ mutate: declineRequest, isPending: false }),
   useAdmitPlaceBookingRequest: () => ({ mutate: admitGuest, isPending: false }),
+  useMarkPlaceBookingNoShow: () => ({ mutate: markNoShow, isPending: false }),
 }));
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -88,7 +90,8 @@ describe('HostReservations', () => {
       booking('a', 'requested', 'Amina'),
       booking('b', 'completed', 'Kamau'),
       booking('c', 'redeemed', 'Njeri'),
-      booking('d', 'declined', 'Otieno'),
+      booking('d', 'completed', 'Otieno', todayAt(19), { bookingStatus: 'no_show' }),
+      booking('e', 'declined', 'Wambui'),
     ]);
 
     expect(screen.getByRole('button', { name: 'Reservations (2)' })).toBeInTheDocument();
@@ -257,5 +260,71 @@ describe('HostReservations', () => {
     const [today] = screen.getAllByRole('button', { pressed: true });
 
     expect(today).toHaveTextContent(String(new Date().getDate()));
+  });
+
+  // DEV-407: the host marks a guest who didn't come, and can undo it
+  describe('no-shows', () => {
+    const earlier = todayAt(0, 1);
+    const later = todayAt(23, 59);
+
+    it('offers Mark as no-show for a confirmed guest whose time has come', () => {
+      renderList([booking('a', 'completed', 'Amina', earlier, { bookingStatus: 'confirmed' })]);
+      fireEvent.click(screen.getByRole('button', { name: 'Amina Hassan, show details' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Mark as no-show' }));
+
+      expect(markNoShow).toHaveBeenCalledWith(
+        { purchaseId: 'a', noShow: true },
+        expect.any(Object),
+      );
+      markNoShow.mock.calls[0][1].onSuccess();
+      expect(toast).toHaveBeenCalledWith({
+        title: 'Marked as a no-show',
+        description: 'Amina Hassan is under No show. Their booking stays paid.',
+        variant: 'success',
+      });
+    });
+
+    it('does not offer it before the booking time', () => {
+      renderList([booking('a', 'completed', 'Amina', later, { bookingStatus: 'confirmed' })]);
+      fireEvent.click(screen.getByRole('button', { name: 'Amina Hassan, show details' }));
+
+      expect(screen.queryByRole('button', { name: 'Mark as no-show' })).not.toBeInTheDocument();
+    });
+
+    it('lists a no-show under No show, where it can be undone', () => {
+      renderList([booking('a', 'completed', 'Amina', earlier, { bookingStatus: 'no_show' })]);
+      expect(screen.queryByText('Amina Hassan')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'No show (1)' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Amina Hassan, show details' }));
+      expect(screen.queryByRole('button', { name: 'Admit Amina Hassan' })).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Undo no-show' }));
+
+      expect(markNoShow).toHaveBeenCalledWith(
+        { purchaseId: 'a', noShow: false },
+        expect.any(Object),
+      );
+    });
+
+    it('says why when the API refuses', () => {
+      renderList([booking('a', 'completed', 'Amina', earlier, { bookingStatus: 'confirmed' })]);
+      fireEvent.click(screen.getByRole('button', { name: 'Amina Hassan, show details' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Mark as no-show' }));
+
+      markNoShow.mock.calls[0][1].onError(
+        new Error('A booking can only be marked as a no-show once its time has come.'),
+      );
+      expect(toast).toHaveBeenCalledWith({
+        title: 'Could not mark as a no-show',
+        description: 'A booking can only be marked as a no-show once its time has come.',
+        variant: 'destructive',
+      });
+    });
+
+    it('no longer lists a declined request as a no-show', () => {
+      renderList([booking('a', 'declined', 'Amina', earlier)]);
+
+      expect(screen.getByRole('button', { name: 'No show (0)' })).toBeInTheDocument();
+    });
   });
 });

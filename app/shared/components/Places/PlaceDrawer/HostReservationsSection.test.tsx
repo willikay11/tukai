@@ -61,7 +61,8 @@ describe('HostReservationsSection', () => {
       request('b', 'completed'),
       request('c', 'completed', 20),
       request('d', 'redeemed'),
-      request('e', 'declined'),
+      { ...(request('e', 'completed') as object), bookingStatus: 'no_show' } as never,
+      request('f', 'declined'),
     ]);
 
     const group = screen.getByRole('group', { name: 'Reservation status' });
