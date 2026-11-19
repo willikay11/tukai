@@ -4,6 +4,7 @@ import { PlaceCategoryParams } from '@/types/networkParam';
 import {
   CreatePlaceAvailabilityException,
   CreatePlaceBookingRequest,
+  PlaceBookingRequest,
 } from '@/types/placeReservation';
 import { parseApiError } from '@/utils/parseApiError';
 import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
@@ -591,6 +592,40 @@ export async function fetchPlaceBookingRequests(
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+/**
+ * Bookings at places across every place, in one request (DEV-387/388):
+ * `guest` is the person's own bookings, `host` the requests at the places
+ * they manage. `bookingStatus` narrows it, e.g. `requested`.
+ */
+export async function fetchPlaceBookings({
+  role,
+  bookingStatus,
+}: {
+  role: 'guest' | 'host';
+  bookingStatus?: string;
+}): Promise<PlaceBookingRequest[]> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get('/v1/experiences/purchases/', {
+      params: {
+        role,
+        place_bookings: true,
+        page_size: 100,
+        ...(bookingStatus ? { booking_status: bookingStatus } : {}),
+      },
+    });
+    const data = parseSnakeToCamel(res.data);
+    return Array.isArray(data) ? data : (data?.results ?? []);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Your bookings could not be loaded'),
     };
   }
 }

@@ -4,15 +4,14 @@ import { useQueries } from '@tanstack/react-query';
 
 import { claimStatusFrom } from '@/app/shared/components/Places/ConnectPlaceDrawer/useResolvedClaim';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
-import { useMyPlaces, usePlaceOwnerships } from '@/app/shared/hooks/usePlaces';
+import { useMyPlaces, usePlaceBookings, usePlaceOwnerships } from '@/app/shared/hooks/usePlaces';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
-import { fetchPlaceBookingRequests, fetchPlaceReservationProfiles } from '@/services/place';
+import { fetchPlaceReservationProfiles } from '@/services/place';
 import { Claim } from '@/types/claim';
 import { Community } from '@/types/community';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
-import { PlaceBookingRequest } from '@/types/placeReservation';
 import { placePath } from '@/utils/detail-paths';
 
 const coverOf = (place: Place): string | undefined =>
@@ -36,11 +35,10 @@ export interface DashboardPlaceItem {
 
 /**
  * The Dashboard's "My places" section: places claimed by a community this
- * person owns, with a per-place reservation-request count fanned out the same
- * way the old Control Center fanned out ticket purchases (there is no
- * host-wide "all my places' requests" endpoint). Boost has no data model
- * anywhere in the app yet, so its stat chip is omitted - see the Dashboard
- * backend-gaps note.
+ * person owns, each with how many reservation requests are waiting - read in
+ * one request across every place they manage (DEV-388), not one per place.
+ * Boost has no data model anywhere in the app yet, so its stat chip is
+ * omitted - see the Dashboard backend-gaps note.
  */
 export const useDashboardPlaces = (userId: string | undefined) => {
   const { data: placesResponse, isLoading: isLoadingPlaces } = useMyPlaces(Boolean(userId));
@@ -63,21 +61,20 @@ export const useDashboardPlaces = (userId: string | undefined) => {
     }),
   );
 
-  const requestQueries = useQueries({
-    queries: places.map((place) => {
-      const profileId = profileIdByPlace.get(place.id);
-      return {
-        queryKey: ['placeBookingRequests', place.id, profileId],
-        queryFn: () => fetchPlaceBookingRequests(place.id, profileId!),
-        enabled: Boolean(userId && profileId),
-      };
-    }),
+  // Every request waiting for an answer, at every place this person manages
+  const { data: waiting } = usePlaceBookings('host', {
+    bookingStatus: 'requested',
+    enabled: Boolean(userId) && places.length > 0,
   });
+  const waitingByPlace = new Map<string, number>();
+  for (const booking of waiting ?? []) {
+    const placeId = booking.experience?.place?.id;
+    if (placeId) waitingByPlace.set(placeId, (waitingByPlace.get(placeId) ?? 0) + 1);
+  }
 
-  const items: DashboardPlaceItem[] = places.map((place, index) => {
+  const items: DashboardPlaceItem[] = places.map((place) => {
     const profileId = profileIdByPlace.get(place.id);
-    const requests: PlaceBookingRequest[] = requestQueries[index]?.data?.data?.results ?? [];
-    const pending = requests.filter((request) => request.status === 'requested').length;
+    const pending = waitingByPlace.get(place.id) ?? 0;
 
     // Stacks the same drawer every other entry point opens, rather than
     // navigating to a dedicated page - a profile already set up goes straight

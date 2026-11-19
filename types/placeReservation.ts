@@ -136,6 +136,26 @@ export type PlaceBookingRequest = {
   noShowAt?: string | null;
   restaurantDetail?: RestaurantReservationDetail;
   occurrence?: { id: string; startDate?: string; endDate?: string };
+  /**
+   * The reservation experience and its place, on the cross-place lists
+   * (DEV-387/388), so a booking draws without a request per place.
+   */
+  experience?: {
+    id: string;
+    slug?: string;
+    title?: string;
+    experienceType?: string;
+    place?: {
+      id: string;
+      slug?: string;
+      title: string;
+      photos?: Photo[];
+      location?: { city?: string | null; name?: string | null } | null;
+    } | null;
+  };
+  /** What the guest pays to confirm: a deposit, else the amount due */
+  depositAmount?: MoneyAmount | null;
+  balanceDue?: MoneyAmount | null;
   user?: LinkedUser;
   message?: string;
   // When the venue must respond by
