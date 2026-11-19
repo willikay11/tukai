@@ -1,13 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { SelectField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { VerifyMpesaWallet } from '@/app/shared/components/Payouts';
+import {
+  VerifyMpesaWallet,
+  matchingPayoutAccount,
+  payoutAccountLabel,
+} from '@/app/shared/components/Payouts';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { Wallet } from '@/types/payment';
 import { toKenyanE164 } from '@/utils/phone';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
@@ -52,6 +58,58 @@ const PayoutPill = ({
     />
     {children}
   </button>
+);
+
+/**
+ * One payout account in the list, or "Add new account" (the handoff's
+ * tk-payout-card). A native radio drives it, so arrow keys move between cards.
+ */
+const PayoutCard = ({
+  checked,
+  onSelect,
+  icon,
+  label,
+  detail,
+}: {
+  checked: boolean;
+  onSelect: () => void;
+  icon: string;
+  label: string;
+  detail?: string;
+}) => (
+  <label
+    className={cn(
+      'flex min-h-[72px] w-full cursor-pointer items-center gap-3.5 rounded-xl py-3 pl-3.5 pr-4 text-left active:scale-[0.99] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
+      checked ? 'bg-surface-brand' : 'bg-surface',
+    )}
+  >
+    <input
+      type="radio"
+      name="payout-account"
+      checked={checked}
+      onChange={onSelect}
+      className="sr-only"
+    />
+    <span
+      aria-hidden="true"
+      className={cn(
+        'flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full border-2',
+        checked ? 'border-brand' : 'border-ink-subtle',
+      )}
+    >
+      <span className={cn('h-2.5 w-2.5 rounded-full', checked && 'bg-brand')} />
+    </span>
+    <span
+      aria-hidden="true"
+      className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-white text-brand"
+    >
+      <IconComponent iconName={icon} size={21} color="currentColor" />
+    </span>
+    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <span className="text-15 font-semibold text-gray-800">{label}</span>
+      {detail && <span className="text-[13.5px] text-ink-muted">{detail}</span>}
+    </span>
+  </label>
 );
 
 // The M-Pesa field and the bank-only "Phone number" field below it are the
@@ -119,133 +177,100 @@ const bareInputClassName =
   'h-14 w-full rounded-xl border border-line bg-white text-15 text-gray-800 outline-none focus:border-brand focus:shadow-[0_0_0_3px_#E8F1ED]';
 
 /**
- * Step 6: Wallet details (paid experiences only). The handoff's markup has
- * no explicit save control inside this step - persistence in
- * `useCreateExperienceFlow` is its own thing, independent of the step-level
- * "save it as you type" model the rest of the drawer uses, and
- * `flow.validateWallet()` (the footer's gate) is satisfied by a *typed*
- * phone number even before it's saved as a wallet.
+ * Step 6: Wallet details (paid experiences only).
  *
- * That leaves two real choices for actually persisting: a hidden auto-save
- * (fragile - a 9+ digit M-Pesa number is easy to detect, a complete bank
- * form much less so) or a small in-step save action. This build keeps M-Pesa
- * auto-saving on blur once the number is long enough, and gives the bank
- * form its own compact "Save bank details" button directly under the
- * fields - a disclosed, minor addition beyond the literal markup, needed
- * because nothing else in this screen would ever actually call
- * createBankWallet/patchBankWallet otherwise.
+ * A host with saved payout accounts picks one of them (the one payouts go to
+ * now is picked at first), or Add new account for the form. With none saved,
+ * the form shows on its own. Publishing makes the picked account the host's
+ * active wallet - the one every payout goes to.
+ *
+ * The form only adds accounts; a saved one is changed in Settings. An M-Pesa
+ * number saves itself once the host leaves the field (it needs a texted code
+ * before payouts can go to it, DEV-448), and a bank account with "Save bank
+ * details". Either is then picked. A number that's already saved is picked
+ * rather than added twice.
  *
  * Billing postcode, town and the bank-only "Phone number" are their own
- * fields on the API (`postcode`, `town`, `contact_phone`, DEV-426). A bank
- * wallet saved before those existed has them joined into `address`, so the
- * town falls back to that.
+ * fields on the API (`postcode`, `town`, `contact_phone`, DEV-426).
  */
 export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
   const { toast } = useToast();
   const { wallet: formData } = flow.formData;
   const errors = flow.walletErrors;
 
-  const existingPhoneWallet = flow.wallets.find((w) => w.walletType === 'phone');
-  const existingBankWallet = flow.wallets.find((w) => w.walletType === 'bank');
+  const saved = flow.savedWallets;
+  const hasSaved = saved.length > 0;
+  const isAddingNew = formData.isAddingNew || !hasSaved;
+  // Read back from the list, so a code just checked shows at once
+  const picked = isAddingNew
+    ? undefined
+    : saved.find((wallet) => wallet.id === formData.selectedWallet?.id);
 
-  // `FormData['wallet'].phoneNumber` is only ever a value the host is typing
-  // (to create or patch) - the hook's own hydration effect sets
-  // `selectedWallet`/`paymentMethod` from the active wallet but never this
-  // field - so a saved M-Pesa number is seeded into it once here, the same
-  // way the bank fields below are seeded from `existingBankWallet`. Seeded
-  // only when the field is still blank, so it never fights the host's typing
-  // or re-fills a number they deliberately cleared.
-  useEffect(() => {
-    if (existingPhoneWallet?.phone && !formData.phoneNumber) {
-      flow.updateWalletFormData({ phoneNumber: existingPhoneWallet.phone });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingPhoneWallet?.id]);
+  const pick = (wallet: Wallet) =>
+    flow.updateWalletFormData({
+      selectedWallet: wallet,
+      paymentMethod: wallet.walletType,
+      isAddingNew: false,
+    });
 
-  // Bank form - local state, seeded from the saved bank wallet if there is one
+  // Bank form for a new account. It stays filled while a saved account is
+  // picked, and comes back if Add new account is picked again.
   const [bank, setBank] = useState({
-    country: existingBankWallet?.country ?? '',
-    bankName: existingBankWallet?.bankName ?? '',
-    bankBranch: existingBankWallet?.bankBranch ?? '',
-    branchCode: existingBankWallet?.branchCode ?? '',
-    accountHolderName: existingBankWallet?.accountHolderName ?? '',
-    accountNumber: existingBankWallet?.accountNumber ?? '',
-    swiftCode: existingBankWallet?.swiftCode ?? '',
-    billingCountry: existingBankWallet?.country ?? '',
-    postcode: existingBankWallet?.postcode ?? '',
-    townCity: existingBankWallet?.town ?? existingBankWallet?.address ?? '',
-    phoneNumber: existingBankWallet?.contactPhone ?? '',
+    country: '',
+    bankName: '',
+    bankBranch: '',
+    branchCode: '',
+    accountHolderName: '',
+    accountNumber: '',
+    swiftCode: '',
+    billingCountry: '',
+    postcode: '',
+    townCity: '',
+    phoneNumber: '',
   });
   const [bankErrors, setBankErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (!existingBankWallet) return;
-    setBank((prev) => ({
-      ...prev,
-      country: existingBankWallet.country ?? prev.country,
-      bankName: existingBankWallet.bankName ?? prev.bankName,
-      bankBranch: existingBankWallet.bankBranch ?? prev.bankBranch,
-      branchCode: existingBankWallet.branchCode ?? prev.branchCode,
-      accountHolderName: existingBankWallet.accountHolderName ?? prev.accountHolderName,
-      accountNumber: existingBankWallet.accountNumber ?? prev.accountNumber,
-      swiftCode: existingBankWallet.swiftCode ?? prev.swiftCode,
-      billingCountry: existingBankWallet.country ?? prev.billingCountry,
-      postcode: existingBankWallet.postcode ?? prev.postcode,
-      townCity: existingBankWallet.town ?? existingBankWallet.address ?? prev.townCity,
-      phoneNumber: existingBankWallet.contactPhone ?? prev.phoneNumber,
-    }));
-    // Only when the saved wallet itself changes identity, not on every render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingBankWallet?.id]);
-
   // An M-Pesa number needs a texted code before payouts can go to it
-  // (DEV-448). Saving one sends the code straight away; a number saved
-  // earlier and still unverified waits for "Send code".
+  // (DEV-448). A new one sends the code straight away; a saved one still
+  // unverified waits for "Send code".
   const [sendCodeFor, setSendCodeFor] = useState<string | null>(null);
   const unverifiedPhoneWallet =
-    existingPhoneWallet?.isVerified === false ? existingPhoneWallet : undefined;
+    picked?.walletType === 'phone' && picked.isVerified === false ? picked : undefined;
 
   const handlePhoneBlur = () => {
     const digits = formData.phoneNumber.replace(/\D/g, '');
     if (digits.length < 9) return;
     const normalized = toKenyanE164(formData.phoneNumber);
 
-    if (existingPhoneWallet?.id) {
-      if (existingPhoneWallet.phone === normalized) return;
-      flow.walletMutations.patchPhoneWallet(
-        { walletId: existingPhoneWallet.id, phone: normalized },
-        {
-          onSuccess: () => {
-            // A changed number is unverified again; its code goes out once
-            // the refreshed wallet shows it
-            setSendCodeFor(existingPhoneWallet.id);
-            toast({
-              title: 'Wallet updated',
-              description: 'Your M-Pesa number was saved. Enter the code we text to it.',
-              variant: 'success',
-            });
-          },
-          onError: (error: Error) =>
-            toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
-        },
-      );
-    } else {
-      flow.walletMutations.createPhoneWallet(
-        { phone: normalized },
-        {
-          onSuccess: (response: { data?: { id?: string } }) => {
-            if (response?.data?.id) setSendCodeFor(response.data.id);
-            toast({
-              title: 'Wallet saved',
-              description: 'Your M-Pesa number was saved. Enter the code we text to it.',
-              variant: 'success',
-            });
-          },
-          onError: (error: Error) =>
-            toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
-        },
-      );
+    const already = matchingPayoutAccount(flow.wallets, {
+      walletType: 'phone',
+      number: normalized,
+    });
+    if (already) {
+      pick(already);
+      flow.updateWalletFormData({ phoneNumber: '' });
+      return;
     }
+
+    flow.walletMutations.createPhoneWallet(
+      { phone: normalized },
+      {
+        onSuccess: (response: { data?: Wallet }) => {
+          if (response?.data?.id) {
+            pick(response.data);
+            setSendCodeFor(response.data.id);
+          }
+          flow.updateWalletFormData({ phoneNumber: '' });
+          toast({
+            title: 'Wallet saved',
+            description: 'Your M-Pesa number was saved. Enter the code we text to it.',
+            variant: 'success',
+          });
+        },
+        onError: (error: Error) =>
+          toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
+      },
+    );
   };
 
   const handleSaveBankDetails = () => {
@@ -275,221 +300,268 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       town: bank.townCity.trim(),
       contactPhone: toKenyanE164(bank.phoneNumber),
     };
-    const onSettled = {
-      onSuccess: () =>
+    const already = matchingPayoutAccount(flow.wallets, {
+      walletType: 'bank',
+      number: payload.accountNumber,
+    });
+    if (already) {
+      pick(already);
+      return;
+    }
+
+    flow.walletMutations.createBankWallet(payload, {
+      onSuccess: (response: { data?: Wallet }) => {
+        if (response?.data?.id) pick(response.data);
         toast({
           title: 'Wallet saved',
           description: 'Your bank account details were saved.',
           variant: 'success',
-        }),
+        });
+      },
       onError: (error: Error) =>
         toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
-    };
-
-    if (existingBankWallet?.id) {
-      flow.walletMutations.patchBankWallet(
-        { walletId: existingBankWallet.id, ...payload },
-        onSettled,
-      );
-    } else {
-      flow.walletMutations.createBankWallet(payload, onSettled);
-    }
+    });
   };
 
   return (
     <div className="flex flex-col gap-7">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2.5">
         <h2 className="text-22 font-bold leading-tight tracking-[-0.3px] text-gray-800">
-          Set up your payout account
+          {hasSaved ? 'Choose your payout account' : 'Set up your payout account'}
         </h2>
-        <p className="text-15 leading-relaxed text-ink-muted">
-          Add the account that should receive the money from ticket sales.
+        <p className="text-15 leading-relaxed text-ink">
+          {hasSaved
+            ? 'Ticket sales from this experience are paid into this account.'
+            : 'Add the account that should receive the money from ticket sales.'}
         </p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <span className="text-15 font-semibold text-gray-800">
-          Select your preferred payout method
-        </span>
-        <div className="flex flex-wrap gap-2.5" role="radiogroup">
-          <PayoutPill
-            active={formData.paymentMethod === 'phone'}
-            onClick={() => flow.updateWalletFormData({ paymentMethod: 'phone' })}
-            icon="SmartPhone01Icon"
-          >
-            M-Pesa
-          </PayoutPill>
-          <PayoutPill
-            active={formData.paymentMethod === 'bank'}
-            onClick={() => flow.updateWalletFormData({ paymentMethod: 'bank' })}
-            icon="BankIcon"
-          >
-            Bank account
-          </PayoutPill>
+      {hasSaved && (
+        <div role="radiogroup" aria-label="Payout account" className="flex flex-col gap-2">
+          {saved.map((wallet) => (
+            <PayoutCard
+              key={wallet.id}
+              checked={picked?.id === wallet.id}
+              onSelect={() => pick(wallet)}
+              icon={wallet.walletType === 'bank' ? 'BankIcon' : 'SmartPhone01Icon'}
+              label={payoutAccountLabel(wallet)}
+              detail={wallet.accountHolderName}
+            />
+          ))}
+          <PayoutCard
+            checked={isAddingNew}
+            onSelect={() =>
+              flow.updateWalletFormData({ isAddingNew: true, selectedWallet: undefined })
+            }
+            icon="Add01Icon"
+            label="Add new account"
+            detail="M-Pesa or bank account"
+          />
         </div>
-        {/* The schema reports an unset wallet under the single 'wallet' key
+      )}
+
+      {unverifiedPhoneWallet && (
+        <div className="rounded-xl border border-line bg-white p-4">
+          <VerifyMpesaWallet
+            key={unverifiedPhoneWallet.id}
+            walletId={unverifiedPhoneWallet.id}
+            phone={unverifiedPhoneWallet.phone}
+            sendOnOpen={sendCodeFor === unverifiedPhoneWallet.id}
+            onVerified={() => {
+              setSendCodeFor(null);
+              toast({
+                title: 'M-Pesa number verified',
+                description: 'Payouts for this experience can go to it.',
+                variant: 'success',
+              });
+            }}
+          />
+        </div>
+      )}
+
+      {errors.wallet && !isAddingNew && (
+        <span className="text-[13.5px] text-danger-deep">{errors.wallet}</span>
+      )}
+
+      {isAddingNew && hasSaved && <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />}
+
+      {isAddingNew && (
+        <>
+          <div className="flex flex-col gap-3">
+            <span className="text-15 font-semibold text-gray-800">
+              Select your preferred payout method
+            </span>
+            <div className="flex flex-wrap gap-2.5" role="radiogroup">
+              <PayoutPill
+                active={formData.paymentMethod === 'phone'}
+                onClick={() => flow.updateWalletFormData({ paymentMethod: 'phone' })}
+                icon="SmartPhone01Icon"
+              >
+                M-Pesa
+              </PayoutPill>
+              <PayoutPill
+                active={formData.paymentMethod === 'bank'}
+                onClick={() => flow.updateWalletFormData({ paymentMethod: 'bank' })}
+                icon="BankIcon"
+              >
+                Bank account
+              </PayoutPill>
+            </div>
+            {/* The schema reports an unset wallet under the single 'wallet' key
             (see buildWalletSchema's path: ['wallet']), not 'phoneNumber' -
             it's not specific to either method, so it renders here rather
             than under one field. */}
-        {errors.wallet && <span className="text-[13.5px] text-danger-deep">{errors.wallet}</span>}
-      </div>
+            {errors.wallet && (
+              <span className="text-[13.5px] text-danger-deep">{errors.wallet}</span>
+            )}
+          </div>
 
-      {formData.paymentMethod === 'phone' ? (
-        <>
-          <Field label="M-Pesa number">
-            <PhoneInput
-              value={formData.phoneNumber}
-              onChange={(phoneNumber) => flow.updateWalletFormData({ phoneNumber })}
-              onBlur={handlePhoneBlur}
-              placeholder="7XX XXX XXX"
-            />
-          </Field>
-          {unverifiedPhoneWallet && (
-            <div className="rounded-xl border border-line bg-white p-4">
-              <VerifyMpesaWallet
-                key={unverifiedPhoneWallet.id}
-                walletId={unverifiedPhoneWallet.id}
-                phone={unverifiedPhoneWallet.phone}
-                sendOnOpen={sendCodeFor === unverifiedPhoneWallet.id}
-                onVerified={() => {
-                  setSendCodeFor(null);
-                  toast({
-                    title: 'M-Pesa number verified',
-                    description: 'Payouts for this experience can go to it.',
-                    variant: 'success',
-                  });
-                }}
+          {formData.paymentMethod === 'phone' ? (
+            <>
+              <Field label="M-Pesa number">
+                <PhoneInput
+                  value={formData.phoneNumber}
+                  onChange={(phoneNumber) => flow.updateWalletFormData({ phoneNumber })}
+                  onBlur={handlePhoneBlur}
+                  placeholder="7XX XXX XXX"
+                />
+              </Field>
+            </>
+          ) : (
+            <div className="flex flex-col gap-3.5">
+              <span className="text-15 font-semibold text-gray-800">
+                Add your bank account details
+              </span>
+              <SelectField
+                label="Country"
+                value={bank.country || null}
+                onChange={(value) => setBank((p) => ({ ...p, country: value }))}
+                options={COUNTRIES}
+                error={bankErrors.country}
               />
+              <Input
+                placeholder="Bank name"
+                value={bank.bankName}
+                onChange={(e) => setBank((p) => ({ ...p, bankName: e.target.value }))}
+                containerClassName={inputContainer}
+                icon={<IconComponent iconName="BankIcon" size={20} color="#5B6B66" />}
+              />
+              {bankErrors.bankName && (
+                <span className="text-[13.5px] text-danger-deep">{bankErrors.bankName}</span>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  placeholder="Branch"
+                  value={bank.bankBranch}
+                  onChange={(e) => setBank((p) => ({ ...p, bankBranch: e.target.value }))}
+                  containerClassName={inputContainer}
+                  icon={<IconComponent iconName="BankIcon" size={20} color="#5B6B66" />}
+                />
+                <Input
+                  placeholder="Branch code (optional)"
+                  value={bank.branchCode}
+                  onChange={(e) => setBank((p) => ({ ...p, branchCode: e.target.value }))}
+                  containerClassName={inputContainer}
+                  icon={<IconComponent iconName="Building03Icon" size={20} color="#5B6B66" />}
+                />
+              </div>
+              {bankErrors.bankBranch && (
+                <span className="text-[13.5px] text-danger-deep">{bankErrors.bankBranch}</span>
+              )}
+              <Input
+                placeholder="Account name"
+                value={bank.accountHolderName}
+                onChange={(e) => setBank((p) => ({ ...p, accountHolderName: e.target.value }))}
+                containerClassName={inputContainer}
+                icon={<IconComponent iconName="IdentityCardIcon" size={20} color="#5B6B66" />}
+              />
+              {bankErrors.accountHolderName && (
+                <span className="text-[13.5px] text-danger-deep">
+                  {bankErrors.accountHolderName}
+                </span>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  placeholder="Account number"
+                  inputMode="numeric"
+                  value={bank.accountNumber}
+                  onChange={(e) => setBank((p) => ({ ...p, accountNumber: e.target.value }))}
+                  containerClassName={inputContainer}
+                  icon={<IconComponent iconName="CreditCardIcon" size={20} color="#5B6B66" />}
+                />
+                <Input
+                  placeholder="SWIFT code (optional)"
+                  value={bank.swiftCode}
+                  onChange={(e) =>
+                    setBank((p) => ({ ...p, swiftCode: e.target.value.toUpperCase().slice(0, 11) }))
+                  }
+                  containerClassName={inputContainer}
+                  icon={<IconComponent iconName="GlobalRefreshIcon" size={20} color="#5B6B66" />}
+                />
+              </div>
+              {bankErrors.accountNumber && (
+                <span className="text-[13.5px] text-danger-deep">{bankErrors.accountNumber}</span>
+              )}
+
+              <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />
+
+              <span className="text-15 font-semibold text-gray-800">Billing address</span>
+              <SelectField
+                label="Country"
+                value={bank.billingCountry || null}
+                onChange={(value) => setBank((p) => ({ ...p, billingCountry: value }))}
+                options={COUNTRIES}
+                error={bankErrors.billingCountry}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  placeholder="Postcode"
+                  value={bank.postcode}
+                  onChange={(e) => setBank((p) => ({ ...p, postcode: e.target.value }))}
+                  containerClassName={inputContainer}
+                  icon={<IconComponent iconName="Mail01Icon" size={20} color="#5B6B66" />}
+                />
+                <Input
+                  placeholder="Town or city"
+                  value={bank.townCity}
+                  onChange={(e) => setBank((p) => ({ ...p, townCity: e.target.value }))}
+                  containerClassName={inputContainer}
+                  icon={<IconComponent iconName="Location01Icon" size={20} color="#5B6B66" />}
+                />
+              </div>
+              {bankErrors.townCity && (
+                <span className="text-[13.5px] text-danger-deep">{bankErrors.townCity}</span>
+              )}
+
+              <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />
+
+              {/* Bank-only "Phone number": the account holder's contact number
+              (`contact_phone`), not where payouts go. Optional. */}
+              <Field label="Phone number">
+                <PhoneInput
+                  value={bank.phoneNumber}
+                  onChange={(phoneNumber) => setBank((p) => ({ ...p, phoneNumber }))}
+                  placeholder="Enter phone number"
+                />
+              </Field>
+
+              <button
+                type="button"
+                onClick={handleSaveBankDetails}
+                disabled={
+                  flow.walletMutations.isCreatingBankWallet ||
+                  flow.walletMutations.isPatchingBankWallet
+                }
+                className="h-11 self-start rounded-full bg-lime px-6 text-[14.5px] font-semibold text-brand-ink hover:bg-lime-dark disabled:opacity-60"
+              >
+                {flow.walletMutations.isCreatingBankWallet ||
+                flow.walletMutations.isPatchingBankWallet
+                  ? 'Saving...'
+                  : 'Save bank details'}
+              </button>
             </div>
           )}
         </>
-      ) : (
-        <div className="flex flex-col gap-3.5">
-          <span className="text-15 font-semibold text-gray-800">Add your bank account details</span>
-          <SelectField
-            label="Country"
-            value={bank.country || null}
-            onChange={(value) => setBank((p) => ({ ...p, country: value }))}
-            options={COUNTRIES}
-            error={bankErrors.country}
-          />
-          <Input
-            placeholder="Bank name"
-            value={bank.bankName}
-            onChange={(e) => setBank((p) => ({ ...p, bankName: e.target.value }))}
-            containerClassName={inputContainer}
-            icon={<IconComponent iconName="BankIcon" size={20} color="#5B6B66" />}
-          />
-          {bankErrors.bankName && (
-            <span className="text-[13.5px] text-danger-deep">{bankErrors.bankName}</span>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              placeholder="Branch"
-              value={bank.bankBranch}
-              onChange={(e) => setBank((p) => ({ ...p, bankBranch: e.target.value }))}
-              containerClassName={inputContainer}
-              icon={<IconComponent iconName="BankIcon" size={20} color="#5B6B66" />}
-            />
-            <Input
-              placeholder="Branch code (optional)"
-              value={bank.branchCode}
-              onChange={(e) => setBank((p) => ({ ...p, branchCode: e.target.value }))}
-              containerClassName={inputContainer}
-              icon={<IconComponent iconName="Building03Icon" size={20} color="#5B6B66" />}
-            />
-          </div>
-          {bankErrors.bankBranch && (
-            <span className="text-[13.5px] text-danger-deep">{bankErrors.bankBranch}</span>
-          )}
-          <Input
-            placeholder="Account name"
-            value={bank.accountHolderName}
-            onChange={(e) => setBank((p) => ({ ...p, accountHolderName: e.target.value }))}
-            containerClassName={inputContainer}
-            icon={<IconComponent iconName="IdentityCardIcon" size={20} color="#5B6B66" />}
-          />
-          {bankErrors.accountHolderName && (
-            <span className="text-[13.5px] text-danger-deep">{bankErrors.accountHolderName}</span>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              placeholder="Account number"
-              inputMode="numeric"
-              value={bank.accountNumber}
-              onChange={(e) => setBank((p) => ({ ...p, accountNumber: e.target.value }))}
-              containerClassName={inputContainer}
-              icon={<IconComponent iconName="CreditCardIcon" size={20} color="#5B6B66" />}
-            />
-            <Input
-              placeholder="SWIFT code (optional)"
-              value={bank.swiftCode}
-              onChange={(e) =>
-                setBank((p) => ({ ...p, swiftCode: e.target.value.toUpperCase().slice(0, 11) }))
-              }
-              containerClassName={inputContainer}
-              icon={<IconComponent iconName="GlobalRefreshIcon" size={20} color="#5B6B66" />}
-            />
-          </div>
-          {bankErrors.accountNumber && (
-            <span className="text-[13.5px] text-danger-deep">{bankErrors.accountNumber}</span>
-          )}
-
-          <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />
-
-          <span className="text-15 font-semibold text-gray-800">Billing address</span>
-          <SelectField
-            label="Country"
-            value={bank.billingCountry || null}
-            onChange={(value) => setBank((p) => ({ ...p, billingCountry: value }))}
-            options={COUNTRIES}
-            error={bankErrors.billingCountry}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              placeholder="Postcode"
-              value={bank.postcode}
-              onChange={(e) => setBank((p) => ({ ...p, postcode: e.target.value }))}
-              containerClassName={inputContainer}
-              icon={<IconComponent iconName="Mail01Icon" size={20} color="#5B6B66" />}
-            />
-            <Input
-              placeholder="Town or city"
-              value={bank.townCity}
-              onChange={(e) => setBank((p) => ({ ...p, townCity: e.target.value }))}
-              containerClassName={inputContainer}
-              icon={<IconComponent iconName="Location01Icon" size={20} color="#5B6B66" />}
-            />
-          </div>
-          {bankErrors.townCity && (
-            <span className="text-[13.5px] text-danger-deep">{bankErrors.townCity}</span>
-          )}
-
-          <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />
-
-          {/* Bank-only "Phone number": the account holder's contact number
-              (`contact_phone`), not where payouts go. Optional. */}
-          <Field label="Phone number">
-            <PhoneInput
-              value={bank.phoneNumber}
-              onChange={(phoneNumber) => setBank((p) => ({ ...p, phoneNumber }))}
-              placeholder="Enter phone number"
-            />
-          </Field>
-
-          <button
-            type="button"
-            onClick={handleSaveBankDetails}
-            disabled={
-              flow.walletMutations.isCreatingBankWallet || flow.walletMutations.isPatchingBankWallet
-            }
-            className="h-11 self-start rounded-full bg-lime px-6 text-[14.5px] font-semibold text-brand-ink hover:bg-lime-dark disabled:opacity-60"
-          >
-            {flow.walletMutations.isCreatingBankWallet || flow.walletMutations.isPatchingBankWallet
-              ? 'Saving...'
-              : 'Save bank details'}
-          </button>
-        </div>
       )}
     </div>
   );

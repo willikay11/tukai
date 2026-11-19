@@ -234,6 +234,35 @@ describe('buildWalletSchema', () => {
       }),
     ).toEqual({});
   });
+  // Saved payout accounts: with Add new account picked, a saved one no
+  // longer counts until the new one is in
+  it('asks for the new account once Add new account is picked', () => {
+    const errors = errorsFor(buildWalletSchema({ hasSavedWallets: true }), {
+      ...wallet,
+      isAddingNew: true,
+    });
+
+    expect(errors.wallet).toBe('Add the new account, or pick one of your saved accounts.');
+  });
+
+  it('passes with Add new account picked and a new M-Pesa number typed', () => {
+    expect(
+      errorsFor(buildWalletSchema({ hasSavedWallets: true }), {
+        ...wallet,
+        isAddingNew: true,
+        phoneNumber: '0712 345 678',
+      }),
+    ).toEqual({});
+  });
+
+  it('does not take a short number as an M-Pesa account', () => {
+    const errors = errorsFor(buildWalletSchema({ hasSavedWallets: false }), {
+      ...wallet,
+      phoneNumber: '0712',
+    });
+
+    expect(errors.wallet).toBe('Please set up a payment method before continuing.');
+  });
 });
 
 describe('buildTicketDraftSchema', () => {
