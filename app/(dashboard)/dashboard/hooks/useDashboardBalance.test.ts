@@ -16,7 +16,7 @@ const summary = {
   currentBalance: money('9120.50'),
   commissionDeducted: money('480.00'),
   estimatedPayoutFee: money('50.00'),
-  ticketsOnSale: money('0.00'),
+  ticketsOnSale: money('81000.00'),
 };
 
 let earnings: { data?: { data: typeof summary | null }; isLoading: boolean };
@@ -46,11 +46,35 @@ describe('useDashboardBalance', () => {
     expect(result.current.balances[2]).toEqual({ label: 'Ticket sales', value: 'KES 12,000.00' });
   });
 
+  // DEV-369: the server's value of the unsold tickets, not a browser estimate
+  it('shows the tickets still on sale from the summary, after ticket sales', () => {
+    const { result } = renderHook(() => useDashboardBalance());
+
+    expect(result.current.balances.map((row) => row.label)).toEqual([
+      'Available',
+      'Pending',
+      'Ticket sales',
+      'Tickets on sale',
+    ]);
+    expect(result.current.balances[3]).toEqual({
+      label: 'Tickets on sale',
+      value: 'KES 81,000.00',
+    });
+  });
+
+  it('shows no tickets on sale as zero', () => {
+    earnings = { data: { data: { ...summary, ticketsOnSale: money('0.00') } }, isLoading: false };
+    const { result } = renderHook(() => useDashboardBalance());
+
+    expect(result.current.balances[3].value).toBe('KES 0.00');
+  });
+
   // Ticket sales are not money received, so they stay out of the total
   it('totals the current balance, not ticket sales', () => {
     const { result } = renderHook(() => useDashboardBalance());
 
     expect(result.current.totalLabel).not.toBe('KES 12,000.00');
+    expect(result.current.totalLabel).toBe('KES 9,120.50');
   });
 
   it('hands the Withdraw drawer the available amount as a decimal string', () => {
