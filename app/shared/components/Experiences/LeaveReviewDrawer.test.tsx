@@ -6,6 +6,10 @@ import userEvent from '@testing-library/user-event';
 import { LeaveReviewDrawer } from './LeaveReviewDrawer';
 
 const createRating = jest.fn();
+// TukAI's writing help has its own tests (TukaiReviewHelper.test.tsx)
+jest.mock('@/app/shared/components/TukAI/TukaiReviewHelper', () => ({
+  TukaiReviewHelper: () => null,
+}));
 jest.mock('@/app/shared/hooks/useExperiences', () => ({
   useCreateExperienceRating: () => ({ mutate: createRating, isPending: false }),
 }));
