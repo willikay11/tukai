@@ -37,9 +37,16 @@ const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 /**
  * House style for anything the model wrote: long dashes become a hyphen
  * between numbers and a comma elsewhere, and markdown bold goes.
+ *
+ * Markdown images go too, with a list line they leave empty: replies are
+ * shown as text, so they read as "![Lavy](https://…)", and the card under the
+ * reply carries the photos (DEV-486).
  */
 export const cleanTukaiText = (value: unknown): string =>
   String(value == null ? '' : value)
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/^[ \t]*(?:[-*+]|\d+\.)[ \t]*$\n?/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
     .replace(/(\d)\s*[–—]\s*(\d)/g, '$1 - $2')
     .replace(/\s*[–—]\s*/g, ', ')
     .replace(/\*\*/g, '')

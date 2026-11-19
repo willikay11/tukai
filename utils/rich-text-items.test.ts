@@ -35,4 +35,10 @@ describe('richTextItems', () => {
     expect(richTextItems('')).toEqual([]);
     expect(richTextItems('<p><br></p>')).toEqual([]);
   });
+
+  // DEV-486: text cut short part-way through a tag or an entity
+  it('drops a tag or entity cut off at the end', () => {
+    expect(richTextItems('<div> A garden &amp; bar <stro')).toEqual(['A garden & bar']);
+    expect(richTextItems('Fish &am')).toEqual(['Fish']);
+  });
 });
