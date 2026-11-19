@@ -11,7 +11,7 @@ import {
   useSetActiveWallet,
 } from '@/app/(experiences)/hooks/usePayment';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { VerifyMpesaWallet } from '@/app/shared/components/Payouts';
+import { VerifyMpesaWallet } from '@/app/shared/components/Payouts/VerifyMpesaWallet';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Drawer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';

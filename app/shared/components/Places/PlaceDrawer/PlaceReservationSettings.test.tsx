@@ -10,8 +10,30 @@ import { PlaceReservationSettings } from './PlaceReservationSettings';
 const save = jest.fn();
 const toast = jest.fn();
 
+let mockDetail: Partial<PlaceReservationProfile> | undefined;
+const refetchWallet = jest.fn();
+
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useSaveReservationSettings: () => ({ mutate: save, isPending: false }),
+  usePlaceReservationProfile: () => ({
+    data: mockDetail,
+    isLoading: false,
+    refetch: refetchWallet,
+  }),
+}));
+let mockSessionUserId: string | undefined = 'host-1';
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({ data: mockSessionUserId ? { user: { id: mockSessionUserId } } : null }),
+}));
+jest.mock('@/app/shared/components/Payouts', () => ({
+  PayoutMethodDrawer: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
+    isOpen ? (
+      <div role="dialog" aria-label="Payout method">
+        <button type="button" onClick={onClose}>
+          Done
+        </button>
+      </div>
+    ) : null,
 }));
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -76,7 +98,11 @@ const renderSettings = (
 const seating = () => screen.getByLabelText('Total seating capacity');
 
 describe('PlaceReservationSettings', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockDetail = undefined;
+    mockSessionUserId = 'host-1';
+  });
 
   describe('a place that already takes reservations', () => {
     it('opens on what is set up, read-only', () => {
@@ -206,12 +232,17 @@ describe('PlaceReservationSettings', () => {
       expect(draft.profile).toEqual({
         reservationType: 'restaurant_reservation',
         seatingCapacity: 60,
+        // Not set on this profile, so the defaults the pills start on
+        respondWithinHours: 2,
+        payWithinHours: 3,
+        paymentType: 'free',
+        depositAmount: null,
+        entryFees: [],
       });
       expect(draft.rules).toEqual([
         { dayOfWeek: 0, openTime: '11:00', closeTime: '23:00', slotIntervalMinutes: 30 },
         { dayOfWeek: 5, openTime: '11:00', closeTime: '23:00', slotIntervalMinutes: 30 },
       ]);
-      expect(draft.existingRules).toEqual(monAndSat);
       expect(draft.isActive).toBe(true);
     });
 
@@ -320,12 +351,12 @@ describe('PlaceReservationSettings', () => {
 
       const [draft] = save.mock.calls[0];
       expect(draft.profileId).toBeUndefined();
-      expect(draft.profile).toEqual({
+      expect(draft.profile).toMatchObject({
         reservationType: 'restaurant_reservation',
         seatingCapacity: 30,
+        paymentType: 'free',
       });
       expect(draft.rules).toEqual([{ dayOfWeek: 0, openTime: '11:00', closeTime: '22:00' }]);
-      expect(draft.existingRules).toEqual([]);
       expect(draft.isActive).toBe(false);
     });
 
@@ -347,6 +378,195 @@ describe('PlaceReservationSettings', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
       expect(save.mock.calls[0][0].placePhotos).toEqual(photos);
+    });
+  });
+
+  // DEV-405/406: deposits, entry fees and the timings are saved to the server
+  describe('paid reservations', () => {
+    const wallet = {
+      id: 'w1',
+      walletType: 'phone',
+      destination: '•••6826',
+      accountHolderName: 'Weekend Readers',
+      isVerified: true,
+    };
+    const host = { id: 'host-1', displayName: 'Wanjiru' };
+
+    const editType = (label: string) => {
+      fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
+      fireEvent.click(screen.getByRole('radio', { name: label }));
+    };
+
+    it('loads max party size and both time windows from the profile', () => {
+      renderSettings({
+        profile: profile({ maxPartySize: 12, respondWithinHours: 6, payWithinHours: 12 }),
+      });
+
+      expect(screen.getByText('12 guests')).toBeInTheDocument();
+      expect(screen.getByText('6 hours after they come in')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
+      expect(screen.getByLabelText('Max party size per booking')).toHaveValue(12);
+      expect(screen.getByRole('radio', { name: '6 hours' })).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
+    });
+
+    it('asks for a deposit, then saves it per guest with the time to pay', () => {
+      renderSettings();
+      editType('Deposit to confirm');
+
+      expect(
+        screen.getByText(/Guests pay a deposit per guest once you accept/),
+      ).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Save & continue' }));
+      expect(save).not.toHaveBeenCalled();
+      expect(screen.getByRole('alert')).toHaveTextContent(/^Add a deposit per guest/);
+
+      fireEvent.change(screen.getByLabelText('Deposit per guest'), { target: { value: '5a00' } });
+      expect(screen.getByLabelText('Deposit per guest')).toHaveValue('500');
+      fireEvent.click(screen.getByRole('radio', { name: '12 hours' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Save & continue' }));
+
+      expect(save.mock.calls[0][0].profile).toMatchObject({
+        paymentType: 'deposit',
+        depositAmount: { amount: '500', currency: 'KES' },
+        entryFees: [],
+        payWithinHours: 12,
+      });
+    });
+
+    it('builds the guest categories for entry fees, and removes one', () => {
+      renderSettings();
+      editType('Entry fees');
+
+      const add = screen.getByRole('button', { name: 'Add category' });
+      expect(add).toBeDisabled();
+      fireEvent.change(screen.getByLabelText('Guest category'), { target: { value: 'Adults' } });
+      fireEvent.change(screen.getByLabelText('Amount per head'), { target: { value: '1500' } });
+      fireEvent.click(add);
+      fireEvent.change(screen.getByLabelText('Guest category'), { target: { value: 'Kids' } });
+      fireEvent.change(screen.getByLabelText('Amount per head'), { target: { value: '500' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Add another category' }));
+
+      expect(screen.getByText('KES 1,500 per head')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Remove Kids' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Save & continue' }));
+
+      expect(save.mock.calls[0][0].profile).toMatchObject({
+        paymentType: 'entry_fee',
+        depositAmount: null,
+        entryFees: [{ guestType: 'Adults', price: { amount: '1500', currency: 'KES' } }],
+      });
+    });
+
+    it('goes on to the wallet step once a paid setup is saved', () => {
+      mockDetail = { payoutAccount: { host, wallets: [wallet] } };
+      renderSettings({
+        profile: profile({
+          paymentType: 'deposit',
+          depositAmount: { amount: '500.00', currency: 'KES' },
+        }),
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Save & continue' }));
+
+      act(() => save.mock.calls[0][1].onSuccess());
+
+      expect(screen.getByRole('tab', { name: /Wallet details/ })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByText('•••6826, Weekend Readers')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Change payout method' })).toBeInTheDocument();
+    });
+
+    it('lets the host set up a payout method, and reads it back after', () => {
+      mockDetail = { payoutAccount: { host, wallets: [] } };
+      renderSettings({
+        profile: profile({
+          paymentType: 'deposit',
+          depositAmount: { amount: '500', currency: 'KES' },
+        }),
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
+      fireEvent.click(screen.getByRole('tab', { name: /Wallet details/ }));
+
+      expect(
+        screen.getByText('No payout method yet. Add one so guests can pay.'),
+      ).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Set up payout method' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
+      expect(refetchWallet).toHaveBeenCalled();
+    });
+
+    it("tells a manager who isn't the host that only the host can change it", () => {
+      mockSessionUserId = 'manager-2';
+      mockDetail = { payoutAccount: { host, wallets: [] } };
+      renderSettings({
+        profile: profile({
+          paymentType: 'deposit',
+          depositAmount: { amount: '500', currency: 'KES' },
+        }),
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Edit settings' }));
+      fireEvent.click(screen.getByRole('tab', { name: /Wallet details/ }));
+
+      expect(screen.queryByRole('button', { name: /payout method/ })).not.toBeInTheDocument();
+      expect(screen.getByText(/Only they can change where the money goes/)).toBeInTheDocument();
+    });
+
+    it('keeps the wallet step shut while the type step has something missing', () => {
+      renderSettings();
+      editType('Deposit to confirm');
+      fireEvent.click(screen.getByRole('tab', { name: /Wallet details/ }));
+
+      expect(screen.getByRole('tab', { name: /Reservation type/ })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByRole('alert')).toHaveTextContent(/^Add a deposit per guest/);
+    });
+
+    it('shows a deposit setup, and says it is not live without a wallet', () => {
+      mockDetail = { payoutAccount: { host, wallets: [] } };
+      renderSettings({
+        profile: profile({
+          paymentType: 'deposit',
+          depositAmount: { amount: '500.00', currency: 'KES' },
+          payWithinHours: 3,
+        }),
+      });
+
+      expect(screen.getByText('Deposit to confirm')).toBeInTheDocument();
+      expect(
+        screen.getByText('KES 500 per guest, paid once you accept and taken off the final bill'),
+      ).toBeInTheDocument();
+      expect(screen.getByText('3 hours after you accept')).toBeInTheDocument();
+      expect(
+        screen.getByText('Not live yet. Add your wallet details so guests can pay.'),
+      ).toBeInTheDocument();
+    });
+
+    it('shows the entry fee categories and the wallet', () => {
+      mockDetail = { payoutAccount: { host, wallets: [wallet] } };
+      renderSettings({
+        profile: profile({
+          paymentType: 'entry_fee',
+          entryFees: [
+            { id: 'f1', guestType: 'Adults', price: { amount: '1500.00', currency: 'KES' } },
+          ],
+        }),
+      });
+
+      expect(
+        screen.getByText('Per person by guest type, paid once you accept'),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Adults')).toBeInTheDocument();
+      expect(screen.getByText('KES 1,500')).toBeInTheDocument();
+      expect(screen.getByText('M-Pesa')).toBeInTheDocument();
+      expect(screen.getByText(/^Live\./)).toBeInTheDocument();
     });
   });
 });

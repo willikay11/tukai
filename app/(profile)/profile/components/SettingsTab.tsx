@@ -5,13 +5,13 @@ import { useState } from 'react';
 import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
 import { useNotificationPreferences } from '@/app/(profile)/hooks';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PayoutMethodDrawer } from '@/app/shared/components/Payouts';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { NotificationPreferences } from '@/types/notification';
 import { Wallet } from '@/types/payment';
 
 import { MyProfile, profileHandle, profileName } from '../profile';
 import { NotificationsDrawer } from './NotificationsDrawer';
-import { PayoutMethodDrawer } from './PayoutMethodDrawer';
 import { PrivacyDrawer } from './PrivacyDrawer';
 
 const payoutMethodLine = (wallets: Wallet[]): string => {
@@ -49,7 +49,9 @@ const notificationsLine = (prefs?: NotificationPreferences): string => {
   // A channel counts as on while any of its own switches is. There is no
   // WhatsApp channel on the wire.
   const channels = [
-    prefs.pushCommunity || prefs.pushExperiences || prefs.pushSocial || prefs.pushGuides ? 'push' : null,
+    prefs.pushCommunity || prefs.pushExperiences || prefs.pushSocial || prefs.pushGuides
+      ? 'push'
+      : null,
     prefs.marketing || prefs.communities || prefs.experiences ? 'email' : null,
   ].filter(Boolean);
   const by = channels.length ? channels.join(' and ') : 'no channel';
@@ -80,7 +82,12 @@ const SettingsRow = ({
       <span className="text-[15px] font-semibold text-gray-900">{title}</span>
       <span className="text-[13.5px] text-ink-muted">{sub}</span>
     </span>
-    <IconComponent iconName="ArrowRight01Icon" size={18} color="currentColor" className="text-ink-subtle" />
+    <IconComponent
+      iconName="ArrowRight01Icon"
+      size={18}
+      color="currentColor"
+      className="text-ink-subtle"
+    />
   </button>
 );
 
@@ -94,7 +101,9 @@ export const SettingsTab = ({
   const { toast } = useToast();
   const { data } = useGetWallets();
   const walletsPayload = data?.data;
-  const wallets: Wallet[] = Array.isArray(walletsPayload) ? walletsPayload : walletsPayload?.results ?? [];
+  const wallets: Wallet[] = Array.isArray(walletsPayload)
+    ? walletsPayload
+    : (walletsPayload?.results ?? []);
 
   const { data: notifResponse } = useNotificationPreferences();
   const notifPrefs = notifResponse?.success ? notifResponse.data : undefined;
@@ -102,14 +111,15 @@ export const SettingsTab = ({
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
-  const comingSoon = (what: string) =>
-    toast({ description: `${what} is coming soon.` });
+  const comingSoon = (what: string) => toast({ description: `${what} is coming soon.` });
 
   return (
     <div className="flex flex-col gap-[22px]">
       <div>
         <h2 className="text-19 font-bold tracking-[-0.3px] text-brand-ink">Settings</h2>
-        <p className="mt-1 text-[13.5px] text-ink-muted">Your account, payouts and who can see what.</p>
+        <p className="mt-1 text-[13.5px] text-ink-muted">
+          Your account, payouts and who can see what.
+        </p>
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(max(220px,(100%_-_32px)/3),1fr))] gap-x-4 gap-y-1">
@@ -145,7 +155,10 @@ export const SettingsTab = ({
         />
       </div>
 
-      <NotificationsDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
+      <NotificationsDrawer
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+      />
       <PayoutMethodDrawer isOpen={isPayoutOpen} onClose={() => setIsPayoutOpen(false)} />
       <PrivacyDrawer isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
     </div>

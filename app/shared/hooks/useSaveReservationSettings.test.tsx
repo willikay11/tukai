@@ -10,15 +10,11 @@ import { useSaveReservationSettings } from './usePlaces';
 const createReservationProfile = jest.fn();
 const updateReservationProfile = jest.fn();
 const activateReservationProfile = jest.fn();
-const createAvailabilityRule = jest.fn();
-const deleteAvailabilityRule = jest.fn();
 
 jest.mock('@/services/place', () => ({
   createReservationProfile: (...args: unknown[]) => createReservationProfile(...args),
   updateReservationProfile: (...args: unknown[]) => updateReservationProfile(...args),
   activateReservationProfile: (...args: unknown[]) => activateReservationProfile(...args),
-  createAvailabilityRule: (...args: unknown[]) => createAvailabilityRule(...args),
-  deleteAvailabilityRule: (...args: unknown[]) => deleteAvailabilityRule(...args),
 }));
 
 jest.mock('@/app/shared/hooks/useCommunities', () => ({ useGetCommunities: () => ({}) }));
@@ -30,21 +26,12 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </QueryClientProvider>
 );
 
-const rule = (extra: Record<string, unknown> = {}) => ({
-  id: 'r1',
-  reservationProfile: 'rp1',
-  dayOfWeek: 0,
-  openTime: '11:00',
-  closeTime: '23:00',
-  slotIntervalMinutes: 30,
-  ...extra,
-});
+const MONDAY = { dayOfWeek: 0, openTime: '11:00', closeTime: '23:00', slotIntervalMinutes: 30 };
 
 const draft = (extra: Partial<ReservationSettingsDraft> = {}): ReservationSettingsDraft => ({
   profileId: 'rp1',
-  profile: { reservationType: 'restaurant_reservation', seatingCapacity: 40 },
-  rules: [{ dayOfWeek: 0, openTime: '11:00', closeTime: '23:00', slotIntervalMinutes: 30 }],
-  existingRules: [rule()],
+  profile: { reservationType: 'restaurant_reservation', seatingCapacity: 40, paymentType: 'free' },
+  rules: [MONDAY],
   isActive: true,
   ...extra,
 });
@@ -62,40 +49,47 @@ describe('useSaveReservationSettings', () => {
     createReservationProfile.mockResolvedValue({ data: { id: 'rp-new' } });
     updateReservationProfile.mockResolvedValue({ data: { id: 'rp1' } });
     activateReservationProfile.mockResolvedValue({});
-    createAvailabilityRule.mockResolvedValue({});
-    deleteAvailabilityRule.mockResolvedValue({});
   });
 
-  // A place with no profile has to get one before hours can hang off it, and
-  // it takes no bookings until it is activated
-  it('creates the profile, its hours and opens it, in that order', async () => {
-    await save(
-      draft({
-        profileId: undefined,
-        existingRules: [],
-        isActive: false,
-        rules: [{ dayOfWeek: 0, openTime: '11:00', closeTime: '23:00' }],
-      }),
-    );
+  // DEV-462: the profile and its whole weekly schedule go in one request, so
+  // a save can't leave half the hours written
+  it('creates the profile with its hours in one request, then opens it', async () => {
+    await save(draft({ profileId: undefined, isActive: false }));
 
     expect(createReservationProfile).toHaveBeenCalledWith('p1', {
       reservationType: 'restaurant_reservation',
       seatingCapacity: 40,
+      paymentType: 'free',
+      availabilityRules: [MONDAY],
     });
     // Against the id the create returned, not one the caller guessed
-    expect(createAvailabilityRule).toHaveBeenCalledWith('p1', 'rp-new', {
-      dayOfWeek: 0,
-      openTime: '11:00',
-      closeTime: '23:00',
-    });
     expect(activateReservationProfile).toHaveBeenCalledWith('p1', 'rp-new');
+  });
+
+  it('sends the payment terms and timings with the schedule', async () => {
+    const profile: ReservationSettingsDraft['profile'] = {
+      reservationType: 'restaurant_reservation',
+      paymentType: 'entry_fee',
+      maxPartySize: 8,
+      respondWithinHours: 6,
+      payWithinHours: 3,
+      depositAmount: null,
+      entryFees: [{ guestType: 'Adults', price: { amount: '1500', currency: 'KES' } }],
+    };
+
+    await save(draft({ profile, rules: [] }));
+
+    // An empty schedule is sent too: it closes every day
+    expect(updateReservationProfile).toHaveBeenCalledWith('p1', 'rp1', {
+      ...profile,
+      availabilityRules: [],
+    });
   });
 
   it('leaves an already-open profile alone', async () => {
     await save(draft());
 
     expect(createReservationProfile).not.toHaveBeenCalled();
-    expect(updateReservationProfile).toHaveBeenCalledWith('p1', 'rp1', expect.any(Object));
     expect(activateReservationProfile).not.toHaveBeenCalled();
   });
 
@@ -107,62 +101,12 @@ describe('useSaveReservationSettings', () => {
     expect(activateReservationProfile).toHaveBeenCalledWith('p1', 'rp1');
   });
 
-  // Rules can only be created and deleted, so an unchanged day must be left
-  // where it is rather than churned
-  it('touches no rule whose day and hours are unchanged', async () => {
-    await save(draft());
-
-    expect(createAvailabilityRule).not.toHaveBeenCalled();
-    expect(deleteAvailabilityRule).not.toHaveBeenCalled();
-  });
-
-  it('rewrites a day whose hours moved', async () => {
-    await save(
-      draft({
-        rules: [{ dayOfWeek: 0, openTime: '09:00', closeTime: '23:00', slotIntervalMinutes: 30 }],
-      }),
-    );
-
-    expect(deleteAvailabilityRule).toHaveBeenCalledWith('p1', 'rp1', 'r1');
-    expect(createAvailabilityRule).toHaveBeenCalledWith(
-      'p1',
-      'rp1',
-      expect.objectContaining({ openTime: '09:00' }),
-    );
-  });
-
-  it('drops a day that is no longer open', async () => {
-    await save(draft({ rules: [] }));
-
-    expect(deleteAvailabilityRule).toHaveBeenCalledWith('p1', 'rp1', 'r1');
-    expect(createAvailabilityRule).not.toHaveBeenCalled();
-  });
-
-  it('adds a day that was not open before', async () => {
-    await save(
-      draft({
-        rules: [
-          { dayOfWeek: 0, openTime: '11:00', closeTime: '23:00', slotIntervalMinutes: 30 },
-          { dayOfWeek: 5, openTime: '11:00', closeTime: '23:00', slotIntervalMinutes: 30 },
-        ],
-      }),
-    );
-
-    expect(deleteAvailabilityRule).not.toHaveBeenCalled();
-    expect(createAvailabilityRule).toHaveBeenCalledTimes(1);
-    expect(createAvailabilityRule).toHaveBeenCalledWith(
-      'p1',
-      'rp1',
-      expect.objectContaining({ dayOfWeek: 5 }),
-    );
-  });
-
-  it('fails rather than writing hours against a profile that was not created', async () => {
+  it('fails rather than opening a profile that was not created', async () => {
     createReservationProfile.mockResolvedValue({ data: {} });
 
-    const result = await save(draft({ profileId: undefined, existingRules: [] }));
+    const result = await save(draft({ profileId: undefined, isActive: false }));
 
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(createAvailabilityRule).not.toHaveBeenCalled();
+    expect(activateReservationProfile).not.toHaveBeenCalled();
   });
 });

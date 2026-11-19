@@ -15,10 +15,14 @@ import {
 import { reservationErrorSentence } from './errorSentence';
 import { ReservationSettingsValues, reservationSettingsSchema, zodErrorsToMap } from './schemas';
 
-/** Has nowhere to live on the API - see the reservation_settings_backend_gaps memory. */
-type LocalOnlyValues = Pick<ReservationSettingsValues, 'partySize' | 'expiryHours'>;
+/** Prices are shown and typed in whole shillings: "500.00" reads as "500". */
+const wholeAmount = (amount?: string | null): string =>
+  amount && Number(amount) > 0 ? String(Number(amount)) : '';
 
-const DEFAULT_LOCAL_ONLY: LocalOnlyValues = { partySize: '', expiryHours: '2' };
+const asText = (value?: number | null, fallback = ''): string => (value ? String(value) : fallback);
+
+export const DEFAULT_RESPOND_WITHIN = '2';
+export const DEFAULT_PAY_WITHIN = '3';
 
 export const useReservationSettingsForm = ({
   placeId,
@@ -37,25 +41,31 @@ export const useReservationSettingsForm = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Partial<ReservationSettingsValues>>({});
   const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
-  // Max party size and the answer-by window have no field on the API, so this
-  // is the closest thing to a "saved" value they get: it survives Cancel (like
-  // a real saved field would) but resets once the drawer is reopened fresh.
-  const [localOnly, setLocalOnly] = useState<LocalOnlyValues>(DEFAULT_LOCAL_ONLY);
+
+  const currency =
+    profile?.depositAmount?.currency ?? profile?.entryFees?.[0]?.price.currency ?? 'KES';
 
   const loaded: ReservationSettingsValues = useMemo(() => {
     const [first] = rules;
 
     return {
       reservationType: profile?.reservationType ?? 'restaurant_reservation',
-      seatingCapacity: profile?.seatingCapacity ? String(profile.seatingCapacity) : '',
-      partySize: localOnly.partySize,
+      paymentType: profile?.paymentType ?? 'free',
+      depositAmount: wholeAmount(profile?.depositAmount?.amount),
+      entryFees: (profile?.entryFees ?? []).map((fee) => ({
+        guestType: fee.guestType,
+        amount: wholeAmount(fee.price.amount),
+      })),
+      seatingCapacity: asText(profile?.seatingCapacity),
+      partySize: asText(profile?.maxPartySize),
       days: rules.map((rule) => WEEKDAYS[rule.dayOfWeek]).filter(Boolean),
       opensAt: first?.openTime?.slice(0, 5) ?? '',
       closesAt: first?.closeTime?.slice(0, 5) ?? '',
-      bufferMinutes: first?.slotIntervalMinutes ? String(first.slotIntervalMinutes) : '',
-      expiryHours: localOnly.expiryHours,
+      bufferMinutes: asText(first?.slotIntervalMinutes),
+      respondWithinHours: asText(profile?.respondWithinHours, DEFAULT_RESPOND_WITHIN),
+      payWithinHours: asText(profile?.payWithinHours, DEFAULT_PAY_WITHIN),
     };
-  }, [profile, rules, localOnly]);
+  }, [profile, rules]);
 
   const values: ReservationSettingsValues = { ...loaded, ...touched };
 
@@ -70,22 +80,38 @@ export const useReservationSettingsForm = ({
 
   const errorSummary = hasAttemptedSave ? reservationErrorSentence(values) : null;
 
-  const submit = (onSaved: () => void) => {
+  /** Checks the form; on a problem shows the error box and returns false. */
+  const validate = (): boolean => {
     const parsed = reservationSettingsSchema.safeParse(values);
-    const nextErrors = parsed.success ? {} : zodErrorsToMap(parsed.error);
+    setErrors(parsed.success ? {} : zodErrorsToMap(parsed.error));
+    setHasAttemptedSave(!parsed.success);
+    return parsed.success;
+  };
 
-    setErrors(nextErrors);
+  const submit = (onSaved: () => void) => {
+    if (!validate()) return;
 
-    if (!parsed.success) {
-      setHasAttemptedSave(true);
-      return;
-    }
+    const money = (amount: string) => ({ amount, currency });
 
     const draft: ReservationSettingsDraft = {
       profileId: profile?.id,
       profile: {
         reservationType: values.reservationType,
         ...(values.seatingCapacity ? { seatingCapacity: Number(values.seatingCapacity) } : {}),
+        ...(values.partySize ? { maxPartySize: Number(values.partySize) } : {}),
+        respondWithinHours: Number(values.respondWithinHours),
+        payWithinHours: Number(values.payWithinHours),
+        paymentType: values.paymentType,
+        // The terms of the other types are cleared, so a switch back to free
+        // leaves nothing behind for guests to be charged
+        depositAmount: values.paymentType === 'deposit' ? money(values.depositAmount) : null,
+        entryFees:
+          values.paymentType === 'entry_fee'
+            ? values.entryFees.map((fee) => ({
+                guestType: fee.guestType,
+                price: money(fee.amount),
+              }))
+            : [],
       },
       rules: values.days.map((day) => ({
         dayOfWeek: WEEKDAYS.indexOf(day as (typeof WEEKDAYS)[number]),
@@ -93,22 +119,26 @@ export const useReservationSettingsForm = ({
         closeTime: values.closesAt,
         ...(values.bufferMinutes ? { slotIntervalMinutes: Number(values.bufferMinutes) } : {}),
       })),
-      existingRules: rules,
       isActive: profile?.status === 'active',
       placePhotos,
-      // partySize/expiryHours are deliberately left out: no field exists yet
-      // for either on the API. They are kept in `localOnly` instead.
     };
 
     save(draft, {
-      onSuccess: () => {
-        setLocalOnly({ partySize: values.partySize, expiryHours: values.expiryHours });
-        onSaved();
-      },
+      onSuccess: () => onSaved(),
       onError: (error: Error) =>
         toast({ title: 'Could not save', description: error.message, variant: 'destructive' }),
     });
   };
 
-  return { values, errors, errorSummary, localOnly, set, reset, submit, isSaving: isPending };
+  return {
+    values,
+    errors,
+    errorSummary,
+    currency,
+    set,
+    reset,
+    validate,
+    submit,
+    isSaving: isPending,
+  };
 };
