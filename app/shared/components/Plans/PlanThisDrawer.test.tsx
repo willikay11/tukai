@@ -53,7 +53,7 @@ describe('planning something', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     plans = [plan()];
-    createPlan.mockReturnValue({ id: 'new1', title: 'Plan for 2026-07-05' });
+    createPlan.mockResolvedValue({ id: 'new1', title: 'Plan for 2026-07-05' });
   });
 
   it('names what is being planned', () => {
@@ -112,7 +112,7 @@ describe('planning something', () => {
     await userEvent.click(screen.getByRole('radio', { name: /New plan/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Create and add' }));
 
-    expect(createPlan).toHaveBeenCalledWith('Plan for 2026-07-05');
+    expect(createPlan).toHaveBeenCalledWith('Plan for 2026-07-05', '2026-07-05');
     expect(addStop).toHaveBeenCalledWith('new1', expect.objectContaining({ refId: 'e1' }));
   });
 
@@ -123,17 +123,33 @@ describe('planning something', () => {
     await userEvent.type(screen.getByLabelText('Call it'), 'Hike day');
     await userEvent.click(screen.getByRole('button', { name: 'Create and add' }));
 
-    expect(createPlan).toHaveBeenCalledWith('Hike day');
+    expect(createPlan).toHaveBeenCalledWith('Hike day', '2026-07-05');
   });
 
-  // A plan built around an experience is on that experience's day
+  // A plan built around an experience is on that experience's day, from the
+  // moment it's made (DEV-376: one request, not a create and then a change)
   it('dates a new plan from the experience', async () => {
     renderDrawer();
 
     await userEvent.click(screen.getByRole('radio', { name: /New plan/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Create and add' }));
 
-    expect(setPlanDate).toHaveBeenCalledWith('new1', '2026-07-05');
+    expect(createPlan).toHaveBeenCalledWith(expect.any(String), '2026-07-05');
+    expect(setPlanDate).not.toHaveBeenCalled();
+  });
+
+  it('says why, and adds nothing, when the plan cannot be made', async () => {
+    createPlan.mockRejectedValueOnce(new Error('The plan could not be created'));
+    renderDrawer();
+
+    await userEvent.click(screen.getByRole('radio', { name: /New plan/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Create and add' }));
+
+    expect(addStop).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'The plan could not be created' }),
+    );
   });
 
   it('starts on a new plan when there are none', () => {

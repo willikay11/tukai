@@ -46,7 +46,8 @@ export const PlanThisDrawer = ({
 }) => {
   const router = useRouter();
   const { toast } = useToast();
-  const { plans, createPlan, addStop, setPlanDate } = usePlans();
+  const { plans, createPlan, addStop } = usePlans();
+  const [isAdding, setIsAdding] = useState(false);
 
   const isExperience = subject.kind === 'experience';
   const defaultPlan = isExperience
@@ -71,8 +72,8 @@ export const PlanThisDrawer = ({
     ? `Plan for ${subject.refDate?.slice(0, 10) ?? subject.title}`
     : 'New plan';
 
-  const add = () => {
-    if (isAlreadyIn) return;
+  const add = async () => {
+    if (isAlreadyIn || isAdding) return;
 
     const time = isExperience
       ? undefined
@@ -94,13 +95,20 @@ export const PlanThisDrawer = ({
     let planName = chosen?.title ?? '';
 
     if (isNew) {
-      const created = createPlan(newTitle.trim() || suggestedName);
-      planId = created.id;
-      planName = created.title;
-
-      // A plan made around an experience takes that experience's day
-      if (isExperience && subject.refDate) {
-        setPlanDate(created.id, subject.refDate.slice(0, 10));
+      setIsAdding(true);
+      try {
+        // A plan made around an experience takes that experience's day
+        const created = await createPlan(
+          newTitle.trim() || suggestedName,
+          isExperience && subject.refDate ? subject.refDate.slice(0, 10) : null,
+        );
+        planId = created.id;
+        planName = created.title;
+      } catch (error) {
+        toast({ description: (error as Error).message, variant: 'destructive' });
+        return;
+      } finally {
+        setIsAdding(false);
       }
     }
 
@@ -265,7 +273,8 @@ export const PlanThisDrawer = ({
           <Button
             type="button"
             variant="lime"
-            onClick={add}
+            onClick={() => void add()}
+            isLoading={isAdding}
             disabled={isAlreadyIn}
             className="rounded-full px-6"
           >

@@ -1,10 +1,10 @@
 /**
  * A plan: a day out, and the stops on it.
  *
- * ⚠️ No endpoint backs this. Nothing in the API stores an itinerary of a
- * reader's own, so a plan lives in the browser and every read and write goes
- * through the plan store - the one seam where persistence lands the day an
- * endpoint exists.
+ * Signed in, plans are saved to the account (/v1/plans/, DEV-376); signed
+ * out, they're kept in this browser. Every read and write goes through the
+ * plan store (context/PlanContext.tsx), and services/plans.ts turns them into
+ * the API's shape and back.
  *
  * A stop keeps a snapshot of what it points at (title, subtitle, photo, and for
  * an experience its date and time). Without one, drawing a plan would mean a

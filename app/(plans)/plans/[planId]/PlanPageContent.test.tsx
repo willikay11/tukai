@@ -10,6 +10,7 @@ import { PlanPageContent } from './PlanPageContent';
 const store = {
   plans: [] as Plan[],
   isReady: true,
+  isSynced: false,
   renamePlan: jest.fn(),
   setPlanDate: jest.fn(),
   deletePlan: jest.fn(),
@@ -47,6 +48,7 @@ describe('one plan', () => {
     jest.clearAllMocks();
     store.plans = [plan()];
     store.isReady = true;
+    store.isSynced = false;
   });
 
   it('is headed by its name, and lists its stops in order', () => {
@@ -182,14 +184,26 @@ describe('one plan', () => {
     expect(push).toHaveBeenCalledWith('/plans');
   });
 
-  it('says plainly when a plan is not on this device', () => {
+  it('says plainly when a plan is not on this device, signed out', () => {
     store.plans = [];
+    store.isSynced = false;
     render(<PlanPageContent planId="p1" />);
 
     expect(
       screen.getByText(
-        'This plan is not on this device. Plans are kept in the browser they were made in.',
+        'This plan is not on this device. Sign in to see the plans saved to your account.',
       ),
+    ).toBeInTheDocument();
+  });
+
+  // DEV-376: signed in, plans are the account's, on every device
+  it('says a plan is not in the account, signed in', () => {
+    store.plans = [];
+    store.isSynced = true;
+    render(<PlanPageContent planId="p1" />);
+
+    expect(
+      screen.getByText('This plan is not in your plans. It may have been deleted.'),
     ).toBeInTheDocument();
   });
 
