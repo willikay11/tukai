@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Drawer } from '@/components/ui/drawer';
 
 import { DrawerFooter } from './DrawerShell/DrawerFooter';
@@ -92,7 +92,11 @@ export const CreateExperienceDrawer = () => {
     alreadySelectedIds?: string[];
   }) =>
     new Promise<PlaceSelection[] | null>((resolve) => {
-      setSelectPlacesRequest({ ...opts, alreadySelectedIds: opts.alreadySelectedIds ?? [], resolve });
+      setSelectPlacesRequest({
+        ...opts,
+        alreadySelectedIds: opts.alreadySelectedIds ?? [],
+        resolve,
+      });
     });
 
   const handleRequestWherePlace = () => {
@@ -202,7 +206,12 @@ export const CreateExperienceDrawer = () => {
 
   if (selectPlacesRequest) {
     return (
-      <Drawer isOpen={isOpen} setIsOpen={(open) => !open && requestClose()} width="narrow" mobile="full">
+      <Drawer
+        isOpen={isOpen}
+        setIsOpen={(open) => !open && requestClose()}
+        width="narrow"
+        mobile="full"
+      >
         <SelectPlacesView
           multiple={selectPlacesRequest.multiple}
           headerTitle={selectPlacesRequest.headerTitle}
@@ -267,14 +276,16 @@ export const CreateExperienceDrawer = () => {
             <CreateStepContentSkeleton />
           ) : !isWizardVisible && latestDraft ? (
             <div className="flex flex-col gap-3">
-              <h2 className="text-22 font-bold leading-tight text-gray-800">Continue your draft?</h2>
+              <h2 className="text-22 font-bold leading-tight text-gray-800">
+                Continue your draft?
+              </h2>
               <p className="text-15 leading-relaxed text-ink-muted">
                 {latestDraft.title || 'Untitled experience'} is saved as a draft.
               </p>
               <button
                 type="button"
                 onClick={handleProceedToWizard}
-                className="h-14 rounded-full bg-lime px-[30px] text-16 font-semibold text-brand-ink hover:bg-lime-dark"
+                className="text-16 h-14 rounded-full bg-lime px-[30px] font-semibold text-brand-ink hover:bg-lime-dark"
               >
                 Continue your draft
               </button>
@@ -319,10 +330,9 @@ export const CreateExperienceDrawer = () => {
             primaryDisabled={
               !isReviewOpen &&
               ((currentStepId === 'dates-type' && !hasOwnedCommunity) ||
-                (currentStepId === 'wallet' &&
-                  !flow.hasSavedWallets &&
-                  !flow.formData.wallet.selectedWallet &&
-                  !flow.formData.wallet.phoneNumber?.trim()))
+                // Until there's a payout account: a saved one picked, a new
+                // M-Pesa number, or a new bank account saved (DEV-509)
+                (currentStepId === 'wallet' && !flow.isWalletComplete))
             }
             isPrimaryLoading={isReviewOpen ? isPublishing : flow.isSavingExperience}
           />

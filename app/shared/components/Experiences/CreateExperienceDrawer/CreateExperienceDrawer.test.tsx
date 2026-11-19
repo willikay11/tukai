@@ -289,4 +289,40 @@ describe('CreateExperienceDrawer', () => {
 
     expect(await findWizard()).toBeInTheDocument();
   });
+
+  // DEV-509: no Preview & publish until the wallet step has a payout account
+  describe('on Wallet details', () => {
+    const openOnWallet = (isWalletComplete: boolean) => {
+      setMockHostingPlan({ hasActivePlan: true });
+      setMockFlow({
+        experienceId: 'exp-1',
+        activeStep: 'wallet',
+        formData: {
+          dateType: { experiencePricing: 'paid' },
+          about: {},
+          tickets: {},
+          invite: {},
+          wallet: { paymentMethod: 'bank', isAddingNew: true, phoneNumber: '' },
+          itineraryDays: [],
+        },
+        // The bug: with any saved account, the old check let it through
+        hasSavedWallets: true,
+        savedWallets: [{ id: 'mp', walletType: 'phone', phone: '+254712345815', isActive: true }],
+        isWalletComplete,
+      });
+      renderDrawer({ experienceId: 'exp-1', step: 'wallet' });
+    };
+
+    it('keeps Preview & publish disabled while bank details are being added', async () => {
+      openOnWallet(false);
+
+      expect(await screen.findByRole('button', { name: 'Preview & publish' })).toBeDisabled();
+    });
+
+    it('enables it once there is a payout account', async () => {
+      openOnWallet(true);
+
+      expect(await screen.findByRole('button', { name: 'Preview & publish' })).toBeEnabled();
+    });
+  });
 });
