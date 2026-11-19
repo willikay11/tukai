@@ -1019,6 +1019,13 @@ export const useCreateExperienceFlow = ({
     return result.success;
   }, [formData.dateType.experiencePricing, formData.dateType.experienceType, formData.tickets]);
 
+  // Whether the step has a payout account yet - the same rule validateWallet
+  // checks, so the footer's button and the check can't disagree (DEV-509)
+  const isWalletComplete = useMemo(
+    () => buildWalletSchema({ hasSavedWallets }).safeParse(formData.wallet).success,
+    [hasSavedWallets, formData.wallet],
+  );
+
   const validateWallet = useCallback((): boolean => {
     const schema = buildWalletSchema({ hasSavedWallets });
     const result = schema.safeParse(formData.wallet);
@@ -1804,6 +1811,7 @@ export const useCreateExperienceFlow = ({
     savedWallets,
     isWalletsLoading,
     hasSavedWallets,
+    isWalletComplete,
     walletErrors,
     validateWallet,
     updateWalletFormData,

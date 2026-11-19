@@ -255,6 +255,38 @@ describe('buildWalletSchema', () => {
     ).toEqual({});
   });
 
+  // DEV-509: Preview & publish stays off while bank details are being added
+  it('does not pass while a new bank account is being added', () => {
+    const adding = { ...wallet, paymentMethod: 'bank', isAddingNew: true };
+
+    expect(errorsFor(buildWalletSchema({ hasSavedWallets: true }), adding).wallet).toBeDefined();
+    expect(
+      errorsFor(buildWalletSchema({ hasSavedWallets: false }), { ...adding, isAddingNew: false })
+        .wallet,
+    ).toBeDefined();
+  });
+
+  it('does not count an M-Pesa number typed before switching to bank', () => {
+    const errors = errorsFor(buildWalletSchema({ hasSavedWallets: false }), {
+      ...wallet,
+      paymentMethod: 'bank',
+      phoneNumber: '0712 345 678',
+    });
+
+    expect(errors.wallet).toBeDefined();
+  });
+
+  it('passes once the new bank account is saved and picked', () => {
+    expect(
+      errorsFor(buildWalletSchema({ hasSavedWallets: false }), {
+        ...wallet,
+        paymentMethod: 'bank',
+        isAddingNew: false,
+        selectedWallet: { id: 'bank-1' },
+      }),
+    ).toEqual({});
+  });
+
   it('does not take a short number as an M-Pesa account', () => {
     const errors = errorsFor(buildWalletSchema({ hasSavedWallets: false }), {
       ...wallet,
