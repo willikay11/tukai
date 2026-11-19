@@ -159,4 +159,24 @@ describe('the field as one end of a range', () => {
 
     expect(cellFor(dayInThisMonth(6))?.className).not.toContain('bg-surface-brand');
   });
+
+  // DEV-503: past days stay on the calendar, greyed out and not pickable
+  it('shows days before minDate as disabled, and will not pick one', () => {
+    const onChange = jest.fn();
+    render(
+      <DatePicker
+        onChange={onChange}
+        placeholder="Select Date"
+        value="2026-11-19"
+        minDate={new Date(2026, 10, 19)}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /November 19th, 2026/ }));
+
+    const past = screen.getByRole('grid').querySelector('[data-day="2026-11-18"]') as HTMLElement;
+    expect(past).toBeInTheDocument();
+    expect(within(past).getByRole('button')).toBeDisabled();
+    fireEvent.click(within(past).getByRole('button'));
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
