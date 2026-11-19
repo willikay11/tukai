@@ -6,6 +6,7 @@ import {
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
   markPlaceBookingNoShow,
+  reorderPlacePhotos,
 } from './place';
 
 jest.mock('@/services/apiService', () => ({
@@ -181,5 +182,39 @@ describe('changePlaceBooking', () => {
         partySize: 2,
       }),
     ).rejects.toMatchObject({ status: 400, message: 'Paid bookings can’t be changed.' });
+  });
+});
+
+// DEV-390: a place's photos in a new order, first one the cover
+describe('reorderPlacePhotos', () => {
+  const mockPatch = jest.fn();
+  beforeEach(() => {
+    (apiWithToken as jest.Mock).mockResolvedValue({ patch: mockPatch });
+  });
+
+  it('sends every photo id in the new order', async () => {
+    mockPatch.mockResolvedValue({ status: 200, data: [] });
+
+    await reorderPlacePhotos('pl1', ['ph2', 'ph1']);
+
+    expect(mockPatch).toHaveBeenCalledWith('/v1/places/pl1/photos/reorder/', {
+      photo_ids: ['ph2', 'ph1'],
+    });
+  });
+
+  it('says why when the list is refused', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockPatch.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          errors: [{ code: 'invalid', detail: 'List every photo of the place exactly once.' }],
+        },
+      },
+    });
+
+    await expect(reorderPlacePhotos('pl1', ['ph1'])).rejects.toMatchObject({
+      message: 'List every photo of the place exactly once.',
+    });
   });
 });

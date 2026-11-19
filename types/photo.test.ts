@@ -53,6 +53,25 @@ describe('photoUrl', () => {
 });
 
 describe('coverPhotoUrl', () => {
+  // DEV-390: the API reads the cover from the order; is_cover is deprecated
+  it('takes the photo with the lowest order, over an old cover flag', () => {
+    const photos = [
+      make({ id: 'a', photo: 'a.webp', photoUrl: 'a.webp', order: 1, isCover: true }),
+      make({ id: 'b', photo: 'b.webp', photoUrl: 'b.webp', order: 0 }),
+    ];
+
+    expect(coverPhotoUrl(photos)).toBe('b.webp');
+  });
+
+  it('lets the cover flag break a tie, as older photos all sit at order 0', () => {
+    const photos = [
+      make({ id: 'a', photo: 'a.webp', photoUrl: 'a.webp', order: 0 }),
+      make({ id: 'b', photo: 'b.webp', photoUrl: 'b.webp', order: 0, isCover: true }),
+    ];
+
+    expect(coverPhotoUrl(photos)).toBe('b.webp');
+  });
+
   it('prefers the photo flagged as the cover', () => {
     const photos = [
       make({ id: 'a', photo: 'a.webp', photoUrl: 'a.webp' }),

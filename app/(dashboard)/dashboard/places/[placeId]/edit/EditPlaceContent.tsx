@@ -56,14 +56,17 @@ const ENTRY_LABEL = { free: 'Free entry', paid: 'Paid entry' };
 
 const isNew = (id: string) => id.startsWith('new-');
 
+/**
+ * The place's photos in their order, the first the cover - as the API reads
+ * it now (DEV-390). The old `is_cover` flag is left off, so the grid marks
+ * the first photo, and moving another to the front makes that the cover.
+ */
 const toEditPhotos = (photos: Photo[] = []): EditPhoto[] =>
   photos
     .filter((photo) => Boolean(photo.photo))
-    .map((photo) => ({
-      id: photo.id,
-      url: photo.photo as string,
-      isCover: photo.isCover,
-    }));
+    .map((photo, index) => ({ photo, index }))
+    .sort((a, b) => (a.photo.order ?? a.index) - (b.photo.order ?? b.index) || a.index - b.index)
+    .map(({ photo }) => ({ id: photo.id, url: photo.photo as string }));
 
 const toPropertyValues = (properties: PlaceProperty[] = []): PropertyValue[] =>
   properties.map((property) => ({
@@ -182,17 +185,27 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
       .filter((photo) => !keptPhotoIds.has(photo.id))
       .map((photo) => photo.id);
     const addedPhotos = photos.filter((photo) => photo.file);
+    const keptInitialOrder = initial.photos
+      .map((photo) => photo.id)
+      .filter((id) => keptPhotoIds.has(id));
+    const keptOrder = photos.filter((photo) => !photo.file).map((photo) => photo.id);
+    // New photos land where they were dropped, not at the end, so any one
+    // added also needs the whole order saved
+    const isReordered =
+      addedPhotos.length > 0 || keptOrder.some((id, index) => id !== keptInitialOrder[index]);
 
-    if (removedPhotoIds.length || addedPhotos.length) {
+    if (removedPhotoIds.length || addedPhotos.length || isReordered) {
       draft.photos = {
         removedIds: removedPhotoIds,
         added: addedPhotos.map((photo, index) => ({
+          localId: photo.id,
           file: photo.file as File,
           // A place stripped of every photo needs a new cover, and the first
           // one uploaded is it
           isCover: removedPhotoIds.length === initial.photos.length && index === 0,
           order: photos.indexOf(photo),
         })),
+        ...(isReordered ? { order: photos.map((photo) => photo.id) } : {}),
       };
     }
 
