@@ -3,19 +3,25 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 
 import { Place } from '@/types/place';
-import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
+import {
+  PlaceAvailabilityRule,
+  PlaceBookingRequest,
+  PlaceReservationProfile,
+} from '@/types/placeReservation';
 
 import { PlaceBookingForm } from './PlaceBookingForm';
 
 const toast = jest.fn();
 const requestBooking = jest.fn();
 const useCreatePlaceBookingRequest = jest.fn();
+const changeBooking = jest.fn();
 
 jest.mock('@/app/shared/hooks/useToast', () => ({
   toast: (...args: unknown[]) => toast(...args),
 }));
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useCreatePlaceBookingRequest: (...args: unknown[]) => useCreatePlaceBookingRequest(...args),
+  useChangePlaceBooking: () => ({ mutate: changeBooking, isPending: false }),
 }));
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
@@ -55,6 +61,7 @@ const renderForm = ({
   rules = [1, 2, 3, 4, 5, 6].map(rule),
   exceptions = [] as { id: string; reservationProfile: string; date: string; isClosed: boolean }[],
   isPending = false,
+  changing = undefined as PlaceBookingRequest | undefined,
 } = {}) => {
   useCreatePlaceBookingRequest.mockReturnValue({ mutate: requestBooking, isPending });
   const onDone = jest.fn();
@@ -64,6 +71,7 @@ const renderForm = ({
       profile={profile}
       availability={{ rules, exceptions }}
       now={TUESDAY_MORNING}
+      changing={changing}
       onDone={onDone}
     />,
   );
@@ -263,5 +271,83 @@ describe('PlaceBookingForm', () => {
     renderForm({ isPending: true });
 
     expect(screen.getByRole('button', { name: 'Sending...' })).toBeDisabled();
+  });
+
+  // DEV-389: a booking not paid for yet is changed, not cancelled and rebooked
+  describe('changing a booking', () => {
+    const thursdayEvening: PlaceBookingRequest = {
+      id: 'pu-1',
+      status: 'accepted',
+      occurrence: { id: 'o', startDate: new Date(2026, 10, 5, 19, 0).toISOString() },
+      restaurantDetail: { partySize: 4, specialRequests: 'Window seat' },
+    };
+
+    it('opens on the booking’s day, time, party and message', () => {
+      renderForm({ changing: thursdayEvening });
+
+      expect(screen.getByText('Change your table')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Your change goes to Kazuri Beads as a new request, so they accept it again.',
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByRole('radiogroup', { name: 'Time' })).getByRole('radio', {
+          name: '7:00 PM',
+        }),
+      ).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByText('4 guests')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('Window seat')).toBeInTheDocument();
+    });
+
+    it('sends the change for that booking, not a new request', () => {
+      const { onDone } = renderForm({ changing: thursdayEvening });
+
+      pickTime('8:00 PM');
+      fireEvent.click(screen.getByRole('button', { name: 'Send change' }));
+
+      expect(requestBooking).not.toHaveBeenCalled();
+      expect(changeBooking).toHaveBeenCalledWith(
+        {
+          purchaseId: 'pu-1',
+          data: {
+            requestedDate: '2026-11-05',
+            requestedTime: '20:00',
+            partySize: 4,
+            specialRequests: 'Window seat',
+          },
+        },
+        expect.any(Object),
+      );
+
+      changeBooking.mock.calls[0][1].onSuccess({ data: {} });
+      expect(toast).toHaveBeenCalledWith({
+        title: 'Change sent',
+        description: 'Kazuri Beads will answer it soon.',
+      });
+      expect(onDone).toHaveBeenCalled();
+    });
+
+    it('says why when the change is refused, and stays open', () => {
+      const { onDone } = renderForm({ changing: thursdayEvening });
+      fireEvent.click(screen.getByRole('button', { name: 'Send change' }));
+
+      changeBooking.mock.calls[0][1].onError(new Error('Paid bookings can’t be changed.'));
+
+      expect(toast).toHaveBeenCalledWith({
+        title: 'Could not change this reservation',
+        description: 'Paid bookings can’t be changed.',
+        variant: 'destructive',
+      });
+      expect(onDone).not.toHaveBeenCalled();
+    });
+
+    it('words it for a request not answered yet', () => {
+      renderForm({ changing: { ...thursdayEvening, status: 'requested' } });
+
+      expect(
+        screen.getByText('Your change goes to Kazuri Beads in place of the request you sent.'),
+      ).toBeInTheDocument();
+    });
   });
 });

@@ -2,15 +2,17 @@
 
 import { useMemo, useState } from 'react';
 
+import moment from 'moment';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { useCreatePlaceBookingRequest } from '@/app/shared/hooks/usePlaces';
+import { useChangePlaceBooking, useCreatePlaceBookingRequest } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
-import { PlaceReservationProfile } from '@/types/placeReservation';
+import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
 import {
   BookingAvailability,
@@ -32,21 +34,47 @@ export const PlaceBookingForm = ({
   profile,
   availability,
   now,
+  changing,
   onDone,
 }: {
   place: Place;
   profile: PlaceReservationProfile;
   availability: BookingAvailability;
   now?: Date;
+  /**
+   * A booking not yet paid for, to change (DEV-389): the form opens on its
+   * day, time, party and message, and sends the change instead of a new
+   * request.
+   */
+  changing?: PlaceBookingRequest;
   onDone: () => void;
 }) => {
   const [clock] = useState(() => now ?? new Date());
-  const [dayOffset, setDayOffset] = useState<number | null>(null);
-  const [time, setTime] = useState<string | null>(null);
-  const [party, setParty] = useState(2);
-  const [message, setMessage] = useState('');
+  const changingStart = changing?.occurrence?.startDate
+    ? moment(changing.occurrence.startDate)
+    : null;
+  const [dayOffset, setDayOffset] = useState<number | null>(() => {
+    if (!changingStart) return null;
+    const day = buildBookingDays(availability, clock).find(
+      (entry) => entry.iso === changingStart.format('YYYY-MM-DD'),
+    );
+    return day?.offset ?? null;
+  });
+  const [time, setTime] = useState<string | null>(() => changingStart?.format('HH:mm') ?? null);
+  const [party, setParty] = useState(() => changing?.restaurantDetail?.partySize ?? 2);
+  const [message, setMessage] = useState(
+    () => changing?.restaurantDetail?.specialRequests ?? changing?.message ?? '',
+  );
 
-  const { mutate: requestBooking, isPending } = useCreatePlaceBookingRequest(place.id, profile.id);
+  const { mutate: requestBooking, isPending: isRequesting } = useCreatePlaceBookingRequest(
+    place.id,
+    profile.id,
+  );
+  const { mutate: changeBooking, isPending: isChanging } = useChangePlaceBooking(
+    place.id,
+    profile.id,
+  );
+  const isPending = isRequesting || isChanging;
 
   const config = bookingConfigFor(profile);
   const days = useMemo(() => buildBookingDays(availability, clock), [availability, clock]);
@@ -75,31 +103,55 @@ export const PlaceBookingForm = ({
       return;
     }
 
-    requestBooking(
-      {
-        requestedDate: selectedDay.iso,
-        requestedTime: selectedTime,
-        partySize: party,
-        specialRequests: message.trim() || undefined,
-      },
-      {
-        onSuccess: (response) => {
-          const respondBy: string | undefined = response?.data?.respondBy;
-          toast({
-            description: respondBy
-              ? `Request sent. ${place.title} has until ${formatAnswerBy(respondBy)} to answer.`
-              : `Request sent. ${place.title} will answer it soon.`,
-          });
-          onDone();
+    const details = {
+      requestedDate: selectedDay.iso,
+      requestedTime: selectedTime,
+      partySize: party,
+      specialRequests: message.trim() || undefined,
+    };
+
+    if (changing) {
+      changeBooking(
+        { purchaseId: changing.id, data: details },
+        {
+          onSuccess: (response) => {
+            const respondBy: string | undefined = response?.data?.respondBy;
+            toast({
+              title: 'Change sent',
+              description: respondBy
+                ? `${place.title} has until ${formatAnswerBy(respondBy)} to answer it.`
+                : `${place.title} will answer it soon.`,
+            });
+            onDone();
+          },
+          onError: (error: Error) =>
+            toast({
+              title: 'Could not change this reservation',
+              description: error.message,
+              variant: 'destructive',
+            }),
         },
-        onError: (error: Error) =>
-          toast({
-            title: 'Could not send this request',
-            description: error.message,
-            variant: 'destructive',
-          }),
+      );
+      return;
+    }
+
+    requestBooking(details, {
+      onSuccess: (response) => {
+        const respondBy: string | undefined = response?.data?.respondBy;
+        toast({
+          description: respondBy
+            ? `Request sent. ${place.title} has until ${formatAnswerBy(respondBy)} to answer.`
+            : `Request sent. ${place.title} will answer it soon.`,
+        });
+        onDone();
       },
-    );
+      onError: (error: Error) =>
+        toast({
+          title: 'Could not send this request',
+          description: error.message,
+          variant: 'destructive',
+        }),
+    });
   };
 
   return (
@@ -124,9 +176,15 @@ export const PlaceBookingForm = ({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <h3 className="text-[19px] font-bold tracking-[-0.2px] text-gray-800">Book a table</h3>
+          <h3 className="text-[19px] font-bold tracking-[-0.2px] text-gray-800">
+            {changing ? 'Change your table' : 'Book a table'}
+          </h3>
           <p className="text-sm leading-snug text-ink-muted">
-            Pick a day, a time and who is coming.
+            {changing
+              ? changing.status === 'accepted'
+                ? `Your change goes to ${place.title} as a new request, so they accept it again.`
+                : `Your change goes to ${place.title} in place of the request you sent.`
+              : 'Pick a day, a time and who is coming.'}
           </p>
         </div>
 
@@ -303,7 +361,7 @@ export const PlaceBookingForm = ({
               : 'bg-surface-brand text-ink',
           )}
         >
-          {isPending ? 'Sending...' : 'Send request'}
+          {isPending ? 'Sending...' : changing ? 'Send change' : 'Send request'}
         </button>
       </div>
     </>

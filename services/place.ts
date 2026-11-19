@@ -597,6 +597,34 @@ export async function fetchPlaceBookingRequests(
 }
 
 /**
+ * Changes a table booking not yet paid for - requested or accepted - to a new
+ * date, time, party or message (DEV-389). Same body as making it; the change
+ * goes back to the place as a new request, so an accepted booking needs
+ * accepting again.
+ */
+export async function changePlaceBooking(
+  purchaseId: string,
+  data: CreatePlaceBookingRequest,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/experiences/purchases/${purchaseId}/change/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not change this reservation'),
+    };
+  }
+}
+
+/**
  * Bookings at places across every place, in one request (DEV-387/388):
  * `guest` is the person's own bookings, `host` the requests at the places
  * they manage. `bookingStatus` narrows it, e.g. `requested`.

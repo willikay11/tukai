@@ -10,6 +10,7 @@ import {
   admitPlaceBookingRequest,
   bookmarkPlace,
   cancelPlaceBookingRequest,
+  changePlaceBooking,
   claimPlaceOwnership,
   createAvailabilityException,
   createPlace,
@@ -466,6 +467,26 @@ export const useCreatePlaceBookingRequest = (placeId: string, profileId: string 
       // The new request has to show up under "My Reservations" straight away
       queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
       queryClient.invalidateQueries({ queryKey: ['myPlaceReservations', placeId] });
+    },
+  });
+};
+
+/** Changes the person's own unpaid booking (DEV-389) */
+export const useChangePlaceBooking = (placeId: string, profileId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      purchaseId,
+      data,
+    }: {
+      purchaseId: string;
+      data: CreatePlaceBookingRequest;
+    }) => await changePlaceBooking(purchaseId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
+      queryClient.invalidateQueries({ queryKey: ['myPlaceReservations', placeId] });
+      queryClient.invalidateQueries({ queryKey: ['placeBookings'] });
     },
   });
 };
