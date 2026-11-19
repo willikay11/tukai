@@ -2,6 +2,8 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 
+import { startOfToday } from 'date-fns';
+
 import { matchesYourCommunities } from '@/app/shared/components/Filters/community';
 import { DURATION_BANDS, matchesDuration } from '@/app/shared/components/Filters/duration';
 import { matchesPrice } from '@/app/shared/components/Filters/price';
@@ -514,6 +516,8 @@ export const FiltersDialog = ({
                   value={draft.date}
                   onChange={pickExactDate}
                   placeholder="Choose a date"
+                  // Nothing is on in the past (DEV-503)
+                  minDate={startOfToday()}
                 />
               </div>
             )}

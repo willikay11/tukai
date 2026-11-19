@@ -4,6 +4,8 @@ import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { startOfToday } from 'date-fns';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { useToast } from '@/app/shared/hooks/useToast';
@@ -135,6 +137,8 @@ export const PlanPageContent = ({ planId }: { planId: string }) => {
             value={plan.date ?? undefined}
             onChange={(value) => setPlanDate(plan.id, value)}
             placeholder="Add a date"
+            // A plan is for a day still to come (DEV-503)
+            minDate={startOfToday()}
             className="mt-1"
           />
         </div>

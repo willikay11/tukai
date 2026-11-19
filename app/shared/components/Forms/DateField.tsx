@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-
 import { DayPicker } from 'react-day-picker';
 
 import { format, isBefore, isValid, parseISO, startOfDay } from 'date-fns';
@@ -114,13 +113,16 @@ export const DateField = ({
               button_next:
                 'flex h-11 w-11 items-center justify-center rounded-full text-brand-ink hover:bg-surface disabled:pointer-events-none disabled:opacity-35',
               weekdays: 'flex',
-              weekday: 'h-8 flex-1 flex items-center justify-center text-[12.5px] font-medium text-ink-muted',
+              weekday:
+                'h-8 flex-1 flex items-center justify-center text-[12.5px] font-medium text-ink-muted',
               week: 'flex mt-0.5 gap-0.5',
               day: 'h-11 w-11 p-0 flex items-center justify-center',
               today: 'font-bold',
               selected: '',
               outside: 'opacity-0 pointer-events-none',
-              disabled: 'opacity-0 pointer-events-none',
+              // Shown greyed rather than hidden: a month with holes in it reads
+              // as broken. The DayButton below mutes the number (DEV-503)
+              disabled: 'pointer-events-none',
               hidden: 'invisible',
             }}
             components={{
