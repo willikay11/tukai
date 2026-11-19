@@ -1,12 +1,15 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import { IconComponent } from './IconComponent';
+import { CATEGORY_ICON_NAMES } from './categoryIconNames';
+import { CATEGORY_BULK_ICONS, CATEGORY_TWOTONE_ICONS } from './categoryIcons';
 
 jest.mock('@hugeicons/react', () => ({
   HugeiconsIcon: ({ icon, size, color, className }: any) => (
     <span
       data-testid="hugeicons-icon"
       data-icon={icon?.name || 'unknown'}
+      data-style={icon?.style}
       data-size={size}
       data-color={color}
       className={className}
@@ -32,11 +35,11 @@ jest.mock('@hugeicons/react', () => ({
  */
 jest.mock(
   '@hugeicons-pro/core-twotone-rounded',
-  () => new Proxy({}, { get: (_target, name) => ({ name }) }),
+  () => new Proxy({}, { get: (_target, name) => ({ name, style: 'twotone' }) }),
 );
 jest.mock(
   '@hugeicons-pro/core-bulk-rounded',
-  () => new Proxy({}, { get: (_target, name) => ({ name }) }),
+  () => new Proxy({}, { get: (_target, name) => ({ name, style: 'bulk' }) }),
 );
 jest.mock(
   '@hugeicons-pro/core-duotone-rounded',
@@ -99,14 +102,14 @@ describe('IconComponent', () => {
 
   /**
    * Nothing in the app renders this variant today, so `IconComponent` has no
-   * icons registered for it - see the comment above `SOLID_ICONS`. It should
-   * behave exactly like an unknown name until something needs it for real.
+   * icons registered for it - see the comment above `SOLID_ICONS`. Until
+   * something needs it for real, it falls back to the twotone icon.
    */
   describe('rendering with solid variant', () => {
-    it('renders nothing - no solid icons are registered yet', () => {
-      const { container } = render(<IconComponent iconName="Mail01Icon" variant="solid" />);
+    it('draws the twotone icon - no solid icons are registered yet', () => {
+      render(<IconComponent iconName="Mail01Icon" variant="solid" />);
 
-      expect(container.firstChild).toBeNull();
+      expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute('data-icon', 'Mail01Icon');
     });
   });
 
@@ -145,17 +148,18 @@ describe('IconComponent', () => {
       expect(icon).toBeInTheDocument();
     });
 
-    it('returns null when switching to a variant the icon has no registered counterpart in', () => {
-      // Mail01Icon is only registered for twotone
-      const { rerender, container } = render(
-        <IconComponent iconName="Mail01Icon" variant="twotone" />,
-      );
+    // DEV-504: a selected chip whose icon has no filled version keeps its
+    // outlined icon instead of going blank
+    it('keeps the twotone icon when the variant has no counterpart', () => {
+      // Cancel01Icon is only registered for twotone
+      const { rerender } = render(<IconComponent iconName="Cancel01Icon" variant="twotone" />);
 
       expect(screen.getByTestId('hugeicons-icon')).toBeInTheDocument();
 
-      rerender(<IconComponent iconName="Mail01Icon" variant="bulk" />);
+      rerender(<IconComponent iconName="Cancel01Icon" variant="bulk" />);
 
-      expect(container.querySelector('[data-testid="hugeicons-icon"]')).not.toBeInTheDocument();
+      expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute('data-icon', 'Cancel01Icon');
+      expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute('data-style', 'twotone');
     });
   });
 
@@ -226,18 +230,17 @@ describe('IconComponent', () => {
       );
     });
 
-    it('returns null for a name the bulk package does not carry', () => {
-      const { container } = render(<IconComponent iconName="Calendar01Icon" variant="bulk" />);
+    it('returns null for a name registered in no style', () => {
+      const { container } = render(<IconComponent iconName="NonExistentIcon" variant="bulk" />);
 
       expect(container.firstChild).toBeNull();
     });
 
-    // Rather than quietly falling back to another style, which would draw the
-    // wrong glyph and look deliberate
-    it('does not fall back to another style', () => {
-      const { container } = render(<IconComponent iconName="Cancel01Icon" variant="bulk" />);
+    // An outlined icon reads better than a blank space where one should be
+    it('falls back to the twotone icon', () => {
+      render(<IconComponent iconName="Cancel01Icon" variant="bulk" />);
 
-      expect(container.firstChild).toBeNull();
+      expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute('data-icon', 'Cancel01Icon');
     });
 
     it('takes the same size and colour as the others', () => {
@@ -266,16 +269,41 @@ describe('IconComponent', () => {
       );
     });
 
-    it('returns null for a name the duotone package does not carry', () => {
-      const { container } = render(<IconComponent iconName="Calendar01Icon" variant="duotone" />);
+    it('returns null for a name registered in no style', () => {
+      const { container } = render(<IconComponent iconName="NonExistentIcon" variant="duotone" />);
 
       expect(container.firstChild).toBeNull();
     });
 
-    it('does not fall back to another style', () => {
-      const { container } = render(<IconComponent iconName="Cancel01Icon" variant="duotone" />);
+    it('falls back to the twotone icon', () => {
+      render(<IconComponent iconName="Cancel01Icon" variant="duotone" />);
 
-      expect(container.firstChild).toBeNull();
+      expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute('data-icon', 'Cancel01Icon');
     });
+  });
+
+  // DEV-504: categories carry icon names from the backend's HUGE_ICONS list,
+  // so every one has to be bundled outlined (off) and filled (on)
+  describe('category icons', () => {
+    it('registers every category icon in both styles', () => {
+      expect(Object.keys(CATEGORY_TWOTONE_ICONS).sort()).toEqual([...CATEGORY_ICON_NAMES].sort());
+      expect(Object.keys(CATEGORY_BULK_ICONS).sort()).toEqual([...CATEGORY_ICON_NAMES].sort());
+    });
+
+    // MountainIcon and SpoonAndForkIcon were in neither bundled map before
+    it.each(['MountainIcon', 'SpoonAndForkIcon', 'Yoga03Icon'])(
+      'draws %s unselected and selected',
+      async (name) => {
+        const { rerender } = render(<IconComponent iconName={name} variant="twotone" />);
+        const off = await screen.findByTestId('hugeicons-icon');
+        expect(off).toHaveAttribute('data-icon', name);
+        expect(off).toHaveAttribute('data-style', 'twotone');
+
+        rerender(<IconComponent iconName={name} variant="bulk" />);
+        await waitFor(() =>
+          expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute('data-style', 'bulk'),
+        );
+      },
+    );
   });
 });

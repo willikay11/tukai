@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import {
   Album02Icon as Album02IconBulk,
   BankIcon as BankIconBulk,
@@ -293,6 +295,8 @@ import {
 } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
 
+import { CATEGORY_ICON_NAME_SET } from './categoryIconNames';
+
 /**
  * The style is the PACKAGE an icon comes from, not a prop on the icon - so a
  * variant exists here only once its package is a dependency. `twotone` is the
@@ -308,6 +312,12 @@ import { HugeiconsIcon } from '@hugeicons/react';
  * icon the backend starts returning) renders nothing, same as an unknown name
  * always has. Add it to the matching map below when that happens - the same
  * pattern `utils/canvas-icons.ts` already uses for the design canvas's icons.
+ *
+ * Category icons come from the backend, so all of them are registered in
+ * both styles in `./categoryIcons` (DEV-504). That module is loaded on demand,
+ * the first time a page draws one, so it stays out of every page's bundle.
+ * A variant that still lacks an icon falls back to the twotone one rather
+ * than drawing nothing.
  *
  * `solid` has no icons registered: nothing in the app currently renders that
  * variant, so there is nothing to import yet. Add to `SOLID_ICONS` the first
@@ -630,6 +640,48 @@ function isValidDuotoneIconName(name: string): name is DuotoneIconName {
   return name in DUOTONE_ICONS;
 }
 
+type CategoryIcons = typeof import('./categoryIcons');
+
+// Loaded once and shared by every icon on the page
+let categoryIcons: CategoryIcons | null = null;
+let categoryIconsLoading: Promise<CategoryIcons> | null = null;
+
+const useCategoryIcons = (isNeeded: boolean): CategoryIcons | null => {
+  const [loaded, setLoaded] = useState<CategoryIcons | null>(categoryIcons);
+
+  useEffect(() => {
+    if (!isNeeded || loaded) return;
+    let isCurrent = true;
+    categoryIconsLoading ??= import('./categoryIcons');
+    categoryIconsLoading
+      .then((module) => {
+        categoryIcons = module;
+        if (isCurrent) setLoaded(module);
+      })
+      .catch(() => {
+        // Try again next time an icon needs it
+        categoryIconsLoading = null;
+      });
+    return () => {
+      isCurrent = false;
+    };
+  }, [isNeeded, loaded]);
+
+  return loaded;
+};
+
+/** The icon in exactly the asked-for style, from the always-bundled maps. */
+const bundledIcon = (iconName: string, variant: IconVariant) => {
+  if (variant === 'bulk') return isValidBulkIconName(iconName) ? BULK_ICONS[iconName] : null;
+  if (variant === 'duotone') {
+    return isValidDuotoneIconName(iconName) ? DUOTONE_ICONS[iconName] : null;
+  }
+  if (variant === 'solid') return isValidSolidIconName(iconName) ? SOLID_ICONS[iconName] : null;
+  return isValidTwotoneIconName(iconName) ? TWOTONE_ICONS[iconName] : null;
+};
+
+type IconVariant = 'solid' | 'twotone' | 'bulk' | 'duotone';
+
 export const IconComponent = ({
   iconName,
   size = 20,
@@ -641,23 +693,21 @@ export const IconComponent = ({
   size?: number;
   color?: string;
   className?: string;
-  variant?: 'solid' | 'twotone' | 'bulk' | 'duotone';
+  variant?: IconVariant;
 }) => {
-  if (variant === 'bulk' && isValidBulkIconName(iconName)) {
-    const iconComponent = BULK_ICONS[iconName];
-    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
-  }
-  if (variant === 'duotone' && isValidDuotoneIconName(iconName)) {
-    const iconComponent = DUOTONE_ICONS[iconName];
-    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
-  }
-  if (variant === 'solid' && isValidSolidIconName(iconName)) {
-    const iconComponent = SOLID_ICONS[iconName];
-    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
-  }
-  if (variant === 'twotone' && isValidTwotoneIconName(iconName)) {
-    const iconComponent = TWOTONE_ICONS[iconName];
-    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
-  }
-  return null;
+  const exact = bundledIcon(iconName, variant);
+  const category = useCategoryIcons(!exact && CATEGORY_ICON_NAME_SET.has(iconName));
+  const categoryName = iconName as keyof CategoryIcons['CATEGORY_TWOTONE_ICONS'];
+
+  const icon =
+    exact ??
+    (category && variant === 'bulk' ? category.CATEGORY_BULK_ICONS[categoryName] : null) ??
+    // The default style, and the fallback for a style that lacks this icon:
+    // an outlined icon reads better than a blank space
+    (isValidTwotoneIconName(iconName) ? TWOTONE_ICONS[iconName] : null) ??
+    category?.CATEGORY_TWOTONE_ICONS[categoryName] ??
+    null;
+
+  if (!icon) return null;
+  return <HugeiconsIcon icon={icon} size={size} color={color} className={className} />;
 };
