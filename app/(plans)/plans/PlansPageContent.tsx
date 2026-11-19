@@ -1,28 +1,39 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { usePlans } from '@/context/PlanContext';
 
 import { PlanCard } from './components/PlanCard';
 
 /**
- * Days out the reader has planned.
- *
- * ⚠️ Plans are kept in this browser: no endpoint stores an itinerary of a
- * reader's own, so they do not follow an account to another device, and the
- * page says so rather than letting someone find out the hard way.
+ * Days out the reader has planned. Saved to their account when signed in
+ * (DEV-376), so they're the same on every device; kept in this browser
+ * otherwise, and the page says which.
  */
 export const PlansPageContent = () => {
   const router = useRouter();
-  const { plans, isReady, createPlan } = usePlans();
+  const { toast } = useToast();
+  const { plans, isReady, isSynced, createPlan } = usePlans();
+  const [isStarting, setIsStarting] = useState(false);
 
-  const start = () => {
-    const plan = createPlan();
-    router.push(`/plans/${plan.id}`);
+  const start = async () => {
+    if (isStarting) return;
+    setIsStarting(true);
+    try {
+      const plan = await createPlan();
+      router.push(`/plans/${plan.id}`);
+    } catch (error) {
+      toast({ description: (error as Error).message, variant: 'destructive' });
+    } finally {
+      setIsStarting(false);
+    }
   };
 
   if (!isReady) {
@@ -39,11 +50,19 @@ export const PlansPageContent = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My plans</h1>
           <p className="mt-1 text-sm text-gray-500">
-            A day out, and the stops on it. Kept on this device.
+            A day out, and the stops on it.{' '}
+            {isSynced
+              ? 'Saved to your account, on every device.'
+              : 'Kept on this device. Sign in to keep them on every device.'}
           </p>
         </div>
 
-        <Button variant="lime" onClick={start} className="rounded-full px-6">
+        <Button
+          variant="lime"
+          onClick={() => void start()}
+          isLoading={isStarting}
+          className="rounded-full px-6"
+        >
           <span className="flex items-center gap-2">
             <IconComponent iconName="PlusSignIcon" size={16} color="currentColor" />
             New plan
@@ -63,7 +82,12 @@ export const PlansPageContent = () => {
           <p className="max-w-sm text-13 text-ink-muted">
             Start one, then add the experiences and places you want to string together into a day.
           </p>
-          <Button variant="lime" onClick={start} className="mt-1 rounded-full px-6">
+          <Button
+            variant="lime"
+            onClick={() => void start()}
+            isLoading={isStarting}
+            className="mt-1 rounded-full px-6"
+          >
             Start a plan
           </Button>
         </div>

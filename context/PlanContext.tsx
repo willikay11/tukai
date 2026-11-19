@@ -1,7 +1,24 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
+import { useSession } from 'next-auth/react';
+
+import { toast } from '@/app/shared/hooks/useToast';
+import {
+  createPlanOnServer,
+  deletePlanOnServer,
+  fetchPlans,
+  savePlanOnServer,
+} from '@/services/plans';
 import {
   DEFAULT_DURATION,
   PLAN_STORAGE_KEY,
@@ -12,21 +29,23 @@ import {
 } from '@/types/plan';
 
 /**
- * The plan store.
+ * The plan store: every read and write of a plan goes through here.
  *
- * ⚠️ Plans have no endpoint. Nothing in the API stores an itinerary of a
- * reader's own, so they live in this browser - which is why every read and
- * write goes through here and nothing reaches into localStorage itself. When an
- * endpoint arrives, the calls below become requests and no screen changes.
+ * Signed in, plans live on the server (/v1/plans/, DEV-376), so they follow
+ * the account to every device. Changes show at once and are saved a moment
+ * later, the whole plan at a time; a save that fails says so.
  *
- * Plans are per-browser, not per-account: a reader who signs in elsewhere will
- * not find them, and the plans page says so.
+ * Signed out, plans are kept in this browser, as they always were. Signing
+ * in moves them to the account once, so nothing made before is lost.
  */
 type PlanStoreValue = {
   plans: Plan[];
-  /** False until the stored plans have been read, so nothing flashes empty. */
+  /** False until the plans have been read, so nothing flashes empty. */
   isReady: boolean;
-  createPlan: (title?: string) => Plan;
+  /** Saved to the account, rather than to this browser */
+  isSynced: boolean;
+  /** Resolves with the new plan once it exists (on the server, when signed in) */
+  createPlan: (title?: string, date?: string | null) => Promise<Plan>;
   renamePlan: (planId: string, title: string) => void;
   setPlanDate: (planId: string, date: string | null) => void;
   deletePlan: (planId: string) => void;
@@ -39,10 +58,13 @@ type PlanStoreValue = {
 
 const PlanContext = createContext<PlanStoreValue | null>(null);
 
+/** How long after the last change a plan is saved */
+export const PLAN_SAVE_DELAY_MS = 600;
+
 const newId = (prefix: string) =>
   `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-/** Anything stored by an older build, read defensively. */
+/** Plans kept in this browser, read defensively. */
 const readStored = (): Plan[] => {
   if (typeof window === 'undefined') return [];
 
@@ -66,50 +88,172 @@ const readStored = (): Plan[] => {
   }
 };
 
+const writeStored = (plans: Plan[]) => {
+  try {
+    if (plans.length === 0) window.localStorage.removeItem(PLAN_STORAGE_KEY);
+    else window.localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(plans));
+  } catch {
+    // Storage can be full or blocked; the plans still work for this session
+  }
+};
+
+/**
+ * Moves the plans this browser kept to the account, once. Each goes with its
+ * own id as the idempotency key, so a move cut short and tried again doesn't
+ * save a plan twice. Only the ones that made it leave the browser.
+ */
+const moveStoredPlansToAccount = async () => {
+  const stored = readStored();
+  if (stored.length === 0) return;
+
+  const left: Plan[] = [];
+  for (const plan of stored) {
+    try {
+      await createPlanOnServer(plan, plan.id);
+    } catch {
+      left.push(plan);
+    }
+  }
+  writeStored(left);
+};
+
 export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
+  const { data: session, status } = useSession();
+  const userId: string | null = (session?.user as { id?: string } | undefined)?.id ?? null;
+
   const [plans, setPlans] = useState<Plan[]>([]);
   const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    setPlans(readStored());
-    setIsReady(true);
-  }, []);
+  // The latest plans, for a save that runs after the change that asked for it
+  const latest = useRef<Plan[]>([]);
+  latest.current = plans;
+  const saveTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
-  // Written on every change, so a reload finds what was there
+  // Read the plans: the account's when signed in, else this browser's
   useEffect(() => {
-    if (!isReady) return;
+    if (status === 'loading') return;
+    let isCurrent = true;
+    setIsReady(false);
 
-    try {
-      window.localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(plans));
-    } catch {
-      // Storage can be full or blocked; the plans still work for this session
+    if (!userId) {
+      setPlans(readStored());
+      setIsReady(true);
+      return;
     }
-  }, [plans, isReady]);
 
-  const change = useCallback((planId: string, fn: (plan: Plan) => Plan) => {
-    setPlans((current) => current.map((plan) => (plan.id === planId ? fn(plan) : plan)));
+    (async () => {
+      try {
+        await moveStoredPlansToAccount();
+        const loaded = await fetchPlans();
+        if (isCurrent) setPlans(loaded);
+      } catch (error) {
+        if (isCurrent) {
+          setPlans([]);
+          toast({ description: (error as Error).message, variant: 'destructive' });
+        }
+      } finally {
+        if (isCurrent) setIsReady(true);
+      }
+    })();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [userId, status]);
+
+  // Signed out, written to this browser on every change, as before
+  useEffect(() => {
+    if (!isReady || userId) return;
+    writeStored(plans);
+  }, [plans, isReady, userId]);
+
+  const saveNow = useCallback((planId: string) => {
+    clearTimeout(saveTimers.current.get(planId));
+    saveTimers.current.delete(planId);
+    const plan = latest.current.find((one) => one.id === planId);
+    if (!plan) return;
+    savePlanOnServer(plan).catch((error: Error) =>
+      toast({
+        title: 'Your plan was not saved',
+        description: `${error.message}. Your last change is still here; try it again.`,
+        variant: 'destructive',
+      }),
+    );
   }, []);
+
+  const scheduleSave = useCallback(
+    (planId: string) => {
+      if (!userId) return;
+      clearTimeout(saveTimers.current.get(planId));
+      saveTimers.current.set(
+        planId,
+        setTimeout(() => saveNow(planId), PLAN_SAVE_DELAY_MS),
+      );
+    },
+    [userId, saveNow],
+  );
+
+  // A change still inside the delay is saved straight away when the page is
+  // hidden or left, rather than lost
+  useEffect(() => {
+    const flush = () => Array.from(saveTimers.current.keys()).forEach(saveNow);
+    window.addEventListener('pagehide', flush);
+    const onHidden = () => document.visibilityState === 'hidden' && flush();
+    document.addEventListener('visibilitychange', onHidden);
+    return () => {
+      flush();
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onHidden);
+    };
+  }, [saveNow]);
+
+  const change = useCallback(
+    (planId: string, fn: (plan: Plan) => Plan) => {
+      setPlans((current) => {
+        const next = current.map((plan) => (plan.id === planId ? fn(plan) : plan));
+        latest.current = next;
+        return next;
+      });
+      scheduleSave(planId);
+    },
+    [scheduleSave],
+  );
 
   const value = useMemo<PlanStoreValue>(
     () => ({
       plans,
       isReady,
-      createPlan: (title = 'New plan') => {
-        const plan: Plan = {
+      isSynced: Boolean(userId),
+      createPlan: async (title = 'New plan', date = null) => {
+        const draft: Plan = {
           id: newId('plan'),
           title,
-          date: null,
+          date,
           stops: [],
           dateCreated: new Date().toISOString(),
         };
+        const plan = userId ? await createPlanOnServer(draft, draft.id) : draft;
 
-        setPlans((current) => [plan, ...current]);
+        setPlans((current) => {
+          const next = [plan, ...current];
+          latest.current = next;
+          return next;
+        });
 
         return plan;
       },
       renamePlan: (planId, title) => change(planId, (plan) => ({ ...plan, title })),
       setPlanDate: (planId, date) => change(planId, (plan) => ({ ...plan, date })),
-      deletePlan: (planId) => setPlans((current) => current.filter((plan) => plan.id !== planId)),
+      deletePlan: (planId) => {
+        clearTimeout(saveTimers.current.get(planId));
+        saveTimers.current.delete(planId);
+        setPlans((current) => current.filter((plan) => plan.id !== planId));
+        if (userId) {
+          deletePlanOnServer(planId).catch((error: Error) =>
+            toast({ description: error.message, variant: 'destructive' }),
+          );
+        }
+      },
       addStop: (planId, stop) =>
         change(planId, (plan) => ({
           ...plan,
@@ -137,7 +281,7 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
       sortStopsByTime: (planId) =>
         change(planId, (plan) => ({ ...plan, stops: sortedByTime(plan.stops) })),
     }),
-    [plans, isReady, change],
+    [plans, isReady, userId, change],
   );
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>;

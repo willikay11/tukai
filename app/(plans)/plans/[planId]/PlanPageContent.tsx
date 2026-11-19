@@ -22,7 +22,8 @@ import { PlanStopRow } from './components/PlanStopRow';
  * One plan: its day, its stops, and their order.
  *
  * Everything is edited in place and saved through the plan store, which is the
- * only thing that knows plans live in the browser rather than on the API.
+ * only thing that knows where plans live - the account (DEV-376), or this
+ * browser when signed out.
  */
 export const PlanPageContent = ({ planId }: { planId: string }) => {
   const router = useRouter();
@@ -30,6 +31,7 @@ export const PlanPageContent = ({ planId }: { planId: string }) => {
   const {
     plans,
     isReady,
+    isSynced,
     renamePlan,
     setPlanDate,
     deletePlan,
@@ -56,7 +58,9 @@ export const PlanPageContent = ({ planId }: { planId: string }) => {
     return (
       <PageContainer className="py-16 text-center">
         <p className="text-sm text-gray-500">
-          This plan is not on this device. Plans are kept in the browser they were made in.
+          {isSynced
+            ? 'This plan is not in your plans. It may have been deleted.'
+            : 'This plan is not on this device. Sign in to see the plans saved to your account.'}
         </p>
         <Button onClick={() => router.push('/plans')} className="mt-4 rounded-full px-6">
           Back to my plans

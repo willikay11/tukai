@@ -5,11 +5,26 @@ import userEvent from '@testing-library/user-event';
 
 import { PLAN_STORAGE_KEY } from '@/types/plan';
 
-import { PlanProvider, usePlans } from './PlanContext';
+import { PLAN_SAVE_DELAY_MS, PlanProvider, usePlans } from './PlanContext';
+
+let mockSession: { data: unknown; status: string } = { data: null, status: 'unauthenticated' };
+jest.mock('next-auth/react', () => ({ useSession: () => mockSession }));
+jest.mock('@/app/shared/hooks/useToast', () => ({ toast: jest.fn() }));
+
+const fetchPlans = jest.fn();
+const createPlanOnServer = jest.fn();
+const savePlanOnServer = jest.fn();
+const deletePlanOnServer = jest.fn();
+jest.mock('@/services/plans', () => ({
+  fetchPlans: (...args: unknown[]) => fetchPlans(...args),
+  createPlanOnServer: (...args: unknown[]) => createPlanOnServer(...args),
+  savePlanOnServer: (...args: unknown[]) => savePlanOnServer(...args),
+  deletePlanOnServer: (...args: unknown[]) => deletePlanOnServer(...args),
+}));
 
 /**
- * ⚠️ Plans have no endpoint: this store is where they live, and the one seam
- * persistence lands in when one arrives.
+ * The plan store. Signed out (most of these), plans are kept in this
+ * browser; signed in they're the account's (DEV-376, at the bottom).
  */
 const Probe = () => {
   const {
@@ -70,7 +85,10 @@ const renderStore = () =>
 const press = (name: string) => userEvent.click(screen.getByRole('button', { name }));
 
 describe('the plan store', () => {
-  beforeEach(() => window.localStorage.clear());
+  beforeEach(() => {
+    window.localStorage.clear();
+    mockSession = { data: null, status: 'unauthenticated' };
+  });
 
   it('starts with nothing, and says when it has looked', () => {
     renderStore();
@@ -198,5 +216,120 @@ describe('the plan store', () => {
     expect(() => render(<Probe />)).toThrow('usePlans must be used inside a PlanProvider');
 
     quiet.mockRestore();
+  });
+});
+
+// DEV-376: signed in, plans live on the server, on every device
+describe('the plan store, signed in', () => {
+  const serverPlan = {
+    id: 'srv-1',
+    title: 'Saturday out',
+    date: '2026-07-04',
+    stops: [{ id: 's1', kind: 'custom', title: 'Coffee', time: '09:00', durationMinutes: 30 }],
+    dateCreated: '2026-07-01T09:00:00Z',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.localStorage.clear();
+    mockSession = { data: { user: { id: 'u1' } }, status: 'authenticated' };
+    fetchPlans.mockResolvedValue([serverPlan]);
+    savePlanOnServer.mockResolvedValue(undefined);
+    deletePlanOnServer.mockResolvedValue(undefined);
+  });
+
+  it('reads the account’s plans', async () => {
+    renderStore();
+
+    expect(await screen.findByText('Saturday out')).toBeInTheDocument();
+    expect(screen.getByTestId('ready')).toHaveTextContent('true');
+    expect(screen.getByTestId('stops')).toHaveTextContent('Coffee');
+  });
+
+  it('makes a new plan on the server', async () => {
+    fetchPlans.mockResolvedValue([]);
+    createPlanOnServer.mockResolvedValue({ ...serverPlan, id: 'srv-2', title: 'Named', stops: [] });
+    renderStore();
+    await screen.findByText('true');
+
+    await press('create named');
+
+    expect(createPlanOnServer).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Named', stops: [] }),
+      expect.any(String),
+    );
+    expect(await screen.findByText('Named')).toBeInTheDocument();
+  });
+
+  it('saves a change a moment later, the whole plan at once', async () => {
+    jest.useFakeTimers();
+    try {
+      renderStore();
+      await act(async () => {
+        await Promise.resolve();
+      });
+      await screen.findByText('Saturday out');
+
+      act(() => screen.getByRole('button', { name: 'rename' }).click());
+      act(() => screen.getByRole('button', { name: 'set date' }).click());
+      expect(savePlanOnServer).not.toHaveBeenCalled();
+
+      act(() => jest.advanceTimersByTime(PLAN_SAVE_DELAY_MS));
+
+      expect(savePlanOnServer).toHaveBeenCalledTimes(1);
+      expect(savePlanOnServer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'srv-1', title: 'Sunday out', date: '2026-07-05' }),
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('deletes a plan on the server', async () => {
+    renderStore();
+    await screen.findByText('Saturday out');
+
+    await press('delete');
+
+    expect(deletePlanOnServer).toHaveBeenCalledWith('srv-1');
+    expect(screen.getByTestId('count')).toHaveTextContent('0');
+  });
+
+  it('moves the plans this browser kept to the account, once', async () => {
+    const local = {
+      id: 'plan_local',
+      title: 'From before',
+      date: null,
+      stops: [],
+      dateCreated: '',
+    };
+    window.localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify([local]));
+    createPlanOnServer.mockResolvedValue({ ...local, id: 'srv-9' });
+    fetchPlans.mockResolvedValue([serverPlan, { ...local, id: 'srv-9' }]);
+    renderStore();
+
+    await screen.findByText('2');
+    // Its own id makes a repeat return the first copy, not a second one
+    expect(createPlanOnServer).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'From before' }),
+      'plan_local',
+    );
+    expect(window.localStorage.getItem(PLAN_STORAGE_KEY)).toBeNull();
+  });
+
+  it('keeps a browser plan that did not make it over, to try again', async () => {
+    const local = {
+      id: 'plan_local',
+      title: 'From before',
+      date: null,
+      stops: [],
+      dateCreated: '',
+    };
+    window.localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify([local]));
+    createPlanOnServer.mockRejectedValue(new Error('offline'));
+    renderStore();
+
+    await screen.findByText('Saturday out');
+    expect(JSON.parse(window.localStorage.getItem(PLAN_STORAGE_KEY) ?? '[]')).toHaveLength(1);
   });
 });
