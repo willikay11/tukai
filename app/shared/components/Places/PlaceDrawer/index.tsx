@@ -27,6 +27,7 @@ import { Place } from '@/types/place';
 import {
   PlaceAvailabilityException,
   PlaceAvailabilityRule,
+  PlaceBookingRequest,
   PlaceReservationProfile,
 } from '@/types/placeReservation';
 
@@ -103,6 +104,11 @@ export const PlaceDrawer = ({
   const [view, setView] = useState<
     'place' | 'review' | 'moment' | 'reservations' | 'requests' | 'hold-off' | 'booking'
   >('place');
+  // The booking being changed, while the booking form is open on it (DEV-389)
+  const [changingBooking, setChangingBooking] = useState<PlaceBookingRequest | null>(null);
+  useEffect(() => {
+    if (view !== 'booking') setChangingBooking(null);
+  }, [view]);
 
   const { data, isLoading } = usePlace(placeId, isOpen && Boolean(placeId));
   const place: Place | undefined = data?.data;
@@ -254,10 +260,15 @@ export const PlaceDrawer = ({
               />
             ) : view === 'booking' && bookingProfile ? (
               <PlaceBookingForm
+                key={changingBooking?.id ?? 'new'}
                 place={place}
                 profile={bookingProfile}
                 availability={{ rules, exceptions }}
-                onDone={() => setView('place')}
+                changing={changingBooking ?? undefined}
+                onDone={() => {
+                  setChangingBooking(null);
+                  setView('place');
+                }}
               />
             ) : view === 'moment' ? (
               <div className="flex-1 px-6 py-6">
@@ -312,7 +323,14 @@ export const PlaceDrawer = ({
                   )}
 
                   {/* Each renders nothing unless it has something to say */}
-                  <MyReservations place={place} profile={profile} />
+                  <MyReservations
+                    place={place}
+                    profile={profile}
+                    onChange={(reservation) => {
+                      setChangingBooking(reservation);
+                      setView('booking');
+                    }}
+                  />
                   <PlaceCommunity communityId={place.verifiedOwner?.id ?? ''} />
 
                   {hasExperiences && (

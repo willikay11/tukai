@@ -1,6 +1,7 @@
 import { api, apiWithToken } from '@/services/apiService';
 
 import {
+  changePlaceBooking,
   fetchPlaceAvailability,
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
@@ -136,5 +137,49 @@ describe('markPlaceBookingNoShow', () => {
       status: 400,
       message: 'A booking can only be marked as a no-show once its time has come.',
     });
+  });
+});
+
+// DEV-389: changing an unpaid booking
+describe('changePlaceBooking', () => {
+  const mockPost = jest.fn();
+  beforeEach(() => {
+    (apiWithToken as jest.Mock).mockResolvedValue({ post: mockPost });
+  });
+
+  it('sends the new day, time, party and message to the booking', async () => {
+    mockPost.mockResolvedValue({ status: 200, data: { id: 'pu1', status: 'requested' } });
+
+    await changePlaceBooking('pu1', {
+      requestedDate: '2026-11-05',
+      requestedTime: '20:00',
+      partySize: 4,
+      specialRequests: 'Window seat',
+    });
+
+    expect(mockPost).toHaveBeenCalledWith('/v1/experiences/purchases/pu1/change/', {
+      requested_date: '2026-11-05',
+      requested_time: '20:00',
+      party_size: 4,
+      special_requests: 'Window seat',
+    });
+  });
+
+  it('says why when it is refused', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockPost.mockRejectedValue({
+      response: {
+        status: 400,
+        data: { errors: [{ code: 'not_changeable', detail: 'Paid bookings can’t be changed.' }] },
+      },
+    });
+
+    await expect(
+      changePlaceBooking('pu1', {
+        requestedDate: '2026-11-05',
+        requestedTime: '20:00',
+        partySize: 2,
+      }),
+    ).rejects.toMatchObject({ status: 400, message: 'Paid bookings can’t be changed.' });
   });
 });

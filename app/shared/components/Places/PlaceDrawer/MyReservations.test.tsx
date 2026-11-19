@@ -55,14 +55,13 @@ describe('MyReservations', () => {
     expect(useBookings).toHaveBeenCalledWith('p1', 'prof-1');
   });
 
-  it('shows the next booking with its party size and no edit control', () => {
+  it('shows the next booking with its party size', () => {
     givenBookings([booking('b1')]);
 
     render(<MyReservations place={place} profile={{ id: 'prof-1' } as never} />);
 
     expect(screen.getByRole('heading', { name: 'My reservations' })).toBeInTheDocument();
     expect(screen.getByText(/^2 Pax · /)).toBeInTheDocument();
-    expect(screen.queryByText(/edit/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /reservation \d of/i })).not.toBeInTheDocument();
   });
 
@@ -96,5 +95,29 @@ describe('MyReservations', () => {
 
     await waitFor(() => expect(cancelBooking).toHaveBeenCalledWith('b1', expect.any(Object)));
     expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Reservation cancelled' }));
+  });
+
+  // DEV-389: a booking not paid for yet is changed in place
+  it('offers to change a booking not paid for yet', () => {
+    const onChange = jest.fn();
+    givenBookings([booking('b1')]);
+
+    render(
+      <MyReservations place={place} profile={{ id: 'prof-1' } as never} onChange={onChange} />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Change reservation' }));
+
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ id: 'b1' }));
+  });
+
+  it('does not offer it for a booking being paid for', () => {
+    givenBookings([{ ...booking('b1'), status: 'pending' }]);
+
+    render(
+      <MyReservations place={place} profile={{ id: 'prof-1' } as never} onChange={jest.fn()} />,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Change reservation' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel reservation' })).toBeInTheDocument();
   });
 });

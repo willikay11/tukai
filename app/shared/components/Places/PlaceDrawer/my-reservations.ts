@@ -9,6 +9,13 @@ const LIVE_STATUSES = new Set<PlaceBookingRequest['status']>(['requested', 'acce
 export type UpcomingReservation = PlaceBookingRequest & { start: Date };
 
 /**
+ * A booking not yet paid for can be changed (DEV-389). One being paid for,
+ * or paid, can't: the guest cancels and books again, or asks the place.
+ */
+export const isChangeable = (reservation: PlaceBookingRequest): boolean =>
+  reservation.status === 'requested' || reservation.status === 'accepted';
+
+/**
  * The reader's live reservations still to come, soonest first.
  *
  * A reservation with no occurrence, or a start that cannot be read, has no day

@@ -20,7 +20,7 @@ import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
-import { UpcomingReservation, upcomingReservations } from './my-reservations';
+import { UpcomingReservation, isChangeable, upcomingReservations } from './my-reservations';
 
 const partyLine = (reservation: UpcomingReservation): string => {
   const time = reservation.start.toLocaleTimeString('en-US', {
@@ -74,16 +74,17 @@ const ReservationCard = ({
  * here - the bookings request is session-gated, so an anonymous reader never
  * sends it.
  *
- * ⚠️ No edit: the API has no change endpoint, so changing a booking means
- * cancelling it and requesting again. Edit is left out rather than sending the
- * reader to a flow that would leave the old booking standing.
+ * A booking not paid for yet can be changed (DEV-389): `onChange` opens the
+ * booking form on it. A paid one can only be cancelled.
  */
 export const MyReservations = ({
   place,
   profile,
+  onChange,
 }: {
   place: Place;
   profile?: PlaceReservationProfile;
+  onChange?: (reservation: UpcomingReservation) => void;
 }) => {
   const { toast } = useToast();
   const [index, setIndex] = useState(0);
@@ -161,14 +162,25 @@ export const MyReservations = ({
             <span />
           )}
 
-          <button
-            type="button"
-            onClick={() => setPendingCancel(current)}
-            disabled={isCancelling}
-            className="inline-flex h-11 items-center text-[14.5px] font-semibold text-red-600 transition-colors hover:underline disabled:opacity-50"
-          >
-            Cancel reservation
-          </button>
+          <span className="flex items-center gap-4">
+            {onChange && isChangeable(current) && (
+              <button
+                type="button"
+                onClick={() => onChange(current)}
+                className="inline-flex h-11 items-center text-[14.5px] font-semibold text-brand transition-colors hover:underline"
+              >
+                Change reservation
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setPendingCancel(current)}
+              disabled={isCancelling}
+              className="inline-flex h-11 items-center text-[14.5px] font-semibold text-red-600 transition-colors hover:underline disabled:opacity-50"
+            >
+              Cancel reservation
+            </button>
+          </span>
         </div>
       </div>
 

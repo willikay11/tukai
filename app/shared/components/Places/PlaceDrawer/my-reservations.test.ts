@@ -1,6 +1,6 @@
 import { PlaceBookingRequest } from '@/types/placeReservation';
 
-import { upcomingReservations } from './my-reservations';
+import { isChangeable, upcomingReservations } from './my-reservations';
 
 const NOW = new Date(2026, 9, 7, 12);
 
@@ -48,5 +48,18 @@ describe('upcomingReservations', () => {
 
   it('leaves out a booking with no day to sit on', () => {
     expect(upcomingReservations([booking('undated', undefined)], NOW)).toEqual([]);
+  });
+});
+
+// DEV-389: what can be changed rather than cancelled and booked again
+describe('isChangeable', () => {
+  it.each([
+    ['requested', true],
+    ['accepted', true],
+    ['pending', false],
+    ['completed', false],
+    ['cancelled', false],
+  ] as const)('%s → %s', (status, expected) => {
+    expect(isChangeable({ id: 'x', status })).toBe(expected);
   });
 });
