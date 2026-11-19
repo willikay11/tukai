@@ -44,6 +44,7 @@ import {
   fetchPlaces,
   likePlaceReview,
   likePlaceReviewComment,
+  markPlaceBookingNoShow,
   updatePlace,
   updatePlaceProperty,
   updatePlaceReview,
@@ -504,6 +505,19 @@ export const useDeclinePlaceBookingRequest = (placeId: string, profileId: string
 
 export const useAdmitPlaceBookingRequest = (placeId: string, profileId: string | undefined) =>
   useBookingRequestAction(placeId, profileId, admitPlaceBookingRequest);
+
+/** Marks a guest as a no-show, or undoes it (DEV-407) */
+export const useMarkPlaceBookingNoShow = (placeId: string, profileId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ purchaseId, noShow }: { purchaseId: string; noShow: boolean }) =>
+      await markPlaceBookingNoShow(purchaseId, noShow),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
+    },
+  });
+};
 
 export const useHoldOffReservations = (placeId: string, profileId: string | undefined) => {
   const queryClient = useQueryClient();

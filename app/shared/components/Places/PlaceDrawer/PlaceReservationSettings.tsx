@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Place } from '@/types/place';
 import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
-import { formatTimeTo12Hour } from '@/utils/date-utils';
 
 import { PAYMENT_TYPES, ReservationSettingsForm, hoursLabel } from './ReservationSettingsForm';
 import { ReservationWallet, WalletLines } from './ReservationWallet';
@@ -98,9 +97,6 @@ export const PlaceReservationSettings = ({
   const days = activeDays(rules);
   const hours = openingHours(rules);
   const interval = slotInterval(rules);
-  const closeTime12 = rules[0]?.closeTime
-    ? formatTimeTo12Hour(rules[0].closeTime.slice(0, 5))
-    : null;
   const status = profile?.status ?? 'draft';
   const locality = place.location?.city ?? place.location?.name;
 
@@ -327,7 +323,7 @@ export const PlaceReservationSettings = ({
                       {hoursLabel(values.payWithinHours)} after you accept
                     </Fact>
                   )}
-                  {closeTime12 && <Fact label="No-shows">At closing time, {closeTime12}</Fact>}
+                  <Fact label="No-shows">Marked by you, once a booking&apos;s time has passed</Fact>
                 </GridRow>
 
                 <Row>

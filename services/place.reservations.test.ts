@@ -4,6 +4,7 @@ import {
   fetchPlaceAvailability,
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
+  markPlaceBookingNoShow,
 } from './place';
 
 jest.mock('@/services/apiService', () => ({
@@ -84,6 +85,56 @@ describe('fetchPlaceAvailability', () => {
     await expect(fetchPlaceAvailability('p1', 'rp1')).rejects.toMatchObject({
       status: 429,
       success: false,
+    });
+  });
+});
+
+// DEV-407: hosts mark a guest who didn't come, and undo it
+describe('markPlaceBookingNoShow', () => {
+  const mockPost = jest.fn();
+  beforeEach(() => {
+    (apiWithToken as jest.Mock).mockResolvedValue({ post: mockPost });
+  });
+
+  it('marks, and undoes, with no_show on the purchase', async () => {
+    mockPost.mockResolvedValue({
+      status: 200,
+      data: { id: 'pu1', booking_status: 'no_show', no_show_at: '2026-11-03T20:00:00Z' },
+    });
+
+    const marked = await markPlaceBookingNoShow('pu1', true);
+    expect(mockPost).toHaveBeenCalledWith('/v1/experiences/purchases/pu1/no-show/', {
+      no_show: true,
+    });
+    expect(marked.data).toMatchObject({ bookingStatus: 'no_show' });
+
+    await markPlaceBookingNoShow('pu1', false);
+    expect(mockPost).toHaveBeenLastCalledWith('/v1/experiences/purchases/pu1/no-show/', {
+      no_show: false,
+    });
+  });
+
+  it('says why when the API refuses', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockPost.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          type: 'validation_error',
+          errors: [
+            {
+              code: 'invalid',
+              detail: 'A booking can only be marked as a no-show once its time has come.',
+              attr: null,
+            },
+          ],
+        },
+      },
+    });
+
+    await expect(markPlaceBookingNoShow('pu1', true)).rejects.toMatchObject({
+      status: 400,
+      message: 'A booking can only be marked as a no-show once its time has come.',
     });
   });
 });

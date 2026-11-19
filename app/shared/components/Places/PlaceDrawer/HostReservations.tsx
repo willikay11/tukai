@@ -7,6 +7,7 @@ import {
   useAcceptPlaceBookingRequest,
   useAdmitPlaceBookingRequest,
   useDeclinePlaceBookingRequest,
+  useMarkPlaceBookingNoShow,
   usePlaceBookingRequests,
 } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
@@ -32,11 +33,13 @@ import {
   HOST_RESERVATION_GROUPS,
   HostReservation,
   HostReservationGroup,
+  canMarkNoShow,
   daysAwaitingAnswer,
   hostReservations,
   inGroup,
   isAdmittable,
   isAwaitingAnswer,
+  isNoShow,
   liveCountsByDay,
   matchesGuest,
   paymentLine,
@@ -70,19 +73,24 @@ const ReservationRow = ({
   isOpen,
   isAccepting,
   isAdmitting,
+  isMarking,
   onToggle,
   onAccept,
   onAdmit,
   onDecline,
+  onNoShow,
 }: {
   reservation: HostReservation;
   isOpen: boolean;
   isAccepting: boolean;
   isAdmitting: boolean;
+  isMarking: boolean;
   onToggle: () => void;
   onAccept: () => void;
   onAdmit: () => void;
   onDecline: () => void;
+  /** true marks the guest as a no-show, false undoes it */
+  onNoShow: (noShow: boolean) => void;
 }) => {
   const picture = reservation.user?.pictureWebpSmUrl || reservation.user?.picture || undefined;
   const waiting = paymentLine(reservation);
@@ -169,6 +177,34 @@ const ReservationRow = ({
               Decline reservation
             </Button>
           )}
+
+          {/* DEV-407: the host marks a guest who didn't come, once the
+              booking's time has come; the booking stays paid */}
+          {canMarkNoShow(reservation) && (
+            <Button
+              type="button"
+              variant="outline-primary"
+              isLoading={isMarking}
+              onClick={() => onNoShow(true)}
+              className="h-11 w-fit rounded-full px-5 text-sm font-semibold"
+            >
+              <IconComponent iconName="Clock01Icon" size={18} color="currentColor" />
+              Mark as no-show
+            </Button>
+          )}
+
+          {isNoShow(reservation) && (
+            <Button
+              type="button"
+              variant="outline-primary"
+              isLoading={isMarking}
+              onClick={() => onNoShow(false)}
+              className="h-11 w-fit rounded-full px-5 text-sm font-semibold"
+            >
+              <IconComponent iconName="UndoIcon" size={18} color="currentColor" />
+              Undo no-show
+            </Button>
+          )}
         </div>
       )}
     </li>
@@ -212,6 +248,11 @@ export const HostReservations = ({
     isPending: isAdmitting,
     variables: admitting,
   } = useAdmitPlaceBookingRequest(place.id, profile.id);
+  const {
+    mutate: markNoShow,
+    isPending: isMarking,
+    variables: marking,
+  } = useMarkPlaceBookingNoShow(place.id, profile.id);
   const { mutate: declineRequest, isPending: isDeclining } = useDeclinePlaceBookingRequest(
     place.id,
     profile.id,
@@ -256,6 +297,29 @@ export const HostReservations = ({
       onError: (error: Error) =>
         toast({ title: 'Could not admit', description: error.message, variant: 'destructive' }),
     });
+
+  const setNoShow = (reservation: HostReservation, noShow: boolean) =>
+    markNoShow(
+      { purchaseId: reservation.id, noShow },
+      {
+        onSuccess: () => {
+          setOpenId(null);
+          toast({
+            title: noShow ? 'Marked as a no-show' : 'No-show undone',
+            description: noShow
+              ? `${reservation.guestName} is under No show. Their booking stays paid.`
+              : `${reservation.guestName} is back under Reservations.`,
+            variant: 'success',
+          });
+        },
+        onError: (error: Error) =>
+          toast({
+            title: noShow ? 'Could not mark as a no-show' : 'Could not undo the no-show',
+            description: error.message,
+            variant: 'destructive',
+          }),
+      },
+    );
 
   const confirmDecline = () => {
     if (!pendingDecline) return;
@@ -333,10 +397,12 @@ export const HostReservations = ({
                 isOpen={openId === reservation.id}
                 isAccepting={isAccepting && accepting === reservation.id}
                 isAdmitting={isAdmitting && admitting === reservation.id}
+                isMarking={isMarking && marking?.purchaseId === reservation.id}
                 onToggle={() => setOpenId(openId === reservation.id ? null : reservation.id)}
                 onAccept={() => accept(reservation)}
                 onAdmit={() => admit(reservation)}
                 onDecline={() => setPendingDecline(reservation)}
+                onNoShow={(noShow) => setNoShow(reservation, noShow)}
               />
             ))}
           </ul>

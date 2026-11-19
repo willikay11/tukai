@@ -271,6 +271,7 @@ import {
   TongueWinkLeftIcon as TongueWinkLeftIconTwotone,
   TruckDeliveryIcon as TruckDeliveryIconTwotone,
   TruckMonsterIcon as TruckMonsterIconTwotone,
+  UndoIcon as UndoIconTwotone,
   UserAdd01Icon as UserAdd01IconTwotone,
   UserAdd02Icon as UserAdd02IconTwotone,
   UserCircleIcon as UserCircleIconTwotone,
@@ -564,6 +565,7 @@ const TWOTONE_ICONS = {
   WorkoutStretchingIcon: WorkoutStretchingIconTwotone,
   Yoga03Icon: Yoga03IconTwotone,
   YoutubeIcon: YoutubeIconTwotone,
+  UndoIcon: UndoIconTwotone,
 };
 
 const BULK_ICONS = {

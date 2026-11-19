@@ -1,4 +1,4 @@
-import { PlaceBookingRequest } from '@/types/placeReservation';
+import { PlaceBookingRequest, PlaceBookingStatus, bookingStatusOf } from '@/types/placeReservation';
 import { linkedUserName } from '@/types/user';
 
 import { dayKey } from './week-strip';
@@ -25,19 +25,18 @@ export const HOST_SUMMARY_TABS: {
   { id: 'no-show', label: 'No show', group: 'no-show' },
 ];
 
-const OPEN_STATUSES = new Set<PlaceBookingRequest['status']>([
+// Read off booking_status (DEV-407). Declined, cancelled, expired, unpaid and
+// refunded bookings aren't coming, so they aren't listed: No show is only for
+// confirmed guests the host marked as not having come.
+const OPEN_STATUSES = new Set<PlaceBookingStatus>([
   'requested',
   'accepted',
   'pending',
-  'completed',
-]);
-const MISSED_STATUSES = new Set<PlaceBookingRequest['status']>([
-  'declined',
-  'cancelled',
-  'expired',
+  'confirmed',
 ]);
 
 export type HostReservation = PlaceBookingRequest & {
+  bookingState: PlaceBookingStatus;
   start: Date;
   dayKey: string;
   group: HostReservationGroup;
@@ -46,21 +45,23 @@ export type HostReservation = PlaceBookingRequest & {
   note: string;
 };
 
-const groupOf = (status: PlaceBookingRequest['status']): HostReservationGroup | null => {
+const groupOf = (status: PlaceBookingStatus): HostReservationGroup | null => {
   if (status === 'redeemed') return 'admitted';
-  if (OPEN_STATUSES.has(status)) return 'reservations';
-  return MISSED_STATUSES.has(status) ? 'no-show' : null;
+  if (status === 'no_show') return 'no-show';
+  return OPEN_STATUSES.has(status) ? 'reservations' : null;
 };
 
 export const hostReservations = (requests: PlaceBookingRequest[]): HostReservation[] =>
   requests
     .map((request): HostReservation | null => {
-      const group = groupOf(request.status);
+      const bookingState = bookingStatusOf(request);
+      const group = groupOf(bookingState);
       const start = new Date(request.occurrence?.startDate ?? Number.NaN);
       if (!group || Number.isNaN(start.getTime())) return null;
 
       return {
         ...request,
+        bookingState,
         start,
         dayKey: dayKey(start),
         group,
@@ -92,7 +93,14 @@ export const isAwaitingAnswer = (reservation: HostReservation): boolean =>
   reservation.status === 'requested';
 
 export const isAdmittable = (reservation: HostReservation): boolean =>
-  reservation.status === 'completed';
+  reservation.bookingState === 'confirmed';
+
+/** A confirmed guest not admitted, once the booking's time has come */
+export const canMarkNoShow = (reservation: HostReservation, now: Date = new Date()): boolean =>
+  reservation.bookingState === 'confirmed' && reservation.start.getTime() <= now.getTime();
+
+export const isNoShow = (reservation: HostReservation): boolean =>
+  reservation.bookingState === 'no_show';
 
 export const paymentLine = (reservation: HostReservation): string | null => {
   if (reservation.status === 'accepted') return 'Payment due';

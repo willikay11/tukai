@@ -690,6 +690,35 @@ export async function admitPlaceBookingRequest(purchaseId: string): Promise<ApiR
   }
 }
 
+/**
+ * Marks a confirmed guest who didn't come as a no-show, or undoes it
+ * (`noShow: false`). Only once the booking's time has come, and only for a
+ * guest not admitted. The booking stays paid (DEV-407).
+ */
+export async function markPlaceBookingNoShow(
+  purchaseId: string,
+  noShow: boolean,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(`/v1/experiences/purchases/${purchaseId}/no-show/`, {
+      no_show: noShow,
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(
+        error.response?.data,
+        noShow ? 'Could not mark this guest as a no-show' : 'Could not undo the no-show',
+      ),
+    };
+  }
+}
+
 // Only the detail carries experience_id, which a guest's own bookings are filed under
 export async function fetchPlaceReservationProfile(
   placeId: string,
