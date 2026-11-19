@@ -6,8 +6,8 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { cn } from '@/lib/utils';
 
-import { DateBadge } from '../DateBadge';
 import { DashboardPlaceBookingItem } from '../../hooks/useDashboardReservations';
+import { DateBadge } from '../DateBadge';
 
 const ACTION_CLASS: Record<'default' | 'lime' | 'danger', string> = {
   default: 'px-0 text-brand hover:brightness-95',
@@ -16,9 +16,9 @@ const ACTION_CLASS: Record<'default' | 'lime' | 'danger', string> = {
 };
 
 /**
- * A booking the person made at a place - the third My reservations item type.
- * Nothing feeds this yet (see useDashboardReservations), but the row itself
- * is real, built against the handoff's exact status-pill and action spec.
+ * A booking the person made at a place - the third My reservations item type,
+ * from their bookings at every place (DEV-387) - built against the handoff's
+ * exact status-pill and action spec.
  */
 export const PlaceBookingItemCard = ({
   item,

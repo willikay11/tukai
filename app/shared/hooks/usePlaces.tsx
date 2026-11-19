@@ -35,6 +35,7 @@ import {
   fetchPlace,
   fetchPlaceAvailability,
   fetchPlaceBookingRequests,
+  fetchPlaceBookings,
   fetchPlaceCategories,
   fetchPlaceOwnership,
   fetchPlaceReservationProfile,
@@ -438,6 +439,20 @@ export const usePlaceBookingRequests = (placeId: string, profileId: string | und
     queryKey: ['placeBookingRequests', placeId, profileId],
     queryFn: async () => await fetchPlaceBookingRequests(placeId, profileId!),
     enabled: Boolean(placeId && profileId && session?.user?.id),
+  });
+};
+
+/** Bookings at places across every place, in one request (DEV-387/388) */
+export const usePlaceBookings = (
+  role: 'guest' | 'host',
+  { bookingStatus, enabled = true }: { bookingStatus?: string; enabled?: boolean } = {},
+) => {
+  const { data: session } = useSession();
+
+  return useQuery({
+    queryKey: ['placeBookings', role, bookingStatus ?? 'all'],
+    queryFn: () => fetchPlaceBookings({ role, bookingStatus }),
+    enabled: enabled && Boolean(session?.user?.id),
   });
 };
 

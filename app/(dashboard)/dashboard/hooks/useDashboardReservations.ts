@@ -1,21 +1,18 @@
 import { useMemo } from 'react';
 
-import { buildCalendarAgenda, CalendarItem } from '@/app/(profile)/hooks/calendar-agenda';
-import { useMyReviews, WrittenReview } from '@/app/(profile)/hooks/useMyReviews';
+import { CalendarItem, buildCalendarAgenda } from '@/app/(profile)/hooks/calendar-agenda';
+import { WrittenReview, useMyReviews } from '@/app/(profile)/hooks/useMyReviews';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
+import { usePlaceBookings } from '@/app/shared/hooks/usePlaces';
 import { Experience } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
 
 import { DateRailDay } from '../components/DateRail';
 import { dateFromOffset, dayOffsetOf, defaultDayOffset } from '../utils/day-offset';
 import { PlaceBookingStatusVm } from '../utils/place-booking-status';
+import { toDashboardPlaceBooking } from '../utils/place-bookings';
 
-/**
- * A booking at a place, shaped for the "Place booking" item row. Nothing
- * populates this yet - see the hook's own doc comment - but the type and the
- * row it renders are real, so wiring a real source later is a data change,
- * not a UI one.
- */
+/** A booking at a place, shaped for the "Place booking" item row. */
 export interface DashboardPlaceBookingItem {
   key: string;
   date: string;
@@ -37,10 +34,9 @@ export interface DashboardPlaceBookingItem {
  * on the selected day only, so this groups by day itself rather than reusing
  * `itemsFrom`.
  *
- * Place bookings are a third item type the handoff calls for, but there is no
- * endpoint for "all of my bookings across every place" - only a per-place
- * query. This returns an empty `placeBookings` array until that exists; see
- * the Dashboard backend-gaps note.
+ * Place bookings are the third item type: the person's own bookings at every
+ * place, in one request (DEV-387). They count towards the date rail and show
+ * on the day picked, like the rest.
  */
 export const useDashboardReservations = (
   userId: string | undefined,
@@ -60,9 +56,21 @@ export const useDashboardReservations = (
     [purchases, reservedExperiences],
   );
 
+  const { data: placeBookingsData, isLoading: isLoadingPlaceBookings } = usePlaceBookings('guest', {
+    enabled: Boolean(userId),
+  });
+  const allPlaceBookings: DashboardPlaceBookingItem[] = useMemo(
+    () =>
+      (placeBookingsData ?? [])
+        .map((booking) => toDashboardPlaceBooking(booking))
+        .filter((item): item is DashboardPlaceBookingItem => item !== null)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+    [placeBookingsData],
+  );
+
   const days: DateRailDay[] = useMemo(() => {
     const countByOffset = new Map<number, number>();
-    agenda.forEach((item) => {
+    [...agenda, ...allPlaceBookings].forEach((item) => {
       const offset = dayOffsetOf(item.date);
       countByOffset.set(offset, (countByOffset.get(offset) ?? 0) + 1);
     });
@@ -75,7 +83,7 @@ export const useDashboardReservations = (
         isPast: offset < 0,
         count,
       }));
-  }, [agenda]);
+  }, [agenda, allPlaceBookings]);
 
   const resolvedOffset =
     selectedOffset !== null && days.some((day) => day.offset === selectedOffset)
@@ -100,12 +108,14 @@ export const useDashboardReservations = (
   );
 
   return {
-    isLoading: isLoadingPurchases || isLoadingReserved,
+    isLoading: isLoadingPurchases || isLoadingReserved || isLoadingPlaceBookings,
     items,
     days,
     selectedOffset: resolvedOffset,
     writtenByExperienceId,
-    // Stubbed pending a cross-place bookings endpoint - see backend-gaps note.
-    placeBookings: [] as DashboardPlaceBookingItem[],
+    placeBookings:
+      resolvedOffset === null
+        ? []
+        : allPlaceBookings.filter((item) => dayOffsetOf(item.date) === resolvedOffset),
   };
 };
