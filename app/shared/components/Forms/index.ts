@@ -9,3 +9,4 @@ export { DateField, type DateFieldProps } from './DateField';
 export { TimeField, type TimeFieldProps } from './TimeField';
 export { SelectField, type SelectFieldOption, type SelectFieldProps } from './SelectField';
 export { RichTextField, type RichTextFieldProps } from './RichTextField';
+export { IntlPhoneField, type IntlPhoneFieldProps } from './IntlPhoneField';

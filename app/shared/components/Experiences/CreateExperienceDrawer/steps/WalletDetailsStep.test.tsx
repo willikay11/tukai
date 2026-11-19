@@ -10,7 +10,30 @@ jest.mock('@/app/shared/components/Payouts/VerifyMpesaWallet', () => ({
   VerifyMpesaWallet: ({ phone }: { phone?: string }) => <div>Verify {phone}</div>,
 }));
 jest.mock('@/app/shared/components/Forms', () => ({
-  SelectField: ({ label }: { label: string }) => <div>{label}</div>,
+  SelectField: ({ label, onChange }: { label: string; onChange: (value: string) => void }) => (
+    <button type="button" onClick={() => onChange(label === 'Country' ? 'Uganda' : 'Kenya')}>
+      {label}
+    </button>
+  ),
+  IntlPhoneField: ({
+    country,
+    onCountryChange,
+    value,
+    onChange,
+  }: {
+    country: string;
+    onCountryChange: (iso: string) => void;
+    value: string;
+    onChange: (value: string) => void;
+  }) => (
+    <div>
+      <span>Code {country}</span>
+      <button type="button" onClick={() => onCountryChange('GB')}>
+        Pick GB
+      </button>
+      <input aria-label="Bank phone" value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  ),
 }));
 
 const mpesa = {
@@ -156,5 +179,41 @@ describe('WalletDetailsStep, with no saved payout accounts', () => {
     expect(screen.getByText('Set up your payout account')).toBeInTheDocument();
     expect(screen.queryByRole('radiogroup', { name: 'Payout account' })).not.toBeInTheDocument();
     expect(screen.getByText('Select your preferred payout method')).toBeInTheDocument();
+  });
+});
+
+// DEV-508: the bank account's phone number can be from any country
+describe('WalletDetailsStep, a new bank account phone number', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const fillBank = () => {
+    renderStep([], { selectedWallet: undefined, paymentMethod: 'bank' });
+    const type = (placeholder: string, value: string) =>
+      fireEvent.change(screen.getByPlaceholderText(placeholder), { target: { value } });
+    type('Bank name', 'Barclays');
+    type('Branch', 'Soho');
+    type('Account name', 'Wanjiku Maina');
+    type('Account number', '12345678');
+    type('Town or city', 'London');
+    // The two country pickers: bank, then billing
+    screen.getAllByRole('button', { name: 'Country' }).forEach((button) => fireEvent.click(button));
+  };
+
+  it('starts its code on the bank country', () => {
+    fillBank();
+
+    expect(screen.getByText('Code UG')).toBeInTheDocument();
+  });
+
+  it('saves the number with the code the host picked', () => {
+    fillBank();
+    fireEvent.click(screen.getByRole('button', { name: 'Pick GB' }));
+    fireEvent.change(screen.getByLabelText('Bank phone'), { target: { value: '07700 900123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save bank details' }));
+
+    expect(createBankWallet).toHaveBeenCalledWith(
+      expect.objectContaining({ contactPhone: '+447700900123' }),
+      expect.anything(),
+    );
   });
 });
