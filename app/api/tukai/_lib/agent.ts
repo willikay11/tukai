@@ -105,6 +105,16 @@ export const agentErrorResponse = (label: string, error: any) => {
   if (status === 401 || status === 403) {
     return NextResponse.json({ message: 'Sign in again to use TukAI.' }, { status: 401 });
   }
+  // The month's free messages are used up (tukai_allowance_exhausted)
+  if (status === 402) {
+    return NextResponse.json(
+      {
+        message: 'You have used your free TukAI messages this month.',
+        code: 'tukai_allowance_exhausted',
+      },
+      { status: 402 },
+    );
+  }
   if (status === 404) {
     return NextResponse.json({ message: 'That chat has ended.' }, { status: 404 });
   }

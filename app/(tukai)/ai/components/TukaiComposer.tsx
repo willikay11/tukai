@@ -6,7 +6,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { TukaiDots } from '@/app/shared/components/TukAI';
 import { useTukai } from '@/context/TukaiContext';
 import { cn } from '@/lib/utils';
-import { TUKAI_FREE_MESSAGES, countUserMessages } from '@/utils/tukai';
+import { freeMessagesText } from '@/utils/tukai';
 
 import { useDictation } from '../hooks';
 import { TukaiStarters } from './TukaiStarters';
@@ -23,12 +23,10 @@ export const TukaiComposer = ({ isEmptyChat }: { isEmptyChat: boolean }) => {
     ask,
     busy,
     focusRequest,
-    currentChat,
     isUnlocked,
     isCapped,
-    hasNoFreeChats,
-    freeChatsLeft,
-    newChat,
+    freeMessagesLeft,
+    freeMessagesResetAt,
     showPaywall,
   } = useTukai();
   const textRef = useRef<HTMLTextAreaElement>(null);
@@ -54,9 +52,12 @@ export const TukaiComposer = ({ isEmptyChat }: { isEmptyChat: boolean }) => {
     }
   };
 
-  const isLocked = isCapped || hasNoFreeChats;
-  const userMessages = currentChat ? countUserMessages(currentChat.messages) : 0;
-  const showMeter = !isUnlocked && Boolean(currentChat) && !dictation.isListening;
+  const isLocked = isCapped;
+  // "18 free messages left this month", counted by the server on every device
+  const showMeter = !isUnlocked && freeMessagesLeft !== null && !dictation.isListening;
+  const resetsOn = freeMessagesResetAt
+    ? new Date(freeMessagesResetAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
+    : null;
 
   return (
     <div className="mx-auto flex w-full max-w-[760px] flex-col gap-2">
@@ -81,8 +82,7 @@ export const TukaiComposer = ({ isEmptyChat }: { isEmptyChat: boolean }) => {
                     Listening
                   </span>
                 )}
-                {showMeter &&
-                  `Message ${Math.min(userMessages + 1, TUKAI_FREE_MESSAGES)} of ${TUKAI_FREE_MESSAGES}`}
+                {showMeter && freeMessagesText(freeMessagesLeft)}
               </span>
               <div className="flex flex-shrink-0 items-center gap-2">
                 <button
@@ -132,27 +132,13 @@ export const TukaiComposer = ({ isEmptyChat }: { isEmptyChat: boolean }) => {
       {isLocked && (
         <div className="flex flex-col gap-2.5 px-1 pb-0.5 pt-1">
           <p className="m-0 text-pretty text-sm leading-normal text-gray-800">
-            {isCapped
-              ? `This chat has reached its 10 messages.${
-                  freeChatsLeft
-                    ? ' Start a new chat, or get TukAI for unlimited messages.'
-                    : ' Get TukAI to keep going.'
-                }`
-              : 'You have used your 2 free chats. Get TukAI to start a new one.'}
+            You have used this month&rsquo;s free messages.
+            {resetsOn ? ` More come on ${resetsOn}, or get` : ' Get'} TukAI to keep going now.
           </p>
           <div className="flex flex-wrap gap-2">
-            {isCapped && freeChatsLeft > 0 && (
-              <button
-                type="button"
-                onClick={newChat}
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-surface px-5 text-[15px] font-semibold text-gray-800 hover:bg-surface-brand"
-              >
-                Start a new chat
-              </button>
-            )}
             <button
               type="button"
-              onClick={() => showPaywall(isCapped ? 'cap' : 'chats')}
+              onClick={() => showPaywall('allowance')}
               className="flex min-h-12 items-center justify-center gap-2.5 rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-6 text-[15px] font-semibold text-white hover:brightness-[1.06]"
             >
               Get TukAI
@@ -166,9 +152,9 @@ export const TukaiComposer = ({ isEmptyChat }: { isEmptyChat: boolean }) => {
           <TukaiStarters />
           {!isUnlocked && (
             <p className="mt-1.5 text-center text-[13px] leading-[1.45] text-ink-muted">
-              {freeChatsLeft
-                ? `You have ${freeChatsLeft} free ${freeChatsLeft === 1 ? 'chat' : 'chats'} left, each up to 10 messages.`
-                : 'You have used your free chats.'}
+              {freeMessagesLeft === null
+                ? 'Free messages reset at the start of each month.'
+                : `You have ${freeMessagesText(freeMessagesLeft).replace(' left this month', '')} left this month.`}
             </p>
           )}
         </>

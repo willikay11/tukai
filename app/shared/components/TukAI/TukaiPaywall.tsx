@@ -7,13 +7,9 @@ import type { TukaiPaywallReason } from '@/types/tukai';
 import { TukaiMark } from './TukaiMark';
 
 const COPY: Record<TukaiPaywallReason, { title: string; text: string }> = {
-  chats: {
+  allowance: {
     title: 'Keep going with TukAI',
-    text: 'You have used your 2 free chats. Get TukAI for unlimited chats and longer plans.',
-  },
-  cap: {
-    title: 'Keep going with TukAI',
-    text: 'This chat has reached its 10 messages. Get TukAI for unlimited messages and chats.',
+    text: 'You have used this month’s free messages. Get TukAI for unlimited messages and longer plans.',
   },
   upgrade: {
     title: 'Get more from TukAI',

@@ -300,3 +300,11 @@ export const tukaiPins = (
   }
   return { numbers, pins };
 };
+
+/** "18 free messages left this month", "1 free message left…", "No free messages left this month". */
+export const freeMessagesText = (left: number | null): string =>
+  left === null
+    ? 'Free messages this month'
+    : left === 0
+      ? 'No free messages left this month'
+      : `${left} free message${left === 1 ? '' : 's'} left this month`;

@@ -123,3 +123,24 @@ export const confirmTukaiSubscription = async (
   const sub = parseSnakeToCamel(response.data) as BackendSubscription;
   return isLive(sub) ? toTukaiSubscription(sub) : null;
 };
+
+/**
+ * This month's free TukAI messages (DEV-374): every message to TukAI, and
+ * every review draft, uses one. A live TukAI subscription makes it
+ * unlimited. Resets at the start of each calendar month.
+ */
+export type TukaiAllowance = {
+  unlimited: boolean;
+  /** Null when unlimited */
+  limit: number | null;
+  used: number;
+  /** Null when unlimited */
+  remaining: number | null;
+  resetsAt: string;
+};
+
+export const fetchTukaiAllowance = async (): Promise<TukaiAllowance> => {
+  const api = await apiWithToken();
+  const response = await api.get('/v1/tukai/allowance/');
+  return parseSnakeToCamel(response.data) as TukaiAllowance;
+};
