@@ -6,11 +6,13 @@ import type { TukaiChat, TukaiMessage } from '@/types/tukai';
  * Your chats with TukAI, and what this browser knows of the free allowance
  * and the TukAI plan.
  *
- * The API has no TukAI endpoints yet, so this is the only record of a chat:
- * persisted through redux-persist (store/store.ts) so chats survive a reload
- * (the handoff's open question 8). Chats belong to one account: `ownerId`
- * is checked on every read, so signing in as someone else never shows the
- * last person's chats.
+ * The server saves every chat too (GET /v1/tukai/conversations/, DEV-474),
+ * and the chats list reads from there. This keeps the fuller copy of the
+ * chats used in this browser - plans, drafts and writing options the server
+ * doesn't save - and a saved chat opened from another device is loaded in
+ * here (`loadTukaiChat`). Persisted through redux-persist (store/store.ts).
+ * Chats belong to one account: `ownerId` is checked on every read, so
+ * signing in as someone else never shows the last person's chats.
  */
 type TukaiState = {
   ownerId: string | null;
@@ -44,6 +46,12 @@ const tukaiSlice = createSlice({
       state.chats.unshift(action.payload.chat);
       if (action.payload.countsAsFree) state.freeChatsUsed += 1;
     },
+    /** A chat loaded from the server: added, or replacing the copy here */
+    loadTukaiChat: (state, action: PayloadAction<{ ownerId: string; chat: TukaiChat }>) => {
+      claim(state, action.payload.ownerId);
+      const { chat } = action.payload;
+      state.chats = [chat, ...state.chats.filter((c) => c.id !== chat.id)];
+    },
     addTukaiMessage: (state, action: PayloadAction<{ chatId: string; message: TukaiMessage }>) => {
       const chat = state.chats.find((c) => c.id === action.payload.chatId);
       if (chat) chat.messages.push(action.payload.message);
@@ -75,6 +83,7 @@ const tukaiSlice = createSlice({
 
 export const {
   startTukaiChat,
+  loadTukaiChat,
   addTukaiMessage,
   removeTukaiMessage,
   patchTukaiMessage,

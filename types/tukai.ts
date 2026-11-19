@@ -147,3 +147,57 @@ export type TukaiConfirmRequest = {
   sessionId: string;
   confirmed: boolean;
 };
+
+/** A saved chat's plan, on the chats list (DEV-474). */
+export type TukaiConversationPlan = {
+  id: string;
+  title: string;
+  /** "YYYY-MM-DD", or null when it has no date */
+  date: string | null;
+  stopCount: number;
+};
+
+/**
+ * One row of GET /v1/tukai/conversations/: a chat the server saved for this
+ * account, on any device. `sessionId` is the chat's id in the browser and
+ * the agent's session id.
+ */
+export type TukaiConversation = {
+  id: string;
+  sessionId: string;
+  title: string;
+  kind: 'chat' | 'plan';
+  /** User and assistant messages */
+  messageCount: number;
+  plan: TukaiConversationPlan | null;
+  lastMessageAt: string;
+  dateCreated: string;
+};
+
+/** A place or experience a saved reply recommends, as the API builds it. */
+export type TukaiRecommendationCard = {
+  type: 'place' | 'experience';
+  id: string;
+  slug: string;
+  name: string;
+  rating: number | null;
+  reviewCount: number | null;
+  area: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  blurb: string;
+  photos: { mdUrl: string | null; thumbUrl: string | null }[];
+  bookable: boolean;
+  isBookmarked: boolean;
+};
+
+export type TukaiSavedMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  recommendations: TukaiRecommendationCard[];
+  dateCreated: string;
+};
+
+/** GET /v1/tukai/conversations/{id}/: the chat with its messages. */
+export type TukaiConversationDetail = TukaiConversation & { messages: TukaiSavedMessage[] };
