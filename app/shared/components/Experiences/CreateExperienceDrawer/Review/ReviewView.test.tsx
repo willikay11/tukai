@@ -8,7 +8,10 @@ jest.mock('@/app/shared/components/Images', () => ({
 }));
 jest.mock('@/app/shared/components/Global', () => ({ OpenInMapsLink: () => null }));
 
-const flowWith = (photos: { id: string; url: string; file?: File }[]) => ({
+const flowWith = (
+  photos: { id: string; url: string; file?: File }[],
+  about: Record<string, unknown> = {},
+) => ({
   formData: {
     dateType: {
       experienceType: 'one-time',
@@ -30,6 +33,7 @@ const flowWith = (photos: { id: string; url: string; file?: File }[]) => ({
       visibility: 'public',
       whatsIncluded: '',
       whatsNotIncluded: '',
+      ...about,
     },
     tickets: { items: [{ id: 't1', name: 'Free', quantity: 10, amount: 0 }] },
     invite: { invitedCommunities: [], invitedCommunityIds: [], invitedGuests: [] },
@@ -70,5 +74,29 @@ describe('ReviewView, photos', () => {
     );
 
     expect(screen.queryByText(/not uploaded yet/)).not.toBeInTheDocument();
+  });
+});
+
+// DEV-511: the fields hold the rich-text editor's HTML, which showed as text
+describe("ReviewView, what's included", () => {
+  it('shows each list item as its own row, with no tags', () => {
+    render(
+      <ReviewView
+        flow={
+          flowWith([], {
+            whatsIncluded:
+              '<ul class="m-0 p-0"><li value="1"><span style="white-space: pre-wrap;">A shared meal</span></li><li value="2"><span>Food &amp; drinks</span></li></ul>',
+            whatsNotIncluded: '<p>Transport</p>',
+          }) as never
+        }
+        onPublish={jest.fn()}
+        isPublishing={false}
+      />,
+    );
+
+    expect(screen.getByText('A shared meal')).toBeInTheDocument();
+    expect(screen.getByText('Food & drinks')).toBeInTheDocument();
+    expect(screen.getByText('Transport')).toBeInTheDocument();
+    expect(screen.queryByText(/<ul|<li|<span/)).not.toBeInTheDocument();
   });
 });

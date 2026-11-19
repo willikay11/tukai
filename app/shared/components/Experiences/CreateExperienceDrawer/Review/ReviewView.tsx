@@ -9,6 +9,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { PlainImage } from '@/app/shared/components/Images';
 import { payoutAccountLabel } from '@/app/shared/components/Payouts/payoutAccounts';
 import { itineraryDayDate } from '@/types/itinerary';
+import { richTextItems } from '@/utils/rich-text-items';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
 
@@ -113,6 +114,9 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
   const isItinerary = dateType.experienceType === 'itinerary';
   const isMultiDay = dateType.experienceType === 'multi-day';
   const isPaid = dateType.experiencePricing === 'paid';
+  // The fields hold the rich-text editor's HTML: drawn here as one row each
+  const includedItems = richTextItems(about.whatsIncluded);
+  const notIncludedItems = richTextItems(about.whatsNotIncluded);
 
   // ---- Missing items (joined "a, b and c.") ----------------------------
   const missing: string[] = [];
@@ -279,47 +283,41 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
         )}
       </div>
 
-      {about.whatsIncluded && (
+      {includedItems.length > 0 && (
         <RvSection title="What&rsquo;s included" gap="gap-2.5">
-          {about.whatsIncluded
-            .split('\n')
-            .filter((line) => line.trim())
-            .map((line, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800"
-              >
-                <IconComponent
-                  iconName="Tick02Icon"
-                  size={19}
-                  color="#066349"
-                  className="mt-px flex-shrink-0"
-                />
-                <span>{line}</span>
-              </div>
-            ))}
+          {includedItems.map((line, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800"
+            >
+              <IconComponent
+                iconName="Tick02Icon"
+                size={19}
+                color="#066349"
+                className="mt-px flex-shrink-0"
+              />
+              <span>{line}</span>
+            </div>
+          ))}
         </RvSection>
       )}
 
-      {about.whatsNotIncluded && (
+      {notIncludedItems.length > 0 && (
         <RvSection title="What&rsquo;s not included" gap="gap-2.5">
-          {about.whatsNotIncluded
-            .split('\n')
-            .filter((line) => line.trim())
-            .map((line, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800"
-              >
-                <IconComponent
-                  iconName="Cancel01Icon"
-                  size={19}
-                  color="#E02D3C"
-                  className="mt-px flex-shrink-0"
-                />
-                <span>{line}</span>
-              </div>
-            ))}
+          {notIncludedItems.map((line, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800"
+            >
+              <IconComponent
+                iconName="Cancel01Icon"
+                size={19}
+                color="#E02D3C"
+                className="mt-px flex-shrink-0"
+              />
+              <span>{line}</span>
+            </div>
+          ))}
         </RvSection>
       )}
 
