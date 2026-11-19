@@ -7,7 +7,11 @@ import { PlainImage } from '@/app/shared/components/Images';
 import { Drawer } from '@/components/ui/drawer';
 import { useTukai } from '@/context/TukaiContext';
 import { cn } from '@/lib/utils';
-import { countUserMessages, freeMessagesText, planStopCount, plural } from '@/utils/tukai';
+import type { TukaiChat, TukaiConversation } from '@/types/tukai';
+import { countUserMessages, freeMessagesText, plural } from '@/utils/tukai';
+import { chatDayLabel, conversationSubtitle } from '@/utils/tukai-saved-chats';
+
+import { useTukaiConversations } from '../hooks/useTukaiConversations';
 
 const SectionHead = ({ title }: { title: string }) => (
   <div className="sticky top-0 z-[1] -mx-6 flex min-h-11 items-center bg-surface-sticky px-6 py-2">
@@ -15,18 +19,39 @@ const SectionHead = ({ title }: { title: string }) => (
   </div>
 );
 
+type ChatRow = {
+  key: string;
+  /** The chat's id in this browser, and the agent's session id */
+  chatId: string;
+  /** Set for a chat the server saved */
+  conversation?: TukaiConversation;
+  title: string;
+  subtitle: string;
+  lastAt: number;
+};
+
+const lastActivity = (chat: TukaiChat) =>
+  new Date(chat.messages[chat.messages.length - 1]?.createdAt ?? chat.createdAt).getTime();
+
 /**
- * "Your chats": search, every chat with a plan, every chat, and the plan
+ * "Your chats": search, the chats that made a plan, every chat, and the plan
  * card at the bottom. Opening a row closes the drawer.
+ *
+ * The list is the server's (DEV-474), so chats from every device show, with
+ * "6 messages · Yesterday" or "Plan · 4 stops · Tue 10 Nov" under each, and
+ * search runs on the server over titles and what was said (DEV-475). A chat
+ * only this browser has - from before the server saved chats - is listed too.
  */
 export const TukaiChatsDrawer = () => {
   const {
     isHistoryOpen,
     setHistoryOpen,
-    chats,
     currentChat,
     view,
+    chats,
     openChat,
+    openSavedChat,
+    openingChatId,
     deleteChat,
     showOnMap,
     access,
@@ -38,27 +63,68 @@ export const TukaiChatsDrawer = () => {
   const close = () => setHistoryOpen(false);
   const q = query.trim().toLowerCase();
 
-  // Search matches titles and anything said in a chat
-  const found = useMemo(
-    () =>
-      chats.filter(
-        (c) =>
-          !q ||
-          c.title.toLowerCase().includes(q) ||
-          c.messages.some((m) => m.text.toLowerCase().includes(q)),
-      ),
-    [chats, q],
-  );
+  const { conversations, isLoading, isError, hasMore, isLoadingMore, loadMore } =
+    useTukaiConversations(query, isHistoryOpen);
 
-  const plans = found
-    .map((chat) => {
-      const message = [...chat.messages].reverse().find((m) => m.plan);
-      return message ? { chat, message } : null;
-    })
-    .filter(Boolean) as {
-    chat: (typeof chats)[number];
-    message: (typeof chats)[number]['messages'][number];
-  }[];
+  const rows: ChatRow[] = useMemo(() => {
+    const saved = new Set(conversations.map((c) => c.sessionId));
+    const fromServer = conversations.map((conversation) => ({
+      key: conversation.id,
+      chatId: conversation.sessionId,
+      conversation,
+      title: conversation.title,
+      subtitle: conversationSubtitle(conversation),
+      lastAt: new Date(conversation.lastMessageAt).getTime(),
+    }));
+    // Only this browser has these: kept, so nothing disappears from the list
+    const onlyHere = chats
+      .filter((chat) => !saved.has(chat.id))
+      .filter(
+        (chat) =>
+          !q ||
+          chat.title.toLowerCase().includes(q) ||
+          chat.messages.some((m) => m.text.toLowerCase().includes(q)),
+      )
+      .map((chat) => ({
+        key: `local-${chat.id}`,
+        chatId: chat.id,
+        title: chat.title,
+        subtitle: [
+          plural(countUserMessages(chat.messages), 'message'),
+          chatDayLabel(new Date(lastActivity(chat)).toISOString()),
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        lastAt: lastActivity(chat),
+      }));
+    // While a search is out, the server's list is still for the old one:
+    // a chat on this device that's only just been saved isn't doubled
+    return [...fromServer, ...onlyHere].sort((a, b) => b.lastAt - a.lastAt);
+  }, [chats, conversations, q]);
+
+  const plans = rows.filter((row) => row.conversation?.kind === 'plan');
+
+  const open = async (row: ChatRow, withMap = false) => {
+    close();
+    if (row.conversation) {
+      const opened = await openSavedChat(row.conversation);
+      if (!opened || !withMap) return;
+    } else {
+      openChat(row.chatId);
+      if (!withMap) return;
+    }
+    // The plan's places on the map, when this browser has the plan
+    const local = chats.find((chat) => chat.id === row.chatId);
+    const planMessage = local && [...local.messages].reverse().find((m) => m.plan);
+    if (planMessage) showOnMap(planMessage.id);
+  };
+
+  const planImage = (row: ChatRow) => {
+    const local = chats.find((chat) => chat.id === row.chatId);
+    const message = local && [...local.messages].reverse().find((m) => m.plan);
+    const first = message?.plan?.days[0]?.stops[0];
+    return first ? message?.items?.[first.id]?.photos[0] : undefined;
+  };
 
   const isCurrent = (id: string) => view === 'chat' && currentChat?.id === id;
 
@@ -134,22 +200,16 @@ export const TukaiChatsDrawer = () => {
             <section aria-label="Plans" className="flex flex-col">
               <SectionHead title="Plans" />
               <div className="flex flex-col pt-1.5">
-                {plans.map(({ chat, message }) => {
-                  const plan = message.plan!;
-                  const first = plan.days[0]?.stops[0];
-                  const img = first ? message.items?.[first.id]?.photos[0] : undefined;
+                {plans.map((row) => {
+                  const img = planImage(row);
                   return (
                     <button
-                      key={chat.id}
+                      key={row.key}
                       type="button"
-                      onClick={() => {
-                        close();
-                        openChat(chat.id);
-                        showOnMap(message.id);
-                      }}
+                      onClick={() => void open(row, true)}
                       className={cn(
                         '-mx-3 flex w-[calc(100%+24px)] items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-surface',
-                        isCurrent(chat.id) && 'bg-surface-brand',
+                        isCurrent(row.chatId) && 'bg-surface-brand',
                       )}
                     >
                       {img ? (
@@ -159,16 +219,15 @@ export const TukaiChatsDrawer = () => {
                           className="block h-14 w-14 flex-shrink-0 rounded-xl bg-surface-brand object-cover"
                         />
                       ) : (
-                        <span className="block h-14 w-14 flex-shrink-0 rounded-xl bg-surface-brand" />
+                        <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-surface-brand text-brand">
+                          <IconComponent iconName="Route01Icon" size={22} color="currentColor" />
+                        </span>
                       )}
                       <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
                         <span className="truncate text-[14.5px] font-semibold leading-[1.35] text-gray-800">
-                          {plan.title}
+                          {row.conversation?.plan?.title || row.title}
                         </span>
-                        <span className="text-[13px] text-ink-muted">
-                          {plural(plan.days.length, 'day')} {'·'}{' '}
-                          {plural(planStopCount(plan), 'stop')}
-                        </span>
+                        <span className="text-[13px] text-ink-muted">{row.subtitle}</span>
                       </span>
                     </button>
                   );
@@ -177,38 +236,44 @@ export const TukaiChatsDrawer = () => {
             </section>
           )}
 
-          {found.length > 0 && (
+          {rows.length > 0 && (
             <section aria-label="Chats" className="flex flex-col">
               <SectionHead title="Chats" />
               <div className="flex flex-col pt-1.5">
-                {found.map((chat) => (
+                {rows.map((row) => (
                   <div
-                    key={chat.id}
+                    key={row.key}
                     className={cn(
                       '-mx-3 flex items-center gap-1 rounded-xl hover:bg-surface',
-                      isCurrent(chat.id) && 'bg-surface-brand',
+                      isCurrent(row.chatId) && 'bg-surface-brand',
                     )}
                   >
                     <button
                       type="button"
-                      onClick={() => {
-                        close();
-                        openChat(chat.id);
-                      }}
-                      aria-current={isCurrent(chat.id)}
-                      className="flex min-h-[60px] min-w-0 flex-1 flex-col justify-center gap-[3px] py-2 pl-3 pr-1 text-left"
+                      onClick={() => void open(row)}
+                      aria-current={isCurrent(row.chatId)}
+                      aria-busy={openingChatId === row.conversation?.id}
+                      className="flex min-h-[60px] min-w-0 flex-1 items-center gap-3 py-2 pl-3 pr-1 text-left"
                     >
-                      <span className="truncate text-[14.5px] font-semibold leading-[1.35] text-gray-800">
-                        {chat.title}
-                      </span>
-                      <span className="text-[13px] text-ink-muted">
-                        {plural(countUserMessages(chat.messages), 'message')}
+                      <IconComponent
+                        iconName={
+                          row.conversation?.kind === 'plan' ? 'Route01Icon' : 'BubbleChatIcon'
+                        }
+                        size={20}
+                        color="currentColor"
+                        className="flex-shrink-0 text-ink-muted"
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                        <span className="truncate text-[14.5px] font-semibold leading-[1.35] text-gray-800">
+                          {row.title}
+                        </span>
+                        <span className="text-[13px] text-ink-muted">{row.subtitle}</span>
                       </span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteChat(chat.id)}
-                      aria-label={`Delete chat: ${chat.title}`}
+                      onClick={() => deleteChat(row.chatId, row.conversation?.id)}
+                      aria-label={`Delete chat: ${row.title}`}
                       className="mr-1.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-ink-muted hover:bg-danger-surface hover:text-danger"
                     >
                       <IconComponent iconName="Delete02Icon" size={18} color="currentColor" />
@@ -219,11 +284,32 @@ export const TukaiChatsDrawer = () => {
             </section>
           )}
 
-          {found.length === 0 && (
+          {hasMore && (
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={isLoadingMore}
+              className="inline-flex min-h-11 items-center self-start rounded-full bg-surface px-[18px] text-[14.5px] font-semibold text-brand-ink hover:bg-surface-brand disabled:opacity-60"
+            >
+              {isLoadingMore ? 'Loading…' : 'Show more chats'}
+            </button>
+          )}
+
+          {isLoading && rows.length === 0 && (
+            <div aria-label="Loading your chats" className="flex flex-col gap-2">
+              {[0, 1, 2].map((n) => (
+                <span key={n} className="block h-[60px] animate-pulse rounded-xl bg-surface" />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && rows.length === 0 && (
             <p className="m-0 text-pretty text-[15px] leading-normal text-ink-muted">
-              {q
-                ? `No chats match “${query.trim()}”.`
-                : 'No chats yet. Ask TukAI anything to start one.'}
+              {isError
+                ? 'Your chats could not be loaded just now. Try again in a moment.'
+                : q
+                  ? `No chats match “${query.trim()}”.`
+                  : 'No chats yet. Ask TukAI anything to start one.'}
             </p>
           )}
         </div>

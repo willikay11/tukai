@@ -20,6 +20,7 @@ import { toast } from '@/app/shared/hooks/useToast';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useHostingPlan } from '@/context/HostingPlanContext';
 import { confirmTukaiAction, deleteTukaiSession, sendTukaiMessage } from '@/services/tukai';
+import { deleteTukaiConversation, fetchTukaiConversation } from '@/services/tukaiConversations';
 import {
   confirmTukaiSubscription,
   fetchTukaiAllowance,
@@ -30,6 +31,7 @@ import {
 import {
   addTukaiMessage,
   deleteTukaiChat,
+  loadTukaiChat,
   patchTukaiMessage,
   removeTukaiMessage,
   startTukaiChat,
@@ -39,11 +41,13 @@ import type { ApiResponse } from '@/types/apiResponse';
 import type {
   TukaiAccess,
   TukaiChat,
+  TukaiConversation,
   TukaiMessage,
   TukaiPaywallReason,
   TukaiReply,
 } from '@/types/tukai';
 import { TUKAI_PRICE_LABEL, chatTitleFrom, freeMessagesText } from '@/utils/tukai';
+import { savedChatToTukaiChat } from '@/utils/tukai-saved-chats';
 
 export const TUKAI_ROUTE = '/ai';
 
@@ -118,7 +122,16 @@ type TukaiContextValue = {
   confirm: (messageId: string, confirmed: boolean) => void;
   newChat: () => void;
   openChat: (chatId: string) => void;
-  deleteChat: (chatId: string) => void;
+  /**
+   * Opens a chat from the server's list (DEV-474): from this browser's copy
+   * when it has one, else loaded from the server - a chat from another
+   * device, say. Resolves true once it's open.
+   */
+  openSavedChat: (conversation: TukaiConversation) => Promise<boolean>;
+  /** The saved chat being loaded, by its server id */
+  openingChatId: string | null;
+  /** Forgets a chat here and on the server */
+  deleteChat: (chatId: string, conversationId?: string) => void;
 
   /** No free messages left this month and no TukAI plan: the composer locks. */
   isCapped: boolean;
@@ -205,6 +218,11 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
     () => queryClient.invalidateQueries({ queryKey: ['tukai-allowance'] }),
     [queryClient],
   );
+  // The server's chats list: a reply adds to it, so it is read again after one
+  const refreshConversations = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ['tukai-conversations'] }),
+    [queryClient],
+  );
   const planRenewsAt = tukaiSubscription?.renewsAt ?? null;
   const priceLabel = tukaiPlan?.priceLabel ?? TUKAI_PRICE_LABEL;
 
@@ -223,6 +241,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [isHistoryOpen, setHistoryOpen] = useState(false);
   const [mapMessageId, setMapMessageId] = useState<string | null>(null);
+  const [openingChatId, setOpeningChatId] = useState<string | null>(null);
   const [isMapSheetOpen, setMapSheetOpen] = useState(false);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   // Read synchronously, so a double press cannot send twice before the
@@ -277,8 +296,10 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       busyRef.current = true;
       setBusy(true);
       const result = await call();
-      // Every reply may have used one of the month's free messages
+      // Every reply may have used one of the month's free messages, and the
+      // server has saved the chat's new messages
       void refreshAllowance();
+      void refreshConversations();
       if (result.status === 402 && onAllowanceUsedUp) {
         busyRef.current = false;
         setBusy(false);
@@ -294,7 +315,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       setBusy(false);
       return message;
     },
-    [dispatch, refreshAllowance],
+    [dispatch, refreshAllowance, refreshConversations],
   );
 
   /**
@@ -433,9 +454,40 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
     setSelectedPinId(null);
   }, []);
 
+  const openSavedChat = useCallback(
+    async (conversation: TukaiConversation): Promise<boolean> => {
+      // This browser's copy is the fuller one: it keeps plans and drafts
+      if (chats.some((chat) => chat.id === conversation.sessionId)) {
+        openChat(conversation.sessionId);
+        return true;
+      }
+      if (!userId) return false;
+      setOpeningChatId(conversation.id);
+      try {
+        const detail = await fetchTukaiConversation(conversation.id);
+        dispatch(loadTukaiChat({ ownerId: userId, chat: savedChatToTukaiChat(detail) }));
+        openChat(detail.sessionId);
+        return true;
+      } catch (error) {
+        console.error('TukAI open chat:', error);
+        toast({ description: 'That chat could not be opened. Try again.' });
+        return false;
+      } finally {
+        setOpeningChatId(null);
+      }
+    },
+    [chats, dispatch, openChat, userId],
+  );
+
   const deleteChat = useCallback(
-    (chatId: string) => {
+    (chatId: string, conversationId?: string) => {
       dispatch(deleteTukaiChat(chatId));
+      // Forgotten on the server too, so it leaves the list on every device
+      if (conversationId) {
+        deleteTukaiConversation(conversationId)
+          .catch((error) => console.error('TukAI delete chat:', error))
+          .finally(() => void refreshConversations());
+      }
       // Ends the agent's session too; the chat is gone here either way
       deleteTukaiSession(chatId);
       if (chatId === currentChatId) {
@@ -445,7 +497,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       }
       toast({ description: 'Chat deleted.' });
     },
-    [currentChatId, dispatch],
+    [currentChatId, dispatch, refreshConversations],
   );
 
   const clearCheckout = useCallback(() => {
@@ -564,6 +616,8 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       confirm,
       newChat,
       openChat,
+      openSavedChat,
+      openingChatId,
       deleteChat,
       isCapped,
       showPaywall,
@@ -614,6 +668,8 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       confirm,
       newChat,
       openChat,
+      openSavedChat,
+      openingChatId,
       deleteChat,
       isCapped,
       showPaywall,
