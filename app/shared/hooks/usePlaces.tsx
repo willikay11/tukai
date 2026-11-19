@@ -47,6 +47,7 @@ import {
   likePlaceReview,
   likePlaceReviewComment,
   markPlaceBookingNoShow,
+  reorderPlacePhotos,
   updatePlace,
   updatePlaceProperty,
   updatePlaceReview,
@@ -671,13 +672,28 @@ export const useSavePlaceEdits = (placeId: string) => {
       // Only the first photo of a place with none left can claim the cover;
       // the API sets no cover flag on its own
       const addedPhotos = photos?.added ?? [];
+      const uploadedIds = new Map<string, string>();
       for (let index = 0; index < addedPhotos.length; index += 1) {
         const added = addedPhotos[index];
-        await uploadPlacePhoto(placeId, {
+        const uploaded = await uploadPlacePhoto(placeId, {
           photo: added.file,
           isCover: added.isCover,
           order: added.order ?? index,
         });
+        const id: string | undefined = uploaded?.data?.id;
+        if (added.localId && id) uploadedIds.set(added.localId, id);
+      }
+
+      // The grid's order, first photo the cover (DEV-390), with each new
+      // photo under the id its upload gave it
+      if (photos?.order?.length) {
+        const newIds = new Set(addedPhotos.map((added) => added.localId));
+        // A new photo whose upload gave no id is left out, not sent as a
+        // grid-only id the API has never seen
+        const ordered = photos.order
+          .map((id) => uploadedIds.get(id) ?? (newIds.has(id) ? null : id))
+          .filter((id): id is string => Boolean(id));
+        if (ordered.length > 0) await reorderPlacePhotos(placeId, ordered);
       }
 
       for (const propertyId of properties?.removedIds ?? []) {

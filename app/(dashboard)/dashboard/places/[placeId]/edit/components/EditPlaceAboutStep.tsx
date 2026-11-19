@@ -36,9 +36,8 @@ export const EditPlaceAboutStep = ({
   return (
     <div className="space-y-6">
       {/* The same uploader the create-experience flow writes photos with.
-          Reordering is off: the API sets a place photo's order and cover as it
-          is created and offers no way to move either afterwards, so a drag here
-          would not survive the save. */}
+          Dragging sets the order, and the first photo is the cover; Save
+          changes stores it (DEV-390). */}
       <PhotoUploader
         photos={values.photos}
         error={errors.photos}
@@ -50,7 +49,6 @@ export const EditPlaceAboutStep = ({
         }
         hint={null}
         maxPhotos={15}
-        sortable={false}
         shape="square"
         // Removals are applied by Save changes, along with everything else, so
         // taking a photo off the grid must not delete it there and then

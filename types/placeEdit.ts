@@ -15,8 +15,15 @@ export type PlaceEditDraft = {
     categoriesIds?: string[];
   };
   photos?: {
-    added: { file: File; isCover?: boolean; order?: number }[];
+    /** `localId` is the photo's id on the grid, until the upload gives it one */
+    added: { localId?: string; file: File; isCover?: boolean; order?: number }[];
     removedIds: string[];
+    /**
+     * Every photo the place keeps, in the grid's order, first one the cover
+     * (DEV-390): saved ids, and the grid ids of new ones. Sent when the order
+     * moved.
+     */
+    order?: string[];
   };
   properties?: {
     added: PlacePropertyPayload[];
