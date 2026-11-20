@@ -1,5 +1,5 @@
 import { DetailRow, DetailsGrid, SectionShell } from '@/app/shared/components/Sections';
-import { PlaceProperty } from '@/types/place';
+import { PlaceProperty, propertyHref } from '@/types/place';
 
 /**
  * The place's "Details" grid.
@@ -15,9 +15,11 @@ export const PlaceDetailsSection = ({ properties }: { properties: PlaceProperty[
     icon: property.icon || 'InformationCircleIcon',
     label: property.key,
     value: property.value,
-    // The API marks the phone row by key; making it dialable is the one
-    // behaviour the old page had that is worth keeping
-    href: property.key === 'Phone Number' ? `tel:${property.value}` : undefined,
+    // A website, email or phone number links as one (DEV-410); a phone row
+    // saved before link types still dials, by its name
+    href:
+      propertyHref(property) ??
+      (property.key === 'Phone Number' ? `tel:${property.value}` : undefined),
   }));
 
   if (rows.length === 0) return null;

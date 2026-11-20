@@ -95,6 +95,28 @@ describe('PlaceFactsGrid', () => {
     expect(link).not.toHaveAttribute('target');
   });
 
+  // DEV-410: a phone number dials
+  it('renders a phone value as a tel link, keeping its copy button', () => {
+    render(
+      <PlaceFactsGrid
+        properties={[
+          makeProperty({
+            id: 'ph',
+            key: 'Phone',
+            value: '+254 700 000 000',
+            linkType: 'phone',
+            canCopy: true,
+          }),
+        ]}
+      />,
+    );
+
+    const link = screen.getByRole('link', { name: '+254 700 000 000' });
+    expect(link).toHaveAttribute('href', 'tel:+254700000000');
+    expect(link).not.toHaveAttribute('target');
+    expect(screen.getByRole('button', { name: 'Copy Phone' })).toBeInTheDocument();
+  });
+
   it('renders a value with no link type as plain text', () => {
     render(<PlaceFactsGrid properties={[makeProperty({ id: 'p', value: 'Parkwood Villas' })]} />);
 

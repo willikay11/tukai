@@ -1176,6 +1176,8 @@ export type PlacePropertyPayload = {
   icon?: string;
   canCopy?: boolean;
   order?: number;
+  /** website, email, phone, or '' for plain text (DEV-410) */
+  linkType?: 'website' | 'email' | 'phone' | '';
 };
 
 export async function createPlaceProperty(

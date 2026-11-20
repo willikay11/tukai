@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { PlaceProperty } from '@/types/place';
+import { PlaceProperty, propertyHref } from '@/types/place';
 
 /**
  * The drawer's facts grid - phone, hours, type of place, and whatever else the
@@ -50,13 +50,9 @@ export const PlaceFactsGrid = ({ properties }: { properties: PlaceProperty[] }) 
             {/* The value row is 44px tall so a link or copy button is a full
                 touch target; the negative margin keeps the visual gap to the label */}
             <div className="-my-3 flex min-w-0 items-center gap-1">
-              {property.linkType ? (
+              {propertyHref(property) ? (
                 <a
-                  href={
-                    property.linkType === 'email'
-                      ? `mailto:${property.value}`
-                      : toWebsiteHref(property.value)
-                  }
+                  href={propertyHref(property)!}
                   target={property.linkType === 'website' ? '_blank' : undefined}
                   rel={property.linkType === 'website' ? 'noopener noreferrer' : undefined}
                   className="inline-flex min-h-11 min-w-0 items-center break-all text-[14.5px] text-ink-muted hover:text-brand hover:underline"
@@ -95,7 +91,3 @@ export const PlaceFactsGrid = ({ properties }: { properties: PlaceProperty[] }) 
     </div>
   );
 };
-
-// A website saved without its scheme would otherwise resolve relative to the
-// drawer's own page
-const toWebsiteHref = (value: string) => (/^https?:\/\//i.test(value) ? value : `https://${value}`);

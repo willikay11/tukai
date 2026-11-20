@@ -12,7 +12,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Photo } from '@/types/photo';
-import { Place, PlaceProperty, PlaceSocialLink, isEntryProperty } from '@/types/place';
+import { Place, PlaceProperty, PlaceSocialLink, isEntryProperty, linkTypeFor } from '@/types/place';
 import { PlaceEditDraft } from '@/types/placeEdit';
 import { placePath } from '@/utils/detail-paths';
 
@@ -226,15 +226,17 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
     if (changedProperties.length || addedProperties.length || removedPropertyIds.length) {
       draft.properties = {
         removedIds: removedPropertyIds,
+        // Each says how its value links, worked out from it (DEV-410)
         updated: changedProperties.map(({ id, key, value, icon, canCopy }) => ({
           id,
-          data: { key, value, icon, canCopy },
+          data: { key, value, icon, canCopy, linkType: linkTypeFor(key, value) },
         })),
         added: addedProperties.map(({ key, value, icon, canCopy }) => ({
           key,
           value,
           icon,
           canCopy,
+          linkType: linkTypeFor(key, value),
         })),
       };
     }

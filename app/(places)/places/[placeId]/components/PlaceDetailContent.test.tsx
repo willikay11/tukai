@@ -200,6 +200,34 @@ describe('PlaceDetailContent', () => {
       );
     });
 
+    // DEV-410: each property links by its link type
+    it('links a website, email or phone property by its link type', () => {
+      render(
+        <PlaceDetailContent
+          place={place({
+            properties: [
+              { id: 'w', key: 'Site', value: 'https://kazuri.co.ke', linkType: 'website' },
+              { id: 'e', key: 'Bookings', value: 'book@kazuri.co.ke', linkType: 'email' },
+              { id: 'p', key: 'Front desk', value: '0700 000 000', linkType: 'phone' },
+            ],
+          })}
+        />,
+      );
+
+      expect(screen.getByText('https://kazuri.co.ke').closest('a')).toHaveAttribute(
+        'href',
+        'https://kazuri.co.ke',
+      );
+      expect(screen.getByText('book@kazuri.co.ke').closest('a')).toHaveAttribute(
+        'href',
+        'mailto:book@kazuri.co.ke',
+      );
+      expect(screen.getByText('0700 000 000').closest('a')).toHaveAttribute(
+        'href',
+        'tel:0700000000',
+      );
+    });
+
     it('drops the section when the place has no properties', () => {
       render(<PlaceDetailContent place={place({ properties: [] })} />);
 
