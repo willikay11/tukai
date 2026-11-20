@@ -16,6 +16,9 @@ const usePlaceReservationProfiles = jest.fn();
 const usePlaceAvailability = jest.fn();
 const usePlaceBookingRequests = jest.fn();
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  // DEV-385/386: linked communities and guides have their own tests
+  usePlaceCommunities: () => ({ data: [] }),
+  usePlaceGuides: () => ({ data: [] }),
   usePlaceBookingRequests: (placeId: string, profileId: string | undefined) =>
     usePlaceBookingRequests(placeId, profileId),
   usePlace: (id: string | null, enabled: boolean) => usePlace(id, enabled),

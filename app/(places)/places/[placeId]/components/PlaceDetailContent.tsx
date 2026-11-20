@@ -148,7 +148,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           </RevealOnScroll>
 
           <RevealOnScroll>
-            <PlaceCommunitySection />
+            <PlaceCommunitySection placeId={place.id} />
           </RevealOnScroll>
 
           <RevealOnScroll>

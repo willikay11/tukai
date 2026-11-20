@@ -3,6 +3,7 @@ import { ApiResponse } from '@/types/apiResponse';
 import { PlaceClaimRow } from '@/types/claim';
 import { PlaceCategoryParams } from '@/types/networkParam';
 import { BoostPackage, PlaceBoost } from '@/types/placeBoost';
+import { PlaceGuide, PlaceLinkedCommunity } from '@/types/placeLinks';
 import {
   CreatePlaceAvailabilityException,
   CreatePlaceBookingRequest,
@@ -855,6 +856,42 @@ export async function fetchMyPlaceClaims(): Promise<PlaceClaimRow[]> {
       success: false,
       message: parseApiError(error.response?.data, 'Your claims could not be loaded'),
     };
+  }
+}
+
+const listOf = <T>(raw: unknown): T[] => {
+  const data = parseSnakeToCamel(raw) as T[] | { results?: T[] };
+  return Array.isArray(data) ? data : (data?.results ?? []);
+};
+
+/**
+ * Communities linked to a place (DEV-385): its verified owner first, then
+ * the published communities that have hosted experiences there.
+ */
+export async function fetchPlaceCommunities(placeId: string): Promise<PlaceLinkedCommunity[]> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/${placeId}/communities/`, {
+      params: { page_size: 20 },
+    });
+    return listOf<PlaceLinkedCommunity>(res.data);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Communities could not be loaded'));
+  }
+}
+
+/** Tour guides who lead experiences at a place, most experiences first (DEV-386) */
+export async function fetchPlaceGuides(placeId: string): Promise<PlaceGuide[]> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/${placeId}/guides/`, {
+      params: { page_size: 20 },
+    });
+    return listOf<PlaceGuide>(res.data);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Tour guides could not be loaded'));
   }
 }
 

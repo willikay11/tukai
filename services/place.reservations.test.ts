@@ -7,6 +7,8 @@ import {
   fetchMyPlaceClaims,
   fetchPlaceAvailability,
   fetchPlaceBoosts,
+  fetchPlaceCommunities,
+  fetchPlaceGuides,
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
   markPlaceBookingNoShow,
@@ -313,5 +315,38 @@ describe('place boosts', () => {
     await expect(buyPlaceBoost('pl1', 'pk1', 'key-1')).rejects.toThrow(
       'Publish the place before boosting it.',
     );
+  });
+});
+
+// DEV-385/386: who a place is linked to
+describe('place communities and guides', () => {
+  it('reads the communities linked to a place', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        results: [{ id: 'c1', relationship: 'owner', experiences_count: 2, members_count: 9 }],
+      },
+    });
+
+    await expect(fetchPlaceCommunities('pl1')).resolves.toEqual([
+      { id: 'c1', relationship: 'owner', experiencesCount: 2, membersCount: 9 },
+    ]);
+    expect(mockGet).toHaveBeenCalledWith('/v1/places/pl1/communities/', {
+      params: { page_size: 20 },
+    });
+  });
+
+  it('reads the tour guides at a place', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        results: [
+          { id: 'g1', experiences_count: 3, average_rating: 4.5, user: { first_name: 'A' } },
+        ],
+      },
+    });
+
+    await expect(fetchPlaceGuides('pl1')).resolves.toEqual([
+      { id: 'g1', experiencesCount: 3, averageRating: 4.5, user: { firstName: 'A' } },
+    ]);
+    expect(mockGet).toHaveBeenCalledWith('/v1/places/pl1/guides/', { params: { page_size: 20 } });
   });
 });
