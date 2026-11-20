@@ -21,8 +21,9 @@ jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ needAuth }),
 }));
 
-let locationState: { city?: string; setCity: (city: string) => void } = {
+let locationState: { city?: string; homeCity: string; setCity: (city: string) => void } = {
   city: 'Nairobi',
+  homeCity: 'Nairobi',
   setCity: jest.fn(),
 };
 jest.mock('@/context/LocationContext', () => ({
@@ -75,11 +76,7 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceCategories: () => ({ data: { data: { results: [] } }, isLoading: false }),
 }));
 
-const community = (
-  id: string,
-  title: string,
-  overrides: Partial<Community> = {},
-): Community =>
+const community = (id: string, title: string, overrides: Partial<Community> = {}): Community =>
   ({
     id,
     title,
@@ -96,15 +93,32 @@ const community = (
 
 const refetch = jest.fn();
 
-// The Discover tab fires three `useGetCommunities` calls (the pool, the
-// following-exclusion set, the owned-exclusion set) - the mock tells them
-// apart by which flag is set, the same way the real params do.
-const respondWith = (pool: Community[], { isLoading = false, isFailed = false } = {}) => {
+// The Discover tab fires four `useGetCommunities` calls (the city's, the pool,
+// the following-exclusion set, the owned-exclusion set) - the mock tells them
+// apart by which flag is set, the same way the real params do. The city's
+// answers `near`, the pool when not given.
+const respondWith = (
+  pool: Community[],
+  {
+    isLoading = false,
+    isFailed = false,
+    near,
+  }: { isLoading?: boolean; isFailed?: boolean; near?: Community[] } = {},
+) => {
   useGetCommunities.mockImplementation(
-    (params: { following?: boolean; createdBy?: string; enabled?: boolean }) => {
+    (params: { following?: boolean; createdBy?: string; city?: string; enabled?: boolean }) => {
       // A disabled query fetches nothing, same as the real hook
       if (!params.enabled) {
         return { data: undefined, isLoading: false, isFetching: false, refetch };
+      }
+
+      if (params.city) {
+        return {
+          data: { success: true, data: { results: near ?? pool } },
+          isLoading,
+          isFetching: false,
+          refetch,
+        };
       }
 
       if (params.following || params.createdBy) {
@@ -138,10 +152,9 @@ const respondWith = (pool: Community[], { isLoading = false, isFailed = false } 
 const typeChip = (name: string) =>
   within(screen.getByRole('group', { name: 'Community types' })).getByText(name);
 
-// "Nairobi Hikers" matches both the all-communities and view-by-type pools, so
+// "Nairobi Hikers" matches both the near-you and view-by-type pools, so
 // queries scoped to one section have to say which
-const allSection = () =>
-  within(screen.getByRole('heading', { name: 'All communities' }).closest('section') as HTMLElement);
+const allSection = () => within(screen.getByRole('region', { name: 'Communities near you' }));
 
 describe('CommunitiesPageContent', () => {
   beforeEach(() => {
@@ -149,7 +162,7 @@ describe('CommunitiesPageContent', () => {
     currentQuery = '';
     interests = [];
     sessionState = { data: { user: { id: 'u1' } }, status: 'authenticated' };
-    locationState = { city: 'Nairobi', setCity: jest.fn() };
+    locationState = { city: 'Nairobi', homeCity: 'Nairobi', setCity: jest.fn() };
     respondWith([community('1', 'Nairobi Hikers'), community('2', 'Mall Rats')]);
   });
 
@@ -224,7 +237,7 @@ describe('CommunitiesPageContent', () => {
       currentQuery = 'tab=nonsense';
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByRole('heading', { name: 'All communities' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Communities near you' })).toBeInTheDocument();
     });
   });
 
@@ -274,7 +287,48 @@ describe('CommunitiesPageContent', () => {
     });
   });
 
-  describe('Discover - all communities', () => {
+  // DEV-434: asked of the API by the reader's city
+  describe('Discover - communities near you', () => {
+    it('asks for the communities in the reader’s city', () => {
+      render(<CommunitiesPageContent />);
+
+      expect(useGetCommunities).toHaveBeenCalledWith(
+        expect.objectContaining({ city: 'Nairobi', enabled: true }),
+      );
+      expect(allSection().getByText('In Nairobi')).toBeInTheDocument();
+    });
+
+    it('follows the city the reader switched to', () => {
+      locationState = { ...locationState, city: 'Mombasa' };
+      render(<CommunitiesPageContent />);
+
+      expect(useGetCommunities).toHaveBeenCalledWith(expect.objectContaining({ city: 'Mombasa' }));
+    });
+
+    it('falls back to the home city before the location resolves', () => {
+      locationState = { ...locationState, city: undefined };
+      render(<CommunitiesPageContent />);
+
+      expect(useGetCommunities).toHaveBeenCalledWith(expect.objectContaining({ city: 'Nairobi' }));
+    });
+
+    it('shows only what the city query returned', () => {
+      respondWith([community('1', 'Nairobi Hikers'), community('2', 'Kilifi Sailors')], {
+        near: [community('1', 'Nairobi Hikers')],
+      });
+      render(<CommunitiesPageContent />);
+
+      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
+      expect(allSection().queryByText('Kilifi Sailors')).not.toBeInTheDocument();
+    });
+
+    it('leaves out private communities', () => {
+      respondWith([], { near: [community('1', 'Secret Club', { isPublic: false })] });
+      render(<CommunitiesPageContent />);
+
+      expect(screen.queryByText('Secret Club')).not.toBeInTheDocument();
+    });
+
     it('shows a card per community', () => {
       render(<CommunitiesPageContent />);
 
@@ -291,22 +345,13 @@ describe('CommunitiesPageContent', () => {
       );
     });
 
-    it('includes communities from every city', () => {
-      respondWith([
-        community('1', 'Nairobi Hikers'),
-        community('2', 'Kilifi Sailors', { location: { city: 'Kilifi' } as Community['location'] }),
-      ]);
-      render(<CommunitiesPageContent />);
-
-      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
-      expect(allSection().getByText('Kilifi Sailors')).toBeInTheDocument();
-    });
-
-    it('says so when there are none', () => {
+    it('says so when there are none, and where to look instead', () => {
       respondWith([]);
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByText('No communities to discover yet.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No communities in Nairobi yet. Pick another city below.'),
+      ).toBeInTheDocument();
     });
 
     it('shows skeletons while loading', () => {

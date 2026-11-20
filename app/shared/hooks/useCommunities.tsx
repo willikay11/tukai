@@ -55,6 +55,9 @@ export const useGetCommunities = (
     popularCommunities,
     following,
     createdBy,
+    joined,
+    member,
+    city,
   }: {
     page: number;
     /** Overrides the default page of 12 - the Discover page's own sections
@@ -69,6 +72,12 @@ export const useGetCommunities = (
     popularCommunities?: boolean;
     following?: boolean;
     createdBy?: string;
+    /** Accepted members only, unlike `following` (DEV-436) */
+    joined?: boolean;
+    /** Whose memberships `joined` reads (DEV-436) */
+    member?: string;
+    /** City name (DEV-434) */
+    city?: string;
   } = {
     page: 1,
     enabled: true,
@@ -89,6 +98,9 @@ export const useGetCommunities = (
       recommendedCommunities,
       popularCommunities,
       following,
+      joined,
+      member,
+      city,
     ],
     queryFn: async () =>
       await getCommunities(
@@ -101,6 +113,7 @@ export const useGetCommunities = (
         popularCommunities,
         following,
         createdBy,
+        { joined, member, city },
       ),
     enabled: enabled,
   });
@@ -108,8 +121,11 @@ export const useGetCommunities = (
 
 /**
  * Communities a person owns, and separately the ones they've joined - deduped
- * against the owned list, since owning one also follows it. Shared between
- * the Profile's Communities tab and the Dashboard's My communities section.
+ * against the owned list, since owning one is also a membership. Shared
+ * between the Profile's Communities tab and the Dashboard's My communities
+ * section. Joined is that person's accepted memberships (`joined` + `member`,
+ * DEV-436): `following` was the signed-in reader's, pending invites and
+ * requests included.
  */
 export const useMyCommunities = (userId: string | null | undefined) => {
   const enabled = Boolean(userId);
@@ -122,7 +138,8 @@ export const useMyCommunities = (userId: string | null | undefined) => {
   const { data: joinedResponse, isLoading: isLoadingJoined } = useGetCommunities({
     page: 1,
     enabled,
-    following: true,
+    joined: true,
+    member: userId ?? undefined,
   });
 
   const owned: Community[] = ownedResponse?.data?.results ?? [];

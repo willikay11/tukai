@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 import { ResultType, SearchFilters } from '@/types/search';
 
+import { YOUR_COMMUNITIES_PAGE } from './community';
 import { RESULT_TYPES, clearedFilters } from './filters';
 import { EXPERIENCE_SHAPES, matchesShapes } from './shapes';
 import { QUICK_DATES, TIME_OF_DAY, matchesQuickDate, matchesTimeOfDay } from './when';
@@ -277,10 +278,12 @@ export const FiltersDialog = ({
     isOpen,
   );
   const { lat, lng, requestLocation } = useLocation();
+  // Joined, not followed: a pending invite or request is not "yours" (DEV-436)
   const { data: followedResponse } = useGetCommunities({
     page: 1,
+    pageSize: YOUR_COMMUNITIES_PAGE,
     enabled: isOpen && draft.yourCommunitiesOnly,
-    following: true,
+    joined: true,
   });
   // Counted against the draft, so the numbers follow the controls as they move
   const { data: preview } = useSearchResults({ ...draft, type: 'all' }, isOpen);
