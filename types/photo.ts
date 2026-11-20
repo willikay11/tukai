@@ -58,11 +58,10 @@ export const photoUrl = (photo: Photo | null | undefined, size: PhotoSize = 'md'
 };
 
 /**
- * The cover of a set, at the size asked for.
- *
- * Falls back to the first photo: a set whose photos carry no `is_cover` flag
- * would otherwise show nothing, which is what used to happen on the booking
- * confirmation.
+ * The cover of a set, at the size asked for: the photo with the lowest
+ * `order`, as the API reads it (`is_cover` is deprecated there, DEV-390).
+ * Where orders tie - older photos all sit at 0 - a photo flagged `is_cover`
+ * goes first, then the first in the list.
  */
 export const coverPhotoUrl = (
   photos: Photo[] | null | undefined,
@@ -70,5 +69,14 @@ export const coverPhotoUrl = (
 ): string | undefined => {
   if (!photos?.length) return undefined;
 
-  return photoUrl(photos.find((photo) => photo.isCover) ?? photos[0], size);
+  const cover = photos
+    .map((photo, index) => ({ photo, index }))
+    .sort(
+      (a, b) =>
+        (a.photo.order ?? Number.MAX_SAFE_INTEGER) - (b.photo.order ?? Number.MAX_SAFE_INTEGER) ||
+        Number(Boolean(b.photo.isCover)) - Number(Boolean(a.photo.isCover)) ||
+        a.index - b.index,
+    )[0].photo;
+
+  return photoUrl(cover, size);
 };

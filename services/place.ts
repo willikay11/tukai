@@ -1006,6 +1006,30 @@ export async function updatePlace(
 }
 
 /** Adds one photo. `isCover` and `order` can only be set as a photo is created. */
+/**
+ * Puts a place's photos in this order: every photo, once. The first is the
+ * cover - the API reads the cover from the order, not a flag (DEV-390).
+ */
+export async function reorderPlacePhotos(
+  placeId: string,
+  photoIds: string[],
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(`/v1/places/${placeId}/photos/reorder/`, {
+      photo_ids: photoIds,
+    });
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'The photo order could not be saved'),
+    };
+  }
+}
+
 export async function uploadPlacePhoto(
   placeId: string,
   data: { photo: File; caption?: string; isCover?: boolean; order?: number },
