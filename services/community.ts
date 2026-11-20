@@ -250,6 +250,41 @@ export async function fetchCommunityRatings(communityId: string, pageSize = 100)
   }
 }
 
+/**
+ * The places a community owns (an approved claim) or has hosted experiences
+ * at - owned first, then the most used (DEV-382).
+ */
+export async function fetchCommunityPlaces(communityId: string, pageSize = 12) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/places/`, {
+      params: { page: 1, page_size: pageSize },
+    });
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'The places could not load'),
+    };
+  }
+}
+
+/** The average, count and per-star split across all its ratings (DEV-383). */
+export async function fetchCommunityRatingSummary(communityId: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/ratings/summary/`);
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'The rating could not load'),
+    };
+  }
+}
+
 export async function joinCommunityWithToken(communityId: string, token?: string) {
   try {
     const api = await apiWithToken();

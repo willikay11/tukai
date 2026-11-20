@@ -133,24 +133,6 @@ export const usePlaces = ({
   });
 };
 
-/**
- * The places a community is the verified owner of - the community page's
- * Places section (DEV-433).
- */
-export const useCommunityPlaces = (communityId: string | undefined, perPage = 12) => {
-  const { userId, withAuth } = usePlaceListViewer();
-
-  return useQuery({
-    queryKey: ['places', 'community', communityId, perPage, userId],
-    queryFn: async () =>
-      await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
-        community: communityId,
-        withAuth,
-      }),
-    enabled: Boolean(communityId),
-  });
-};
-
 const MY_PLACES_PAGE_SIZE = 50;
 
 /**

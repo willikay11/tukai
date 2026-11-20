@@ -1,4 +1,10 @@
-import { Community, CommunityMember, CommunityPlace, CommunityRating } from '@/types/community';
+import {
+  Community,
+  CommunityMember,
+  CommunityPlace,
+  CommunityRating,
+  CommunityRatingSummary,
+} from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment, momentPhotos } from '@/types/moment';
 import { photoUrl } from '@/types/photo';
@@ -167,8 +173,25 @@ export const upcomingExperiences = (experiences: Experience[], now = Date.now())
 const MAX_MEETING_PLACES = 6;
 
 /**
- * A verified business lists exactly the places it owns, so the count matches
- * its chip. Any other community lists up to 6 places its experiences happen at.
+ * From GET /communities/{id}/places/ (DEV-382), owned first: the places the
+ * community owns when it owns any, so the count matches its business chip,
+ * or else up to 6 places it has hosted experiences at.
+ */
+export const placesToShow = (
+  places: CommunityPlace[],
+): { places: CommunityPlace[]; isOwned: boolean } => {
+  const owned = places.filter((place) => place.relationship === 'owned');
+  if (owned.length > 0) return { places: owned, isOwned: true };
+  return {
+    places: places.filter((place) => place.relationship !== 'owned').slice(0, MAX_MEETING_PLACES),
+    isOwned: false,
+  };
+};
+
+/**
+ * The same, worked out from the community and its upcoming experiences - for
+ * when the places endpoint has not answered. A verified business lists exactly
+ * the places it owns; any other community up to 6 its experiences happen at.
  */
 export const communityPlaces = (
   community: Community,
@@ -188,12 +211,20 @@ export const communityPlaces = (
 
 export const MAX_REVIEWS = 4;
 
-/** The average (one decimal) and count, and the newest few to show. */
-export const reviewSummary = (ratings: CommunityRating[], total?: number) => {
-  const count = total ?? ratings.length;
-  const average = ratings.length
-    ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length
-    : 0;
+/**
+ * The average (one decimal) and count, and the newest few to show. The
+ * summary endpoint's figures win when given (DEV-383): they cover every
+ * rating, where the page fetched may not.
+ */
+export const reviewSummary = (
+  ratings: CommunityRating[],
+  total?: number,
+  summary?: CommunityRatingSummary | null,
+) => {
+  const count = summary?.ratingsCount ?? total ?? ratings.length;
+  const average =
+    summary?.averageRating ??
+    (ratings.length ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length : 0);
   const newest = ratings
     .slice()
     .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())

@@ -34,6 +34,7 @@ export const CommunityCard = ({
   showFaces = true,
   showMeta = true,
   showMemberAvatars = false,
+  showFriends = false,
   className,
 }: {
   community: Community;
@@ -45,6 +46,9 @@ export const CommunityCard = ({
    * than just its owners - the list endpoint returns none. One request per
    * card, so it is opt-in: only the reader's own, smaller grids turn it on. */
   showMemberAvatars?: boolean;
+  /** "Your friends joined": the faces are the people the reader follows who
+   * joined, and the card's name says who they are (DEV-384). */
+  showFriends?: boolean;
   className?: string;
 }) => {
   const photo = photoUrl(community.photos?.[0], 'thumb');
@@ -59,17 +63,24 @@ export const CommunityCard = ({
     ? listMembers
     : (detail?.data?.members ?? []);
   const owners: CommunityOwner[] = community.owners ?? [];
-  const faces: AvatarStackUser[] = members.length
-    ? members.slice(0, AVATAR_LIMIT).map((member) => ({
-        id: member.id,
-        name:
-          member.user?.displayName ||
-          `${member.user?.firstName ?? ''} ${member.user?.lastName ?? ''}`.trim(),
-        picture: member.user?.picture || null,
-      }))
-    : ownerFaces(owners);
+  const friends: CommunityOwner[] = showFriends ? (community.friendPreviews ?? []) : [];
+  const faces: AvatarStackUser[] = friends.length
+    ? ownerFaces(friends)
+    : members.length
+      ? members.slice(0, AVATAR_LIMIT).map((member) => ({
+          id: member.id,
+          name:
+            member.user?.displayName ||
+            `${member.user?.firstName ?? ''} ${member.user?.lastName ?? ''}`.trim(),
+          picture: member.user?.picture || null,
+        }))
+      : ownerFaces(owners);
 
   const interests = (community.categories ?? []).slice(0, MAX_INTERESTS);
+
+  const friendNames = ownerFaces(friends, friends.length)
+    .map((friend) => friend.name.split(' ')[0])
+    .filter(Boolean);
 
   // `upcoming_experiences_count` (DEV-413): shown, as the design does, only
   // when there is something coming up
@@ -78,6 +89,7 @@ export const CommunityCard = ({
 
   const ariaLabel = communityCardAriaLabel(community, {
     memberCount,
+    friendNames: friendNames.length ? friendNames : undefined,
     upcomingCount: hasUpcoming ? upcomingCount : undefined,
   });
 

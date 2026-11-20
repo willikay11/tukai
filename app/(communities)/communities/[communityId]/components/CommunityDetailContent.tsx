@@ -39,6 +39,10 @@ export const CommunityDetailContent = ({
     true,
   );
   const experiences: Experience[] = experiencesResponse?.data?.results ?? [];
+  const experienceTitles = useMemo(
+    () => new Map(experiences.map((experience) => [experience.id, experience.title])),
+    [experiences],
+  );
 
   const { data: momentsResponse, isLoading: isLoadingMoments } = useMoments({
     community: community.id,
@@ -108,7 +112,11 @@ export const CommunityDetailContent = ({
             moments={moments}
             isLoading={isLoadingMoments}
           />
-          <ReviewsSection communityName={community.title} />
+          <ReviewsSection
+            communityId={community.id}
+            communityName={community.title}
+            experienceTitles={experienceTitles}
+          />
         </div>
 
         <div className="lg:col-span-1">

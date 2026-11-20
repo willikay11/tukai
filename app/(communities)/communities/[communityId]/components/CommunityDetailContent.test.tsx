@@ -48,15 +48,17 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useJoinCommunity: () => ({ mutate: jest.fn(), isPending: false }),
   useLeaveCommunity: () => ({ mutate: jest.fn(), isPending: false }),
+  useCommunityPlaces: (id: string) => useCommunityPlaces(id),
+  useCommunityRatings: (id: string) => useCommunityRatings(id),
+  useCommunityRatingSummary: (id: string) => useCommunityRatingSummary(id),
 }));
 jest.mock('@/app/shared/hooks/useToast', () => ({
   useToast: () => ({ toast: jest.fn() }),
 }));
 
 const useCommunityPlaces = jest.fn();
-jest.mock('@/app/shared/hooks/usePlaces', () => ({
-  useCommunityPlaces: (id: string) => useCommunityPlaces(id),
-}));
+const useCommunityRatings = jest.fn();
+const useCommunityRatingSummary = jest.fn();
 jest.mock('@/app/(experiences)/components/PlaceCard', () => ({
   PlaceCard: ({ place }: { place: { title: string } }) => <div>{`place-${place.title}`}</div>,
 }));
@@ -91,7 +93,15 @@ describe('CommunityDetailContent', () => {
     useScrollSpy.mockReturnValue({ activeId: 'about', scrollTo });
     useExperiences.mockReturnValue({ data: { data: { results: [] } }, isLoading: false });
     useMoments.mockReturnValue({ data: { data: { results: [] } }, isLoading: false });
-    useCommunityPlaces.mockReturnValue({ data: { data: { results: [] } }, isLoading: false });
+    useCommunityPlaces.mockReturnValue({
+      data: { success: true, data: { results: [] } },
+      isLoading: false,
+    });
+    useCommunityRatings.mockReturnValue({
+      data: { success: true, data: { count: 0, results: [] } },
+      isLoading: false,
+    });
+    useCommunityRatingSummary.mockReturnValue({ data: undefined });
   });
 
   describe('header', () => {
@@ -290,29 +300,50 @@ describe('CommunityDetailContent', () => {
     });
   });
 
-  // DEV-433: the places the community is the verified owner of
+  // DEV-382: the places it owns, or else the ones it meets at
   describe('places', () => {
     it('asks for the community’s own places', () => {
       renderPage();
       expect(useCommunityPlaces).toHaveBeenCalledWith('c1');
     });
 
-    it('shows each place it owns', () => {
+    it('shows each place it owns, and not the ones it only used', () => {
       useCommunityPlaces.mockReturnValue({
-        data: { data: { results: [{ id: 'pl1', title: 'Karura Café' }] } },
+        data: {
+          success: true,
+          data: {
+            results: [
+              { id: 'pl1', title: 'Karura Café', relationship: 'owned' },
+              { id: 'pl2', title: 'Ngong Hills', relationship: 'used' },
+            ],
+          },
+        },
         isLoading: false,
       });
       renderPage();
 
       expect(screen.getByText('place-Karura Café')).toBeInTheDocument();
+      expect(screen.queryByText('place-Ngong Hills')).not.toBeInTheDocument();
       expect(screen.getByText('These are the places owned by Nairobi Hikers')).toBeInTheDocument();
     });
 
-    it('says so when it owns none', () => {
+    it('shows where it meets when it owns none', () => {
+      useCommunityPlaces.mockReturnValue({
+        data: {
+          success: true,
+          data: { results: [{ id: 'pl2', title: 'Ngong Hills', relationship: 'used' }] },
+        },
+        isLoading: false,
+      });
       renderPage();
-      expect(
-        screen.getByText("Nairobi Hikers doesn't own any places on Tukai yet"),
-      ).toBeInTheDocument();
+
+      expect(screen.getByText('place-Ngong Hills')).toBeInTheDocument();
+      expect(screen.getByText('Places Nairobi Hikers meets at')).toBeInTheDocument();
+    });
+
+    it('says so when it has none', () => {
+      renderPage();
+      expect(screen.getByText('Nairobi Hikers has no places on Tukai yet')).toBeInTheDocument();
     });
 
     it('holds the space while the places load', () => {
@@ -322,12 +353,48 @@ describe('CommunityDetailContent', () => {
     });
   });
 
-  // No backend yet; the section exists so the page is complete but must not
-  // invent content
-  describe('sections with no backend', () => {
+  // DEV-383: the summary across every rating, then the newest few
+  describe('reviews', () => {
     it('says there are no reviews rather than showing a rating', () => {
       renderPage();
       expect(screen.getByText('No reviews for Nairobi Hikers yet')).toBeInTheDocument();
+    });
+
+    it('shows the average and count from the summary, and the newest reviews', () => {
+      useExperiences.mockReturnValue({
+        data: { data: { results: [{ id: 'e1', title: 'Karura loop', startDate: '2026-12-01' }] } },
+        isLoading: false,
+      });
+      useCommunityRatings.mockReturnValue({
+        data: {
+          success: true,
+          data: {
+            count: 1,
+            results: [
+              {
+                id: 'r1',
+                experience: 'e1',
+                attendee: { displayName: 'Kevo' },
+                rating: 5,
+                review: 'Great pace.',
+                dateCreated: '2026-09-12T00:00:00Z',
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      useCommunityRatingSummary.mockReturnValue({
+        data: { success: true, data: { averageRating: 4.6, ratingsCount: 23, distribution: {} } },
+      });
+      renderPage();
+
+      expect(screen.getByText('4.6')).toBeInTheDocument();
+      expect(screen.getByText(/23 reviews/)).toBeInTheDocument();
+      expect(screen.getByText('Kevo')).toBeInTheDocument();
+      expect(screen.getAllByText('Karura loop').length).toBeGreaterThan(0);
+      expect(screen.getByText('Great pace.')).toBeInTheDocument();
+      expect(screen.getByText('September 2026')).toBeInTheDocument();
     });
   });
 });

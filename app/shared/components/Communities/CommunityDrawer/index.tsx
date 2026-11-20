@@ -11,7 +11,12 @@ import {
   useMomentComposer,
 } from '@/app/shared/components/Moments';
 import { Share, communityShare } from '@/app/shared/components/Share';
-import { useCommunityDetail, useCommunityRatings } from '@/app/shared/hooks/useCommunities';
+import {
+  useCommunityDetail,
+  useCommunityPlaces,
+  useCommunityRatingSummary,
+  useCommunityRatings,
+} from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
@@ -24,6 +29,7 @@ import {
   Community,
   CommunityContact,
   CommunityRating,
+  CommunityRatingSummary,
   contactFromPublic,
   isHostOf,
 } from '@/types/community';
@@ -48,6 +54,7 @@ import {
   drawerPhotos,
   ownerOf,
   pastExperienceCount,
+  placesToShow,
   upcomingExperiences,
 } from './community-drawer';
 import { Divider } from './parts';
@@ -145,11 +152,20 @@ const CommunityBody = ({
 
   const { data: ratingsResponse } = useCommunityRatings(community.id, isFullView);
   const ratings: CommunityRating[] = ratingsResponse?.data?.results ?? [];
-  const ratingCount: number = ratingsResponse?.data?.count ?? ratings.length;
+  const { data: summaryResponse } = useCommunityRatingSummary(community.id, isFullView);
+  const ratingSummary: CommunityRatingSummary | null = summaryResponse?.success
+    ? summaryResponse.data
+    : null;
+  const ratingCount: number =
+    ratingSummary?.ratingsCount ?? ratingsResponse?.data?.count ?? ratings.length;
 
+  const { data: placesResponse } = useCommunityPlaces(community.id, isFullView);
   const { places, isOwned } = useMemo(
-    () => communityPlaces(community, experiences),
-    [community, experiences],
+    () =>
+      placesResponse?.success
+        ? placesToShow(placesResponse.data?.results ?? [])
+        : communityPlaces(community, experiences),
+    [placesResponse, community, experiences],
   );
   const photos = useMemo(
     () => drawerPhotos(community, moments, upcoming),
@@ -263,6 +279,7 @@ const CommunityBody = ({
           communityTitle={community.title}
           ratings={ratings}
           total={ratingCount}
+          summary={ratingSummary}
           experienceTitles={experienceTitles}
         />
 

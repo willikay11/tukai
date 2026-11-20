@@ -5,7 +5,8 @@ import { Community } from '@/types/community';
  * a full stop, per the Communities handoff ("Nairobi Foodies Club. Amina,
  * Njeri joined. 1,240 members. Restaurants, Nyama Choma (Braai), Date spots.
  * 2 upcoming experiences."). `friendNames` is given on "Your friends joined"
- * only; `upcomingCount` from `upcoming_experiences_count` when above zero.
+ * only (DEV-384); `upcomingCount` from `upcoming_experiences_count` when
+ * above zero (DEV-413).
  */
 export const communityCardAriaLabel = (
   community: Community,
