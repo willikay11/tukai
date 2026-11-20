@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
+  acceptCommunityInvite,
   createCommunity,
   createCommunityPhotos,
+  declineCommunityInvite,
   deleteVerificationDocument,
   fetchCommunity,
   fetchCommunityContact,
+  fetchCommunityInvites,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
   fetchCommunityRatings,
@@ -14,6 +17,7 @@ import {
   joinCommunity,
   joinCommunityWithToken,
   leaveCommunity,
+  messageCommunityMembers,
   removeCommunityMember,
   submitCommunityVerification,
   uploadVerificationDocument,
@@ -138,7 +142,46 @@ const invalidateCommunity = (queryClient: ReturnType<typeof useQueryClient>) => 
   // addressed it, and the detail route takes its slug as readily as its UUID
   queryClient.invalidateQueries({ queryKey: ['community'] });
   queryClient.invalidateQueries({ queryKey: ['communities'] });
+  queryClient.invalidateQueries({ queryKey: ['communityInvites'] });
 };
+
+/** The reader's unanswered community invites - the Following tab's banner (DEV-380). */
+export const useCommunityInvites = (enabled: boolean) =>
+  useQuery({
+    queryKey: ['communityInvites'],
+    queryFn: async () => await fetchCommunityInvites(),
+    enabled,
+  });
+
+/** Joins through the invite, straight away, a private community included (DEV-381). */
+export const useAcceptCommunityInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['acceptCommunityInvite'],
+    mutationFn: async (communityId: string) => await acceptCommunityInvite(communityId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+/** Turns an invite down for good (DEV-381). */
+export const useDeclineCommunityInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['declineCommunityInvite'],
+    mutationFn: async (communityId: string) => await declineCommunityInvite(communityId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+/** The owner writing to every member at once (DEV-379). */
+export const useMessageCommunityMembers = () =>
+  useMutation({
+    mutationKey: ['messageCommunityMembers'],
+    mutationFn: async ({ communityId, content }: { communityId: string; content: string }) =>
+      await messageCommunityMembers(communityId, content),
+  });
 
 export const useJoinCommunity = () => {
   const queryClient = useQueryClient();

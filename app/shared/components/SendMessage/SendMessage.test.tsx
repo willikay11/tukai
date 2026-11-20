@@ -15,6 +15,11 @@ jest.mock('@/app/shared/hooks/useMessages', () => ({
   useSendMessageTo: () => ({ mutate: sendMessage, isPending, isSuccess, isError }),
 }));
 
+const messageMembers = jest.fn();
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useMessageCommunityMembers: () => ({ mutate: messageMembers, isPending: false }),
+}));
+
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ toast: (args: unknown) => toast(args) }));
 
@@ -85,5 +90,90 @@ describe('SendMessage', () => {
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' })),
     );
+  });
+
+  // DEV-379: the owner's Message members
+  describe('to a whole community', () => {
+    const renderMembers = (setOpen = jest.fn()) =>
+      render(
+        <SendMessage open setOpen={setOpen} community={{ id: 'c1', title: 'Nairobi Hikers' }} />,
+      );
+
+    it('is titled for the members, and says where it lands', () => {
+      renderMembers();
+
+      expect(screen.getByText('Message members')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Write one message to everyone in Nairobi Hikers. It arrives in their Tukai inbox.',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it('sends one message to the community, not to a person', async () => {
+      const user = userEvent.setup();
+      const setOpen = jest.fn();
+      messageMembers.mockImplementation(
+        (_vars: unknown, options: { onSuccess: (r: { sent: number }) => void }) =>
+          options.onSuccess({ sent: 12 }),
+      );
+      renderMembers(setOpen);
+
+      await user.type(screen.getByRole('textbox'), 'Hike moved to 7am');
+      await user.click(screen.getByRole('button', { name: 'Send message' }));
+
+      await waitFor(() =>
+        expect(messageMembers).toHaveBeenCalledWith(
+          { communityId: 'c1', content: 'Hike moved to 7am' },
+          expect.anything(),
+        ),
+      );
+      expect(sendMessage).not.toHaveBeenCalled();
+      expect(setOpen).toHaveBeenCalledWith(false);
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({ description: 'Sent to 12 members of Nairobi Hikers.' }),
+      );
+    });
+
+    it('says so when nobody was there to message', async () => {
+      const user = userEvent.setup();
+      messageMembers.mockImplementation(
+        (_vars: unknown, options: { onSuccess: (r: { sent: number }) => void }) =>
+          options.onSuccess({ sent: 0 }),
+      );
+      renderMembers();
+
+      await user.type(screen.getByRole('textbox'), 'Hello all');
+      await user.click(screen.getByRole('button', { name: 'Send message' }));
+
+      await waitFor(() =>
+        expect(toast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            description: 'There is nobody in Nairobi Hikers to message yet.',
+          }),
+        ),
+      );
+    });
+
+    it('keeps the message when it could not be sent', async () => {
+      const user = userEvent.setup();
+      const setOpen = jest.fn();
+      messageMembers.mockImplementation(
+        (_vars: unknown, options: { onError: (e: Error) => void }) =>
+          options.onError(new Error('Only the owner can')),
+      );
+      renderMembers(setOpen);
+
+      await user.type(screen.getByRole('textbox'), 'Hello all');
+      await user.click(screen.getByRole('button', { name: 'Send message' }));
+
+      await waitFor(() =>
+        expect(toast).toHaveBeenCalledWith(
+          expect.objectContaining({ title: 'Could not send', description: 'Only the owner can' }),
+        ),
+      );
+      expect(setOpen).not.toHaveBeenCalledWith(false);
+      expect(screen.getByRole('textbox')).toHaveValue('Hello all');
+    });
   });
 });
