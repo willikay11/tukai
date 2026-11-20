@@ -5,6 +5,7 @@ import { fetchPlace } from '@/services/place';
 import { ApiResponse } from '@/types/apiResponse';
 import { Place } from '@/types/place';
 import { placePath } from '@/utils/detail-paths';
+import { toPlainText } from '@/utils/safe-text-utils';
 import { APP_ORIGIN, buildShareMetadata } from '@/utils/share-metadata';
 
 import { PlaceDetailContent } from './components/PlaceDetailContent';
@@ -22,7 +23,9 @@ export async function generateMetadata({
 
     return buildShareMetadata({
       name: place.title,
-      description: place.description?.replace(/<[^>]*>/g, '').slice(0, 200),
+      // The description is rich-text HTML (DEV-409): read as text, with its
+      // entities decoded and paragraphs kept apart, for previews and search
+      description: toPlainText(place.description).slice(0, 200) || undefined,
       url: `${APP_ORIGIN}${placePath(place)}`,
       keywords: place.categories?.map((category) => category.name),
     });

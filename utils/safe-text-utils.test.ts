@@ -1,6 +1,14 @@
 import { titleFrom, toPlainText } from './safe-text-utils';
 
 describe('toPlainText', () => {
+  // DEV-409: paragraphs and lines stay apart once the tags go
+  it('keeps a space where a paragraph, list item or line ended', () => {
+    expect(toPlainText('<p>One.</p><p>Two.</p>')).toBe('One. Two.');
+    expect(toPlainText('<ul><li>Tea</li><li>Cake</li></ul>')).toBe('Tea Cake');
+    expect(toPlainText('Line one<br>Line two<br/>three')).toBe('Line one Line two three');
+    expect(toPlainText('<h2>Story</h2>Made by hand')).toBe('Story Made by hand');
+  });
+
   it('strips HTML tags', () => {
     expect(toPlainText('<p>Weekend <strong>trails</strong></p>')).toBe('Weekend trails');
   });

@@ -32,7 +32,7 @@ describe('PlaceDescription', () => {
     render(<PlaceDescription text="Two hundred women shaping clay beads by hand." />);
 
     expect(screen.getByText('Two hundred women shaping clay beads by hand.')).toHaveClass(
-      'line-clamp-3'
+      'line-clamp-3',
     );
   });
 
@@ -49,7 +49,7 @@ describe('PlaceDescription', () => {
 
     expect(screen.getByRole('button', { name: 'Show more' })).toHaveAttribute(
       'aria-expanded',
-      'false'
+      'false',
     );
   });
 
@@ -61,7 +61,7 @@ describe('PlaceDescription', () => {
 
     expect(screen.getByRole('button', { name: 'Show less' })).toHaveAttribute(
       'aria-expanded',
-      'true'
+      'true',
     );
     fireEvent.click(screen.getByRole('button', { name: 'Show less' }));
 
@@ -73,5 +73,40 @@ describe('PlaceDescription', () => {
     render(<PlaceDescription text="<p>Clay <strong>beads</strong></p>" />);
 
     expect(screen.getByText('Clay beads')).toBeInTheDocument();
+  });
+
+  // DEV-409: About is the place's description, rich-text HTML from the editor
+  it('keeps the headings and lists of the description once expanded', () => {
+    withClipping(true);
+    const { container } = render(
+      <PlaceDescription text="<h2>Our story</h2><p>Hand-made beads.</p><ul><li>Tours daily</li><li>Shop on site</li></ul>" />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
+
+    expect(screen.getByRole('heading', { name: 'Our story' })).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'Tours daily',
+      'Shop on site',
+    ]);
+    expect(container.querySelector('ul')).not.toBeNull();
+  });
+
+  it('removes anything that could run, keeping the text around it', () => {
+    withClipping(true);
+    const { container } = render(
+      <PlaceDescription
+        text={
+          '<p>Hello</p><script>alert(1)</script><img src="x" onerror="alert(2)"><a href="javascript:alert(3)">link</a>'
+        }
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
+
+    expect(container.querySelector('script')).toBeNull();
+    expect(container.querySelector('img')?.getAttribute('onerror')).toBeNull();
+    expect(container.querySelector('a')?.getAttribute('href') ?? '').not.toMatch(/javascript/i);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
   });
 });
