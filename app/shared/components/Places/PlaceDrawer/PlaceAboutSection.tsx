@@ -4,7 +4,7 @@ import { OpenInMapsLink } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useLocation } from '@/context/LocationContext';
 import { photoUrl } from '@/types/photo';
-import { Place } from '@/types/place';
+import { Place, placeFacts } from '@/types/place';
 import { haversineKm } from '@/utils/geo-utils';
 
 import { PlaceDescription } from './PlaceDescription';
@@ -93,9 +93,9 @@ export const PlaceAboutSection = ({
 
       {place.description && <PlaceDescription text={place.description} />}
 
-      {(place.properties?.length ?? 0) > 0 && (
+      {placeFacts(place).length > 0 && (
         <div className="border-t border-line pt-6">
-          <PlaceFactsGrid properties={place.properties ?? []} />
+          <PlaceFactsGrid properties={placeFacts(place)} />
         </div>
       )}
 

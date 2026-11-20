@@ -13,6 +13,7 @@ import {
   fetchPlaceReservationProfiles,
   markPlaceBookingNoShow,
   reorderPlacePhotos,
+  updatePlace,
 } from './place';
 
 jest.mock('@/services/apiService', () => ({
@@ -348,5 +349,32 @@ describe('place communities and guides', () => {
       { id: 'g1', experiencesCount: 3, averageRating: 4.5, user: { firstName: 'A' } },
     ]);
     expect(mockGet).toHaveBeenCalledWith('/v1/places/pl1/guides/', { params: { page_size: 20 } });
+  });
+});
+
+// DEV-408: free or paid entry saved as the place's entry_type
+describe('updatePlace, entry type', () => {
+  const mockPatch = jest.fn();
+  beforeEach(() => {
+    (apiWithToken as jest.Mock).mockResolvedValue({ patch: mockPatch });
+  });
+
+  it('sends entry_type with the rest of the place', async () => {
+    mockPatch.mockResolvedValue({ status: 200, data: {} });
+
+    await updatePlace('pl1', { title: 'Kraftory', entryType: 'paid' });
+
+    const [url, body] = mockPatch.mock.calls[0];
+    expect(url).toBe('/v1/places/pl1/');
+    expect((body as FormData).get('entry_type')).toBe('paid');
+    expect((body as FormData).get('title')).toBe('Kraftory');
+  });
+
+  it('leaves entry_type out when it is not being changed', async () => {
+    mockPatch.mockResolvedValue({ status: 200, data: {} });
+
+    await updatePlace('pl1', { title: 'Kraftory' });
+
+    expect((mockPatch.mock.calls[0][1] as FormData).has('entry_type')).toBe(false);
   });
 });

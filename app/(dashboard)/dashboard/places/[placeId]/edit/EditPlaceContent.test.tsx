@@ -204,9 +204,10 @@ describe('EditPlaceContent', () => {
 
   // A place has no free/paid column, so the pill edits the property of that
   // name - the same row the Properties step lists
-  it('saves free or paid entry as a property', async () => {
+  // DEV-408: free or paid entry is the place's entry_type, not a property
+  it('saves free or paid entry as the place’s entry type', async () => {
     const user = userEvent.setup();
-    renderEdit();
+    renderEdit(place({ entryType: 'free' }));
 
     await user.click(screen.getByRole('button', { name: 'Paid Entry' }));
     await user.click(screen.getByRole('button', { name: 'Save changes' }));
@@ -214,19 +215,34 @@ describe('EditPlaceContent', () => {
     await waitFor(() => expect(save).toHaveBeenCalled());
 
     const [draft] = save.mock.calls[0];
-    expect(draft.properties.added).toEqual([
-      expect.objectContaining({ key: 'Entry', value: 'Paid entry' }),
-    ]);
+    expect(draft.about).toMatchObject({ entryType: 'paid' });
+    expect(draft.properties).toBeUndefined();
   });
 
-  it('reads an existing entry property back into the pills', () => {
+  it('reads the entry type into the pills', () => {
+    renderEdit(place({ entryType: 'paid' }));
+
+    expect(screen.getByRole('button', { name: 'Paid Entry' })).toHaveClass('text-white');
+  });
+
+  it('falls back to an old Entry property, and keeps it off the Properties step', async () => {
+    const user = userEvent.setup();
     renderEdit(
       place({
+        entryType: '',
         properties: [{ id: 'pr9', key: 'Entry', value: 'Paid entry' }],
       }),
     );
 
     expect(screen.getByRole('button', { name: 'Paid Entry' })).toHaveClass('text-white');
+
+    // Pressing the one already showing still sets the field
+    await user.click(screen.getByRole('button', { name: 'Paid Entry' }));
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(save).toHaveBeenCalled());
+    const [draft] = save.mock.calls[0];
+    expect(draft.about).toMatchObject({ entryType: 'paid' });
+    expect(draft.properties).toBeUndefined();
   });
 
   it('marks a removed photo for deletion and a picked one for upload', async () => {

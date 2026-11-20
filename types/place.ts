@@ -25,6 +25,8 @@ export type Place = {
   // The DETAIL endpoint embeds both of these, so a place page needs no extra
   // requests for them. The list endpoint does not return them.
   properties?: PlaceProperty[];
+  /** Free or paid entry; blank when not known (DEV-408) */
+  entryType?: 'free' | 'paid' | '' | null;
   socialLinks?: PlaceSocialLink[];
   // The detail endpoint only. The community whose claim was approved, or null
   // where none has been - a claim still under review does not show up here.
@@ -59,3 +61,28 @@ export type PlaceSocialLink = {
 export function isPlace(item: any): item is Place {
   return 'totalReviews' in item && 'averageRating' in item;
 }
+
+export const ENTRY_LABEL = { free: 'Free entry', paid: 'Paid entry' } as const;
+
+/** A property named "Entry": how free or paid entry was kept before entry_type */
+export const isEntryProperty = (property: PlaceProperty) =>
+  property.key.trim().toLowerCase() === 'entry';
+
+/**
+ * A place's facts as guests see them: its properties, with free or paid entry
+ * from `entry_type` (DEV-408) in place of an old "Entry" property. Where
+ * `entry_type` is blank, an "Entry" property still says what it knows.
+ */
+export const placeFacts = (place: Pick<Place, 'properties' | 'entryType'>): PlaceProperty[] => {
+  const properties = place.properties ?? [];
+  if (!place.entryType) return properties;
+  return [
+    {
+      id: 'entry-type',
+      key: 'Entry',
+      value: ENTRY_LABEL[place.entryType],
+      icon: 'Ticket01Icon',
+    },
+    ...properties.filter((property) => !isEntryProperty(property)),
+  ];
+};

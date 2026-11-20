@@ -1070,6 +1070,7 @@ export async function updatePlace(
     googleMapPlaceId?: string;
     categoriesIds?: string[];
     status?: string;
+    entryType?: 'free' | 'paid' | '';
   },
 ): Promise<ApiResponse> {
   try {
@@ -1080,6 +1081,7 @@ export async function updatePlace(
     if (data.description !== undefined) formData.append('description', data.description);
     if (data.googleMapPlaceId) formData.append('google_map_place_id', data.googleMapPlaceId);
     if (data.status !== undefined) formData.append('status', data.status);
+    if (data.entryType !== undefined) formData.append('entry_type', data.entryType);
     (data.categoriesIds ?? []).forEach((categoryId) =>
       formData.append('categories_ids', categoryId),
     );
