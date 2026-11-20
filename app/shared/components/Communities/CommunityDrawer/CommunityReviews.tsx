@@ -4,7 +4,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { cn } from '@/lib/utils';
-import { CommunityRating } from '@/types/community';
+import { CommunityRating, CommunityRatingSummary } from '@/types/community';
 import { photoUrl } from '@/types/photo';
 
 import { SectionLinkTitle } from './CommunityPlaces';
@@ -36,16 +36,19 @@ export const CommunityReviews = ({
   communityTitle,
   ratings,
   total,
+  summary,
   experienceTitles,
 }: {
   communityTitle: string;
   ratings: CommunityRating[];
   total: number;
+  /** Average and count across every rating (DEV-383) */
+  summary?: CommunityRatingSummary | null;
   /** A rating names its experience by id only; the drawer already holds the titles. */
   experienceTitles: Map<string, string>;
 }) => {
   const { toast } = useToast();
-  const { count, average, newest } = reviewSummary(ratings, total);
+  const { count, average, newest } = reviewSummary(ratings, total, summary);
 
   return (
     <section id={COMMUNITY_SECTIONS.reviews} className={cn('flex flex-col', SECTION_SCROLL_MARGIN)}>

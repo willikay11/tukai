@@ -12,6 +12,7 @@ import { Community } from '@/types/community';
 
 import { AllCommunitiesSection } from './AllCommunitiesSection';
 import { DiscoverByCitySection } from './DiscoverByCitySection';
+import { FriendsJoinedSection } from './FriendsJoinedSection';
 import { ViewByTypeSection } from './ViewByTypeSection';
 
 // Wide enough that the all-communities/view-by-type sections, both narrowed
@@ -34,14 +35,11 @@ const GridSkeleton = () => (
 );
 
 /**
- * The Communities page's Discover tab: all communities, view-by-type and
- * discover-by-city, all narrowed client-side from one shared pool of public
- * communities (not the reader's own, not already followed) - the list
- * endpoint has no city, "fresh" or friends filter to ask for instead.
- *
- * "Your friends joined" is left out entirely: there is no connections/social
- * graph anywhere in this codebase to build it from - see COMMUNITY_HANDOFF
- * gap notes.
+ * The Communities page's Discover tab: all communities, your friends joined,
+ * view-by-type and discover-by-city, all narrowed client-side from one shared
+ * pool of public communities (not the reader's own, not already followed) -
+ * the list endpoint has no city or "fresh" filter to ask for instead. Friends
+ * come on each community of the pool (DEV-384).
  */
 export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
   const { data: session } = useSession();
@@ -105,6 +103,7 @@ export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
       ) : (
         <>
           <AllCommunitiesSection communities={byMembers} />
+          {isSignedIn && <FriendsJoinedSection communities={fresh} />}
           <ViewByTypeSection communities={fresh} />
         </>
       )}

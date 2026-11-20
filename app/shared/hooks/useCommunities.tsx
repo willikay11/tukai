@@ -9,8 +9,10 @@ import {
   fetchCommunity,
   fetchCommunityContact,
   fetchCommunityInvites,
+  fetchCommunityPlaces,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
+  fetchCommunityRatingSummary,
   fetchCommunityRatings,
   fetchVerificationDocuments,
   getCommunities,
@@ -230,6 +232,24 @@ export const useCommunityRatings = (communityId: string, enabled: boolean) =>
   useQuery({
     queryKey: ['community', communityId, 'ratings'],
     queryFn: async () => await fetchCommunityRatings(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+/** Average and count across every rating, not just the page fetched (DEV-383). */
+export const useCommunityRatingSummary = (communityId: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ['community', communityId, 'ratings', 'summary'],
+    queryFn: async () => await fetchCommunityRatingSummary(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+/** The places it owns or has hosted at, owned first (DEV-382). */
+export const useCommunityPlaces = (communityId: string | undefined, enabled = true) =>
+  useQuery({
+    queryKey: ['community', communityId, 'places'],
+    queryFn: async () => await fetchCommunityPlaces(communityId as string),
     enabled: enabled && Boolean(communityId),
     staleTime: 5 * 60 * 1000,
   });

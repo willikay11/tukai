@@ -14,6 +14,8 @@ import { Share, communityShare } from '@/app/shared/components/Share';
 import {
   useCommunityContact,
   useCommunityDetail,
+  useCommunityPlaces,
+  useCommunityRatingSummary,
   useCommunityRatings,
 } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -24,7 +26,12 @@ import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { Community, CommunityContact, CommunityRating } from '@/types/community';
+import {
+  Community,
+  CommunityContact,
+  CommunityRating,
+  CommunityRatingSummary,
+} from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
 
@@ -45,6 +52,7 @@ import {
   drawerPhotos,
   ownerOf,
   pastExperienceCount,
+  placesToShow,
   upcomingExperiences,
 } from './community-drawer';
 import { Divider } from './parts';
@@ -143,11 +151,20 @@ const CommunityBody = ({
 
   const { data: ratingsResponse } = useCommunityRatings(community.id, isFullView);
   const ratings: CommunityRating[] = ratingsResponse?.data?.results ?? [];
-  const ratingCount: number = ratingsResponse?.data?.count ?? ratings.length;
+  const { data: summaryResponse } = useCommunityRatingSummary(community.id, isFullView);
+  const ratingSummary: CommunityRatingSummary | null = summaryResponse?.success
+    ? summaryResponse.data
+    : null;
+  const ratingCount: number =
+    ratingSummary?.ratingsCount ?? ratingsResponse?.data?.count ?? ratings.length;
 
+  const { data: placesResponse } = useCommunityPlaces(community.id, isFullView);
   const { places, isOwned } = useMemo(
-    () => communityPlaces(community, experiences),
-    [community, experiences],
+    () =>
+      placesResponse?.success
+        ? placesToShow(placesResponse.data?.results ?? [])
+        : communityPlaces(community, experiences),
+    [placesResponse, community, experiences],
   );
   const photos = useMemo(
     () => drawerPhotos(community, moments, upcoming),
@@ -257,6 +274,7 @@ const CommunityBody = ({
           communityTitle={community.title}
           ratings={ratings}
           total={ratingCount}
+          summary={ratingSummary}
           experienceTitles={experienceTitles}
         />
 
