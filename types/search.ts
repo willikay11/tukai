@@ -101,6 +101,13 @@ export type SearchFilters = {
   happeningNow: boolean;
   /** `experience_type: 'guide_booking'` - a real, API-filterable value. */
   guidedToursOnly: boolean;
+  /** Places a community has claimed, which can take bookings: `claimed=true` (DEV-411) */
+  takesBookingsOnly: boolean;
+  /**
+   * Places with something on now - open for reservations, or a published
+   * experience there: `has_offer=true` (DEV-411)
+   */
+  hasOfferOnly: boolean;
   /**
    * Hosted by a community the reader follows. The API's `community` param
    * takes one id, not a list, so this is matched off the rows against every
@@ -134,6 +141,8 @@ export const EMPTY_FILTERS: SearchFilters = {
   freeOnly: false,
   paidOnly: false,
   availableOnly: false,
+  takesBookingsOnly: false,
+  hasOfferOnly: false,
   happeningNow: false,
   guidedToursOnly: false,
   yourCommunitiesOnly: false,

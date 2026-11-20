@@ -29,7 +29,8 @@ describe('reading filters out of the URL', () => {
       new URLSearchParams(
         'q=hike&type=experiences&date=2026-10-05&quick=weekend&tod=morning,evening' +
           '&city=c1&interests=i1,i2&distance=5km&free=1&paid=0&priceMin=500&priceMax=5000' +
-          '&available=1&now=1&guided=1&mine=1&xtype=itinerary&duration=short&sort=popular',
+          '&available=1&claimed=1&offer=1&now=1&guided=1&mine=1&xtype=itinerary&duration=short' +
+          '&sort=popular',
       ),
     );
 
@@ -47,6 +48,8 @@ describe('reading filters out of the URL', () => {
       priceMin: 500,
       priceMax: 5000,
       availableOnly: true,
+      takesBookingsOnly: true,
+      hasOfferOnly: true,
       happeningNow: true,
       guidedToursOnly: true,
       yourCommunitiesOnly: true,
@@ -120,6 +123,8 @@ describe('writing filters back', () => {
         happeningNow: true,
         guidedToursOnly: true,
         yourCommunitiesOnly: true,
+        takesBookingsOnly: true,
+        hasOfferOnly: true,
         durationBand: 'full',
         rating: 4.5,
         sort: 'near',
@@ -136,6 +141,8 @@ describe('writing filters back', () => {
     expect(written.get('now')).toBe('1');
     expect(written.get('guided')).toBe('1');
     expect(written.get('mine')).toBe('1');
+    expect(written.get('claimed')).toBe('1');
+    expect(written.get('offer')).toBe('1');
     expect(written.get('duration')).toBe('full');
     expect(written.get('rating')).toBe('4.5');
     expect(written.get('sort')).toBe('near');
@@ -197,6 +204,15 @@ describe('activeChips', () => {
     const chips = activeChips(filters({ type: 'places', freeOnly: true, availableOnly: true }));
 
     expect(chips.map((chip) => chip.label)).toEqual(['Places', 'Free', 'Has spots']);
+  });
+
+  // DEV-411
+  it('makes chips for the two place toggles', () => {
+    const chips = activeChips(
+      filters({ type: 'places', takesBookingsOnly: true, hasOfferOnly: true }),
+    );
+
+    expect(chips.map((chip) => chip.label)).toEqual(['Places', 'Takes bookings', 'Something on']);
   });
 
   it('names a city or an interest rather than showing its id', () => {
@@ -284,6 +300,8 @@ describe('removing one narrowing', () => {
     ['freeOnly', { freeOnly: true }],
     ['paidOnly', { paidOnly: true }],
     ['availableOnly', { availableOnly: true }],
+    ['takesBookingsOnly', { takesBookingsOnly: true }],
+    ['hasOfferOnly', { hasOfferOnly: true }],
     ['happeningNow', { happeningNow: true }],
     ['guidedToursOnly', { guidedToursOnly: true }],
     ['yourCommunitiesOnly', { yourCommunitiesOnly: true }],

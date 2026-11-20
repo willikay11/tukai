@@ -368,20 +368,31 @@ describe('the filters dialog', () => {
       expect(screen.queryByRole('switch', { name: 'No booking needed' })).not.toBeInTheDocument();
     });
 
-    // No `isClaimed`/offer field exists on Place yet - shown to match the
-    // canvas, not functional
-    it('shows Takes bookings and Has an offer, as inert, for places', () => {
+    // DEV-411: sent as claimed=true and has_offer=true
+    it('toggles Takes bookings and Something on for places', async () => {
       open(filters({ query: 'hike', type: 'places' }));
 
-      expect(screen.getByRole('switch', { name: 'Takes bookings' })).toBeDisabled();
-      expect(screen.getByRole('switch', { name: 'Has an offer' })).toBeDisabled();
+      await userEvent.click(screen.getByRole('switch', { name: 'Takes bookings' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'Something on' }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(
+        expect.objectContaining({ takesBookingsOnly: true, hasOfferOnly: true }),
+      );
     });
 
-    it('hides Takes bookings and Has an offer when only experiences are wanted', () => {
+    it('shows the place toggles as on when the filters already have them', () => {
+      open(filters({ query: 'hike', type: 'places', takesBookingsOnly: true, hasOfferOnly: true }));
+
+      expect(screen.getByRole('switch', { name: 'Takes bookings' })).toBeChecked();
+      expect(screen.getByRole('switch', { name: 'Something on' })).toBeChecked();
+    });
+
+    it('hides Takes bookings and Something on when only experiences are wanted', () => {
       open(filters({ query: 'hike', type: 'experiences' }));
 
       expect(screen.queryByRole('switch', { name: 'Takes bookings' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('switch', { name: 'Has an offer' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: 'Something on' })).not.toBeInTheDocument();
     });
   });
 

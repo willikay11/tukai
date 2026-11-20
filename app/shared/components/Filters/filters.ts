@@ -56,6 +56,8 @@ export const filtersFromParams = (
   priceMin: numberParam(params.get('priceMin')),
   priceMax: numberParam(params.get('priceMax')),
   availableOnly: params.get('available') === '1',
+  takesBookingsOnly: params.get('claimed') === '1',
+  hasOfferOnly: params.get('offer') === '1',
   happeningNow: params.get('now') === '1',
   guidedToursOnly: params.get('guided') === '1',
   yourCommunitiesOnly: params.get('mine') === '1',
@@ -90,6 +92,8 @@ export const paramsFromFilters = (filters: SearchFilters): URLSearchParams => {
   if (filters.priceMin !== undefined) params.set('priceMin', String(filters.priceMin));
   if (filters.priceMax !== undefined) params.set('priceMax', String(filters.priceMax));
   if (filters.availableOnly) params.set('available', '1');
+  if (filters.takesBookingsOnly) params.set('claimed', '1');
+  if (filters.hasOfferOnly) params.set('offer', '1');
   if (filters.happeningNow) params.set('now', '1');
   if (filters.guidedToursOnly) params.set('guided', '1');
   if (filters.yourCommunitiesOnly) params.set('mine', '1');
@@ -175,6 +179,8 @@ export const activeChips = (
   }
 
   if (filters.availableOnly) chips.push({ key: 'availableOnly', label: 'Has spots' });
+  if (filters.takesBookingsOnly) chips.push({ key: 'takesBookingsOnly', label: 'Takes bookings' });
+  if (filters.hasOfferOnly) chips.push({ key: 'hasOfferOnly', label: 'Something on' });
   if (filters.happeningNow) chips.push({ key: 'happeningNow', label: 'Happening now' });
   if (filters.guidedToursOnly) chips.push({ key: 'guidedToursOnly', label: 'Guided tours' });
   if (filters.yourCommunitiesOnly) {
@@ -249,6 +255,10 @@ export const withoutFilter = (
       return { ...filters, paidOnly: false };
     case 'availableOnly':
       return { ...filters, availableOnly: false };
+    case 'takesBookingsOnly':
+      return { ...filters, takesBookingsOnly: false };
+    case 'hasOfferOnly':
+      return { ...filters, hasOfferOnly: false };
     case 'happeningNow':
       return { ...filters, happeningNow: false };
     case 'guidedToursOnly':
