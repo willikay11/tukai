@@ -31,6 +31,14 @@ export async function fetchPlaces(
     claimed?: boolean;
     /** Only places with something on: reservations open, or an experience (DEV-411) */
     hasOffer?: boolean;
+    /** Places this community is the verified owner of, by id or slug (DEV-433) */
+    community?: string;
+    /** City name, matched case-insensitively (DEV-432) */
+    city?: string;
+    /** ISO code (KE) or English name (Kenya) (DEV-432) */
+    country?: string;
+    /** Places in a city an approved, active guide covers (DEV-440) */
+    guidedTours?: boolean;
   },
 ): Promise<ApiResponse> {
   try {
@@ -57,6 +65,10 @@ export async function fetchPlaces(
     if (options?.hasExperiences) queryParams.append('has_experiences', 'true');
     if (options?.claimed) queryParams.append('claimed', 'true');
     if (options?.hasOffer) queryParams.append('has_offer', 'true');
+    if (options?.community) queryParams.append('community', options.community);
+    if (options?.city) queryParams.append('city', options.city);
+    if (options?.country) queryParams.append('country', options.country);
+    if (options?.guidedTours) queryParams.append('guided_tours', 'true');
 
     const axiosInstance = options?.withAuth ? await apiWithToken() : api;
     const res = await axiosInstance.get(`/v1/places/?${queryParams.toString()}`);

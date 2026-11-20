@@ -109,6 +109,8 @@ export const usePlaces = ({
   lat,
   lng,
   search,
+  city,
+  country,
 }: {
   categoryId?: string | string[];
   page: number;
@@ -116,13 +118,36 @@ export const usePlaces = ({
   lat?: number;
   lng?: number;
   search?: string;
+  /** City name (DEV-432) */
+  city?: string;
+  /** ISO code or English name (DEV-432) */
+  country?: string;
 }) => {
   const { userId, withAuth } = usePlaceListViewer();
 
   return useQuery({
-    queryKey: ['places', { categoryId, page, lat, lng, search, userId }],
-    queryFn: async () => await fetchPlaces(page, 12, categoryId, search, lat, lng, { withAuth }),
+    queryKey: ['places', { categoryId, page, lat, lng, search, city, country, userId }],
+    queryFn: async () =>
+      await fetchPlaces(page, 12, categoryId, search, lat, lng, { withAuth, city, country }),
     enabled,
+  });
+};
+
+/**
+ * The places a community is the verified owner of - the community page's
+ * Places section (DEV-433).
+ */
+export const useCommunityPlaces = (communityId: string | undefined, perPage = 12) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
+  return useQuery({
+    queryKey: ['places', 'community', communityId, perPage, userId],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
+        community: communityId,
+        withAuth,
+      }),
+    enabled: Boolean(communityId),
   });
 };
 

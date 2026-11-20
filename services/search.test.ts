@@ -128,6 +128,13 @@ describe('searchAll', () => {
     expect(placeOptions()).toEqual({ sortBy: 'popular', claimed: true, hasOffer: true });
   });
 
+  // DEV-440
+  it('asks for places a guide covers when only guided tours are wanted', async () => {
+    await searchAll({ ...EMPTY_FILTERS, query: 'karura', guidedToursOnly: true });
+
+    expect(placeOptions()).toEqual({ guidedTours: true });
+  });
+
   it('sends neither by default', async () => {
     await searchAll({ ...EMPTY_FILTERS, query: 'karura' });
 

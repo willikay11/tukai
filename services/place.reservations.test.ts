@@ -399,10 +399,29 @@ describe('fetchPlaces', () => {
     expect(params.get('has_offer')).toBe('true');
   });
 
+  // DEV-432, DEV-433, DEV-440
+  it('asks for one community’s places, in a city and country, with guided tours', async () => {
+    await fetchPlaces(1, 12, undefined, undefined, undefined, undefined, {
+      community: 'c1',
+      city: 'Nairobi',
+      country: 'KE',
+      guidedTours: true,
+    });
+
+    const params = new URLSearchParams(sentUrl().split('?')[1]);
+    expect(params.get('community')).toBe('c1');
+    expect(params.get('city')).toBe('Nairobi');
+    expect(params.get('country')).toBe('KE');
+    expect(params.get('guided_tours')).toBe('true');
+  });
+
   it('leaves both out unless asked', async () => {
     await fetchPlaces(1, 12, undefined, 'karura');
 
     expect(sentUrl()).not.toContain('claimed');
     expect(sentUrl()).not.toContain('has_offer');
+    ['community', 'city', 'country', 'guided_tours'].forEach((param) =>
+      expect(sentUrl()).not.toContain(`${param}=`),
+    );
   });
 });

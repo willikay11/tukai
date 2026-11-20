@@ -102,7 +102,7 @@ export const CommunityDetailContent = ({
             isLoading={isLoadingExperiences}
           />
           <MembersSection members={members} />
-          <PlacesSection communityName={community.title} />
+          <PlacesSection communityId={community.id} communityName={community.title} />
           <MomentsGridSection
             hostName={community.title}
             moments={moments}

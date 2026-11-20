@@ -431,11 +431,17 @@ describe('the filters dialog', () => {
       );
     });
 
-    it('still offers Your communities, but not Guided tours, for places', () => {
+    // DEV-440: places in a city a verified guide covers
+    it('offers Your communities and Guided tours for places', async () => {
       open(filters({ query: 'hike', type: 'places' }));
 
       expect(screen.getByRole('switch', { name: 'Your communities' })).toBeEnabled();
-      expect(screen.queryByRole('switch', { name: 'Guided tours' })).not.toBeInTheDocument();
+      expect(screen.getByText('A verified guide covers the area')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Guided tours' }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ guidedToursOnly: true }));
     });
   });
 
