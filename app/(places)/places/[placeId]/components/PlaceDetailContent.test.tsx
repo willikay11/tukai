@@ -42,6 +42,14 @@ jest.mock('@/app/shared/components/Images', () => ({
 
 const useLocation = jest.fn();
 jest.mock('@/context/LocationContext', () => ({ useLocation: () => useLocation() }));
+// DEV-385: the communities linked to this place
+let mockCommunities: unknown[] = [];
+jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  usePlaceCommunities: () => ({ data: mockCommunities, isLoading: false }),
+}));
+jest.mock('@/app/shared/components/Communities/CommunityLink', () => ({
+  CommunityLink: ({ children }: { children: React.ReactNode }) => <a href="/c">{children}</a>,
+}));
 
 const useExperiences = jest.fn();
 jest.mock('@/app/shared/hooks/useExperiences', () => ({
@@ -245,10 +253,40 @@ describe('PlaceDetailContent', () => {
   });
 
   // Nothing links a place to a community in the API
-  it('says no community is linked rather than inventing one', () => {
+  it('says no community is linked when none is', () => {
+    mockCommunities = [];
     render(<PlaceDetailContent place={place()} />);
 
     expect(screen.getByText('No community is linked to this place yet')).toBeInTheDocument();
+  });
+
+  it('lists the community that owns it, then the ones that meet there', () => {
+    mockCommunities = [
+      {
+        id: 'c1',
+        title: 'Grain Collective',
+        relationship: 'owner',
+        experiencesCount: 0,
+        membersCount: 40,
+        photoUrl: null,
+        isPublic: true,
+      },
+      {
+        id: 'c2',
+        title: 'Hike Club',
+        relationship: 'host',
+        experiencesCount: 3,
+        membersCount: 12,
+        photoUrl: null,
+        isPublic: true,
+      },
+    ];
+    render(<PlaceDetailContent place={place()} />);
+
+    expect(screen.getByRole('heading', { name: 'Communities' })).toBeInTheDocument();
+    expect(screen.getByText('Owns this place')).toBeInTheDocument();
+    expect(screen.getByText('3 experiences here')).toBeInTheDocument();
+    mockCommunities = [];
   });
 });
 

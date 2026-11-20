@@ -41,6 +41,8 @@ import {
   fetchPlaceBookings,
   fetchPlaceBoosts,
   fetchPlaceCategories,
+  fetchPlaceCommunities,
+  fetchPlaceGuides,
   fetchPlaceOwnership,
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
@@ -457,6 +459,22 @@ export const usePlaceClaims = (enabled = true) => {
     enabled: enabled && Boolean(session?.user?.id),
   });
 };
+
+/** Communities linked to a place: its owner, and those that host there (DEV-385) */
+export const usePlaceCommunities = (placeId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['placeCommunities', placeId],
+    queryFn: () => fetchPlaceCommunities(placeId),
+    enabled: enabled && Boolean(placeId),
+  });
+
+/** Tour guides who lead experiences at a place (DEV-386) */
+export const usePlaceGuides = (placeId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['placeGuides', placeId],
+    queryFn: () => fetchPlaceGuides(placeId),
+    enabled: enabled && Boolean(placeId),
+  });
 
 /** The boost packages on offer (DEV-392) */
 export const useBoostPackages = (enabled = true) =>

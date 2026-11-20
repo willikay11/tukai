@@ -44,6 +44,8 @@ import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
 import { PlaceDrawerReviews } from './PlaceDrawerReviews';
 import { PlaceDrawerTabs } from './PlaceDrawerTabs';
+import { PlaceGuides } from './PlaceGuides';
+import { PlaceHostCommunities } from './PlaceHostCommunities';
 import { PlaceManagerBanner } from './PlaceManagerBanner';
 import { PlaceReservationSettings } from './PlaceReservationSettings';
 import { PlaceReviewForm } from './PlaceReviewForm';
@@ -337,6 +339,8 @@ export const PlaceDrawer = ({
                     }}
                   />
                   <PlaceCommunity communityId={place.verifiedOwner?.id ?? ''} />
+                  <PlaceHostCommunities placeId={place.id} />
+                  <PlaceGuides placeId={place.id} />
 
                   {hasExperiences && (
                     <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
