@@ -62,6 +62,8 @@ jest.mock('@/app/shared/components/Moments', () => ({
 let communityResponse: unknown;
 let contactResponse: unknown;
 let ratingsResponse: unknown;
+let summaryResponse: unknown;
+let placesResponse: unknown;
 const joinCommunity = jest.fn();
 const leaveCommunity = jest.fn();
 const cancelInvite = jest.fn();
@@ -71,6 +73,8 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCommunityDetail: () => ({ data: communityResponse, isLoading: !communityResponse }),
   useCommunityContact: () => ({ data: contactResponse }),
   useCommunityRatings: () => ({ data: ratingsResponse }),
+  useCommunityRatingSummary: () => ({ data: summaryResponse }),
+  useCommunityPlaces: () => ({ data: placesResponse }),
   useJoinCommunity: () => ({ mutate: joinCommunity, isPending: false }),
   useLeaveCommunity: () => ({ mutate: leaveCommunity, isPending: false }),
   useCancelCommunityInvite: () => ({ mutate: cancelInvite, isPending: false }),
@@ -132,6 +136,9 @@ describe('CommunityDrawer', () => {
     communityResponse = community();
     contactResponse = { success: true, data: {} };
     ratingsResponse = { success: true, data: { count: 0, results: [] } };
+    // Not answered yet: the drawer works the places out itself
+    summaryResponse = undefined;
+    placesResponse = undefined;
     experiences = [];
     moments = [];
   });
@@ -241,6 +248,35 @@ describe('CommunityDrawer', () => {
       expect(screen.getByTestId('place-card')).toHaveTextContent('Courtyard Studio');
     });
 
+    // DEV-382: the places endpoint, owned first
+    it('shows the places it owns from the places endpoint', () => {
+      placesResponse = {
+        success: true,
+        data: {
+          results: [
+            { id: 'p1', title: 'Courtyard Studio', relationship: 'owned' },
+            { id: 'p2', title: 'Karura Gate', relationship: 'used' },
+          ],
+        },
+      };
+      renderDrawer();
+
+      expect(screen.getByText('1 place owned by Nairobi Trail Runners')).toBeInTheDocument();
+      expect(screen.getAllByTestId('place-card')).toHaveLength(1);
+      expect(screen.getByTestId('place-card')).toHaveTextContent('Courtyard Studio');
+    });
+
+    it('shows where it meets when it owns none', () => {
+      placesResponse = {
+        success: true,
+        data: { results: [{ id: 'p2', title: 'Karura Gate', relationship: 'used' }] },
+      };
+      renderDrawer();
+
+      expect(screen.getByText('Places Nairobi Trail Runners meets at')).toBeInTheDocument();
+      expect(screen.getByTestId('place-card')).toHaveTextContent('Karura Gate');
+    });
+
     it('hides contact details and socials when the community has none', () => {
       renderDrawer();
 
@@ -317,6 +353,33 @@ describe('CommunityDrawer', () => {
       expect(screen.getAllByText('Karura loop').length).toBeGreaterThan(0);
       expect(screen.getByText('Great pace.')).toBeInTheDocument();
       expect(screen.getByText('September 2026')).toBeInTheDocument();
+    });
+
+    // DEV-383: the summary covers every rating, not just the page fetched
+    it('takes the average and count from the rating summary', () => {
+      ratingsResponse = {
+        success: true,
+        data: {
+          count: 1,
+          results: [
+            {
+              id: 'r1',
+              experience: 'e0',
+              attendee: { displayName: 'Kevo' },
+              rating: 5,
+              dateCreated: '2026-09-12T00:00:00Z',
+            },
+          ],
+        },
+      };
+      summaryResponse = {
+        success: true,
+        data: { averageRating: 4.2, ratingsCount: 140, distribution: {} },
+      };
+      renderDrawer();
+
+      expect(screen.getByText('4.2')).toBeInTheDocument();
+      expect(screen.getByText('140 reviews')).toBeInTheDocument();
     });
 
     it('says so when there are no reviews yet', () => {

@@ -4,10 +4,9 @@ import { Community } from '@/types/community';
  * The card's accessible name, built from sentence fragments - each ending in
  * a full stop, per the Communities handoff ("Nairobi Foodies Club. Amina,
  * Njeri joined. 1,240 members. Restaurants, Nyama Choma (Braai), Date spots.
- * 2 upcoming experiences."). `friendNames` and `upcomingCount` are left out
- * wherever the data to fill them in does not exist yet (see the handoff's
- * "Your friends joined" section and the card's own per-card upcoming count,
- * both missing a backend source - COMMUNITY_HANDOFF_GAPS.md).
+ * 2 upcoming experiences."). `friendNames` is given on "Your friends joined"
+ * only (DEV-384); `upcomingCount` is left out wherever the data to fill it in
+ * does not exist yet.
  */
 export const communityCardAriaLabel = (
   community: Community,

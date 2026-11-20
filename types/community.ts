@@ -59,6 +59,10 @@ export type Community = {
   membersCount?: number;
   /** The detail endpoint only. The claimed places that make it a verified business. */
   verifiedPlaces?: CommunityPlace[];
+  /** How many people the reader follows have joined - 0 signed out (DEV-384) */
+  friendsCount?: number;
+  /** Up to a few of them, earliest to join first (DEV-384) */
+  friendPreviews?: CommunityOwner[];
   owners?: CommunityOwner[];
   dateCreated: string;
   dateModified: string;
@@ -72,6 +76,22 @@ export type CommunityPlace = {
   description?: string;
   location?: Location;
   photos?: Photo[];
+  /**
+   * GET /communities/{id}/places/ only (DEV-382): `owned` when the community
+   * is the place's verified owner, `used` when it has hosted experiences there.
+   */
+  relationship?: 'owned' | 'used';
+  /** Experiences the community has hosted there */
+  experiencesCount?: number;
+};
+
+/** GET /communities/{id}/ratings/summary/ (DEV-383), across every rating. */
+export type CommunityRatingSummary = {
+  /** One decimal, or null with no ratings */
+  averageRating: number | null;
+  ratingsCount: number;
+  /** Ratings per star, "1" to "5" */
+  distribution: Record<string, number>;
 };
 
 /**
