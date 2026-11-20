@@ -13,17 +13,14 @@ const GRADIENT_BUTTON =
 
 /**
  * A private community the reader has been invited to. Join makes them a
- * member and the drawer turns into the full view; Decline shows the closed
- * state.
- *
- * ⚠️ The API has no way for an invitee to decline - `leave` refuses an invite
- * never accepted, and `update-join-status` is the host's. Declining here only
- * hides the invite for this visit; the invite itself stays open.
+ * member and the drawer turns into the full view; Decline turns the invite
+ * down for good (`decline-invite`, DEV-381) and shows the closed state.
  */
 export const CommunityInvitedState = ({
   community,
   inviter,
   isJoining,
+  isDeclining = false,
   onJoin,
   onDecline,
 }: {
@@ -31,6 +28,7 @@ export const CommunityInvitedState = ({
   /** Who sent it. The membership record does not say, so the owner stands in. */
   inviter?: CommunityMember;
   isJoining: boolean;
+  isDeclining?: boolean;
   onJoin: () => void;
   onDecline: () => void;
 }) => {
@@ -73,7 +71,8 @@ export const CommunityInvitedState = ({
           <button
             type="button"
             onClick={onDecline}
-            className="h-12 whitespace-nowrap rounded-full bg-white px-[22px] text-[15px] font-semibold text-brand-ink hover:bg-surface active:scale-[0.97]"
+            disabled={isDeclining || isJoining}
+            className="h-12 whitespace-nowrap rounded-full bg-white px-[22px] text-[15px] font-semibold text-brand-ink hover:bg-surface active:scale-[0.97] disabled:opacity-60"
           >
             Decline invite
           </button>

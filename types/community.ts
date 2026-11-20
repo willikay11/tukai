@@ -30,6 +30,15 @@ export type CommunityOwner = {
   picture: string | null;
 };
 
+/** The invite itself, on a row of GET /communities/invites/ (DEV-380). */
+export type CommunityInviteDetails = {
+  /** The membership (invite) id */
+  id: string;
+  role: string;
+  invitedBy: CommunityOwner | null;
+  dateInvited: string;
+};
+
 export type Community = {
   id: string;
   /** URL key. The detail route and every nested one resolve it or the UUID. */
@@ -129,3 +138,6 @@ export type CommunityPost = {
   dateModified: string;
   createdBy: User;
 };
+
+/** A community the reader has an unanswered invite to (DEV-380). */
+export type CommunityInvite = Community & { invite: CommunityInviteDetails | null };

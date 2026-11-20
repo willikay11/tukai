@@ -5,23 +5,22 @@ import { useState } from 'react';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SendMessage } from '@/app/shared/components/SendMessage';
 import { useToast } from '@/app/shared/hooks/useToast';
-import { CommunityMember } from '@/types/community';
+import { Community, CommunityMember } from '@/types/community';
 
 import { nameOfMember } from './community-drawer';
 import { Avatar } from './parts';
-
-/** Owners write to every member - there is no endpoint for that yet. */
-export const MESSAGE_MEMBERS_UNAVAILABLE = "Messaging all members isn't available yet.";
 
 /**
  * The Admin band: the community's owner, how much they have organised, and a
  * way to write to them - or, on the reader's own community, to its members.
  */
 export const CommunityAdminBand = ({
+  community,
   owner,
   isOwnerSelf,
   pastExperiences,
 }: {
+  community: Pick<Community, 'id' | 'title'>;
   owner?: CommunityMember;
   isOwnerSelf: boolean;
   pastExperiences: number;
@@ -77,17 +76,27 @@ export const CommunityAdminBand = ({
 
       <button
         type="button"
-        onClick={() =>
-          isOwnerSelf ? toast({ description: MESSAGE_MEMBERS_UNAVAILABLE }) : setIsMessageOpen(true)
-        }
+        onClick={() => setIsMessageOpen(true)}
         className="inline-flex h-12 flex-none items-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-5 text-[14.5px] font-bold text-white active:scale-[0.98]"
       >
         <IconComponent iconName="BubbleChatIcon" size={18} color="currentColor" />
         {isOwnerSelf ? 'Message members' : 'Message host'}
       </button>
 
-      {!isOwnerSelf && owner.user?.id && (
-        <SendMessage open={isMessageOpen} setOpen={setIsMessageOpen} recipientId={owner.user.id} />
+      {isOwnerSelf ? (
+        <SendMessage
+          open={isMessageOpen}
+          setOpen={setIsMessageOpen}
+          community={{ id: community.id, title: community.title }}
+        />
+      ) : (
+        owner.user?.id && (
+          <SendMessage
+            open={isMessageOpen}
+            setOpen={setIsMessageOpen}
+            recipientId={owner.user.id}
+          />
+        )
       )}
     </div>
   );

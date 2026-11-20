@@ -4,10 +4,7 @@ import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SendMessage } from '@/app/shared/components/SendMessage';
-import { useToast } from '@/app/shared/hooks/useToast';
-import { CommunityMember } from '@/types/community';
-
-import { MESSAGE_MEMBERS_UNAVAILABLE } from './CommunityAdminBand';
+import { Community, CommunityMember } from '@/types/community';
 
 const BUTTON =
   'inline-flex h-12 flex-none items-center justify-center gap-2 whitespace-nowrap rounded-full px-6 text-[15px] font-semibold transition-[transform,box-shadow,filter,background-color] duration-200 active:scale-[0.97] disabled:opacity-60';
@@ -18,6 +15,7 @@ const BUTTON =
  * what the composer row does. Leave lives in the body, not here.
  */
 export const CommunityDrawerFooter = ({
+  community,
   isMember,
   isOwnerSelf,
   owner,
@@ -25,6 +23,7 @@ export const CommunityDrawerFooter = ({
   onJoin,
   onShareMoment,
 }: {
+  community: Pick<Community, 'id' | 'title'>;
   isMember: boolean;
   isOwnerSelf: boolean;
   owner?: CommunityMember;
@@ -32,7 +31,6 @@ export const CommunityDrawerFooter = ({
   onJoin: () => void;
   onShareMoment: () => void;
 }) => {
-  const { toast } = useToast();
   const [isMessageOpen, setIsMessageOpen] = useState(false);
 
   return (
@@ -40,11 +38,7 @@ export const CommunityDrawerFooter = ({
       {isOwnerSelf || isMember ? (
         <button
           type="button"
-          onClick={() =>
-            isOwnerSelf
-              ? toast({ description: MESSAGE_MEMBERS_UNAVAILABLE })
-              : setIsMessageOpen(true)
-          }
+          onClick={() => setIsMessageOpen(true)}
           className={`${BUTTON} bg-gradient-to-b from-brand-mid to-brand-deep text-white hover:shadow-[0_6px_16px_rgba(1,51,52,.16)] hover:brightness-[1.04]`}
         >
           <IconComponent iconName="BubbleChatIcon" size={20} color="currentColor" />
@@ -71,6 +65,13 @@ export const CommunityDrawerFooter = ({
         Share moment
       </button>
 
+      {isOwnerSelf && (
+        <SendMessage
+          open={isMessageOpen}
+          setOpen={setIsMessageOpen}
+          community={{ id: community.id, title: community.title }}
+        />
+      )}
       {isMember && !isOwnerSelf && owner?.user?.id && (
         <SendMessage open={isMessageOpen} setOpen={setIsMessageOpen} recipientId={owner.user.id} />
       )}

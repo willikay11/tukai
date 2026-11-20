@@ -23,8 +23,12 @@ jest.mock('@/app/shared/components/Share', () => ({
   ...jest.requireActual('@/app/shared/components/Share/shareContent'),
   Share: () => <button type="button">share</button>,
 }));
+const sendMessageProps = jest.fn();
 jest.mock('@/app/shared/components/SendMessage', () => ({
-  SendMessage: () => null,
+  SendMessage: (props: Record<string, unknown>) => {
+    sendMessageProps(props);
+    return null;
+  },
 }));
 jest.mock('@/app/(experiences)/components/ExperienceCard', () => ({
   ExperienceCard: ({ experience }: { experience: { title: string } }) => (
@@ -61,6 +65,8 @@ let ratingsResponse: unknown;
 const joinCommunity = jest.fn();
 const leaveCommunity = jest.fn();
 const cancelInvite = jest.fn();
+const acceptInvite = jest.fn();
+const declineInvite = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCommunityDetail: () => ({ data: communityResponse, isLoading: !communityResponse }),
   useCommunityContact: () => ({ data: contactResponse }),
@@ -68,6 +74,8 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useJoinCommunity: () => ({ mutate: joinCommunity, isPending: false }),
   useLeaveCommunity: () => ({ mutate: leaveCommunity, isPending: false }),
   useCancelCommunityInvite: () => ({ mutate: cancelInvite, isPending: false }),
+  useAcceptCommunityInvite: () => ({ mutate: acceptInvite, isPending: false }),
+  useDeclineCommunityInvite: () => ({ mutate: declineInvite, isPending: false }),
 }));
 
 let experiences: unknown[] = [];
@@ -361,6 +369,19 @@ describe('CommunityDrawer', () => {
       expect(screen.getAllByRole('button', { name: /Message members/ }).length).toBeGreaterThan(0);
       expect(screen.queryByRole('button', { name: 'Leave community' })).not.toBeInTheDocument();
     });
+
+    // DEV-379: the owner's button writes to every member, not "not available yet"
+    it('opens the members message for the owner', async () => {
+      communityResponse = community({ members: [ownerRecord('u1')] });
+      renderDrawer();
+
+      await userEvent.click(screen.getAllByRole('button', { name: /Message members/ })[0]);
+
+      expect(toast).not.toHaveBeenCalled();
+      expect(sendMessageProps).toHaveBeenCalledWith(
+        expect.objectContaining({ open: true, community: expect.objectContaining({ id: 'c1' }) }),
+      );
+    });
   });
 
   describe('sharing a moment', () => {
@@ -471,8 +492,13 @@ describe('CommunityDrawer', () => {
       });
       renderDrawer();
 
+      // The server has it before the drawer closes (DEV-381)
+      declineInvite.mockImplementation((_id: string, options: { onSuccess: () => void }) =>
+        options.onSuccess(),
+      );
       await userEvent.click(screen.getByRole('button', { name: 'Decline invite' }));
 
+      expect(declineInvite).toHaveBeenCalledWith('c1', expect.anything());
       expect(screen.getByText('This community is private')).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Private community' })).toBeInTheDocument();
     });
@@ -489,7 +515,28 @@ describe('CommunityDrawer', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'Join community' }));
 
-      expect(joinCommunity).toHaveBeenCalledWith('c1', expect.anything());
+      // accept-invite, not request-to-join, which would make it a request (DEV-381)
+      expect(acceptInvite).toHaveBeenCalledWith('c1', expect.anything());
+      expect(joinCommunity).not.toHaveBeenCalled();
+    });
+
+    it('keeps the invite open when the decline fails', async () => {
+      communityResponse = community({
+        isPublic: false,
+        members: [
+          ownerRecord(),
+          { id: 'm1', role: 'regular', inviteStatus: 'pending', user: { id: 'u1' } },
+        ],
+      });
+      declineInvite.mockImplementation((_id: string, options: { onError: (e: Error) => void }) =>
+        options.onError(new Error('Try again')),
+      );
+      renderDrawer();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Decline invite' }));
+
+      expect(screen.getByText('Amina invited you to this private community')).toBeInTheDocument();
+      expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Could not decline' }));
     });
 
     it('shows anyone else the closed state, without its name', () => {

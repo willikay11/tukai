@@ -108,7 +108,6 @@ const CommunityBody = ({
   onDecline: () => void;
   onCompose: () => void;
 }) => {
-  const { toast } = useToast();
   const actions = useCommunityActions(community, currentUserId);
   const access = accessOf(community, currentUserId, hasDeclined);
   const isFullView = access === 'owner' || access === 'member' || access === 'guest';
@@ -185,13 +184,9 @@ const CommunityBody = ({
           community={community}
           inviter={owner}
           isJoining={actions.isJoining}
+          isDeclining={actions.isDeclining}
           onJoin={actions.acceptInvite}
-          onDecline={() => {
-            onDecline();
-            toast({
-              description: `Invite to ${community.title} declined. You have no access to it.`,
-            });
-          }}
+          onDecline={() => actions.declineInvite(onDecline)}
         />
       </div>
     );
@@ -250,6 +245,7 @@ const CommunityBody = ({
         />
 
         <CommunityAdminBand
+          community={community}
           owner={owner}
           isOwnerSelf={isOwnerSelf}
           pastExperiences={pastExperienceCount(experiences)}
@@ -279,6 +275,7 @@ const CommunityBody = ({
 
       <div className="sticky bottom-0 z-30 flex min-h-[88px] flex-none flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 pb-[calc(18px+var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-[18px]">
         <CommunityDrawerFooter
+          community={community}
           isMember={isMember}
           isOwnerSelf={isOwnerSelf}
           owner={owner}
@@ -329,7 +326,8 @@ export const CommunityDrawer = ({
   const isRefused = hasFailed && (data?.status === 403 || data?.status === 404);
   const community: Community | undefined = hasFailed ? undefined : data?.data;
 
-  // Declining hides the invite for this visit only - see CommunityInvitedState
+  // Shows the closed state as soon as the server has the decline, before the
+  // community refetches with the invite marked ignored
   const [declinedId, setDeclinedId] = useState<string | null>(null);
   const hasDeclined = Boolean(community && declinedId === community.id);
 

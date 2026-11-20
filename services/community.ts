@@ -94,6 +94,80 @@ export async function joinCommunity(communityId: string) {
 }
 
 /**
+ * The communities the reader has an unanswered invite to, newest first -
+ * including ones sent to their email before they signed up (DEV-380).
+ */
+export async function fetchCommunityInvites() {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get('/v1/communities/invites/', { params: { page_size: 50 } });
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Your invites could not load'),
+    };
+  }
+}
+
+/**
+ * Accepts an invite. Joins straight away, a private community included -
+ * `request-to-join` would turn the invite into a request the host must
+ * approve (DEV-381).
+ */
+export async function acceptCommunityInvite(communityId: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/communities/${communityId}/accept-invite/`);
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'The invite could not be accepted'));
+  }
+}
+
+/**
+ * Declines an invite for good. The reader can still ask to join later
+ * (DEV-381).
+ */
+export async function declineCommunityInvite(communityId: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/communities/${communityId}/decline-invite/`);
+    return { status: response.status, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'The invite could not be declined'));
+  }
+}
+
+/**
+ * One message to every member, from the owner or a co-host. Each member gets
+ * it in their inbox; anyone blocked either way is skipped (DEV-379).
+ */
+export async function messageCommunityMembers(
+  communityId: string,
+  content: string,
+): Promise<{ sent: number }> {
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/communities/${communityId}/message-members/`, {
+      content,
+    });
+    return { sent: Number(response.data?.sent ?? 0) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Your message could not be sent'));
+  }
+}
+
+/**
  * The swagger's own `leave` route. `remove-member`, which this used before, is
  * documented as owner/admin only, so a member removing themselves could be
  * turned away. Owners cannot leave their own community.
