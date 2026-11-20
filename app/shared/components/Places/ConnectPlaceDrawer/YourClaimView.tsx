@@ -48,6 +48,15 @@ const STATUS_CONFIG: Record<
   },
 };
 
+const whenLabel = (iso: string) =>
+  new Date(iso).toLocaleString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
 const statusLine = (claim: Claim) => {
   const places = joinPlaceNames(claim.places.map((place) => place.title));
 
@@ -187,15 +196,11 @@ export const YourClaimView = ({
         </section>
       )}
 
+      {/* Once Tukai has decided, when it did (DEV-427), not when it was sent */}
       <p className="text-13 text-ink-muted">
-        Sent{' '}
-        {new Date(claim.sentAt).toLocaleString(undefined, {
-          weekday: 'short',
-          day: 'numeric',
-          month: 'short',
-          hour: 'numeric',
-          minute: '2-digit',
-        })}
+        {claim.decidedAt && (claim.status === 'approved' || claim.status === 'rejected')
+          ? `${claim.status === 'approved' ? 'Approved' : 'Not approved'} ${whenLabel(claim.decidedAt)}`
+          : `Sent ${whenLabel(claim.sentAt)}`}
       </p>
 
       {canCancel && (

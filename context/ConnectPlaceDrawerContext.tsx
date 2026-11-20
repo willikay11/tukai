@@ -1,11 +1,16 @@
 'use client';
 
 import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
-
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ConnectPlaceDrawer } from '@/app/shared/components/Places/ConnectPlaceDrawer';
-import { addClaim, cancelClaim as cancelClaimAction, resubmitClaimDocuments } from '@/slices/claimsSlice';
+import { mergeClaims } from '@/app/shared/components/Places/ConnectPlaceDrawer/claims';
+import { usePlaceClaims } from '@/app/shared/hooks/usePlaces';
+import {
+  addClaim,
+  cancelClaim as cancelClaimAction,
+  resubmitClaimDocuments,
+} from '@/slices/claimsSlice';
 import { AppDispatch, RootState } from '@/store/store';
 import { Claim, ClaimDocument, ClaimPlaceSummary, ClaimStatus } from '@/types/claim';
 
@@ -36,10 +41,9 @@ type ConnectPlaceDrawerValue = {
   openConnectPlace: (opts?: OpenConnectPlaceOptions) => void;
   closeConnectPlace: () => void;
   /**
-   * The claims this browser has sent: which places and community went
-   * together. The API has no claim record, so this is kept in redux-persist
-   * rather than fetched, and survives a reload; useResolvedClaim reads each
-   * one's live status and documents.
+   * The person's claims, as the server has them (DEV-391): status, when it
+   * was decided and documents, on every device. The places this browser
+   * claimed together stay grouped as one claim; see claims.ts.
    */
   claims: Claim[];
   getClaimForPlace: (placeId: string) => Claim | undefined;
@@ -58,15 +62,22 @@ const makeId = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toSt
  * menu, Dashboard > Places, an unclaimed place's drawer, and the mobile place
  * bar.
  *
- * Also remembers the claims this browser has sent, since the API has no
- * claim record that groups several places under one set of documents - see
- * slices/claimsSlice.ts.
+ * Also holds the person's claims: the server's list (DEV-391), with the
+ * places this browser claimed together kept as one claim - see
+ * slices/claimsSlice.ts and claims.ts.
  */
 export const ConnectPlaceDrawerProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<OpenConnectPlaceOptions>({});
-  const claims = useSelector((state: RootState) => state.claimsReducer.claims);
+  const sent = useSelector((state: RootState) => state.claimsReducer.claims);
   const dispatch = useDispatch<AppDispatch>();
+  const { data: rows, dataUpdatedAt, refetch } = usePlaceClaims();
+  const claims = useMemo(
+    () => mergeClaims({ sent, rows: rows ?? null, listedAt: dataUpdatedAt }),
+    [sent, rows, dataUpdatedAt],
+  );
+  // A claim sent, resent or cancelled shows on the server's list next read
+  const refreshClaims = useCallback(() => void refetch(), [refetch]);
 
   const openConnectPlace = useCallback((opts?: OpenConnectPlaceOptions) => {
     setOptions(opts ?? {});
@@ -83,7 +94,8 @@ export const ConnectPlaceDrawerProvider = ({ children }: { children: ReactNode }
   const getClaimForPlace = useCallback(
     (placeId: string) =>
       claims.find(
-        (claim) => claim.status !== 'cancelled' && claim.places.some((place) => place.id === placeId),
+        (claim) =>
+          claim.status !== 'cancelled' && claim.places.some((place) => place.id === placeId),
       ),
     [claims],
   );
@@ -103,23 +115,26 @@ export const ConnectPlaceDrawerProvider = ({ children }: { children: ReactNode }
       };
 
       dispatch(addClaim(claim));
+      refreshClaims();
       return claim;
     },
-    [dispatch],
+    [dispatch, refreshClaims],
   );
 
   const resubmitDocuments = useCallback(
     (claimId: string, documents: ClaimDocument[], notes?: string) => {
       dispatch(resubmitClaimDocuments({ claimId, documents, notes }));
+      refreshClaims();
     },
-    [dispatch],
+    [dispatch, refreshClaims],
   );
 
   const cancelClaim = useCallback(
     (claimId: string) => {
       dispatch(cancelClaimAction(claimId));
+      refreshClaims();
     },
-    [dispatch],
+    [dispatch, refreshClaims],
   );
 
   const value = useMemo(

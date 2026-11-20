@@ -32,6 +32,7 @@ import {
   fetchFollowing,
   fetchGoogleMapsAutocomplete,
   fetchGoogleMapsPlaceGeocode,
+  fetchMyPlaceClaims,
   fetchMyPlaces,
   fetchPlace,
   fetchPlaceAvailability,
@@ -441,6 +442,17 @@ export const usePlaceBookingRequests = (placeId: string, profileId: string | und
     queryKey: ['placeBookingRequests', placeId, profileId],
     queryFn: async () => await fetchPlaceBookingRequests(placeId, profileId!),
     enabled: Boolean(placeId && profileId && session?.user?.id),
+  });
+};
+
+/** The person's place claims, from the server (DEV-391) */
+export const usePlaceClaims = (enabled = true) => {
+  const { data: session } = useSession();
+
+  return useQuery({
+    queryKey: ['placeClaims'],
+    queryFn: fetchMyPlaceClaims,
+    enabled: enabled && Boolean(session?.user?.id),
   });
 };
 
