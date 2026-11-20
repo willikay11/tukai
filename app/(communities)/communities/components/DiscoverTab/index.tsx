@@ -8,16 +8,17 @@ import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { useLocation } from '@/context/LocationContext';
 import { Community } from '@/types/community';
 
-import { AllCommunitiesSection } from './AllCommunitiesSection';
+import { CommunitiesNearYouSection } from './CommunitiesNearYouSection';
 import { DiscoverByCitySection } from './DiscoverByCitySection';
 import { FriendsJoinedSection } from './FriendsJoinedSection';
 import { ViewByTypeSection } from './ViewByTypeSection';
 
-// Wide enough that the all-communities/view-by-type sections, both narrowed
+// Wide enough that the friends/view-by-type sections, both narrowed
 // client-side from this one pool, have something left after excluding what
-// the reader owns or follows - the API offers no city or "fresh" filter.
+// the reader owns or follows - the API offers no "fresh" filter.
 const DISCOVER_POOL_SIZE = 60;
 
 const GridSkeleton = () => (
@@ -35,21 +36,32 @@ const GridSkeleton = () => (
 );
 
 /**
- * The Communities page's Discover tab: all communities, your friends joined,
- * view-by-type and discover-by-city, all narrowed client-side from one shared
- * pool of public communities (not the reader's own, not already followed) -
- * the list endpoint has no city or "fresh" filter to ask for instead. Friends
- * come on each community of the pool (DEV-384).
+ * The Communities page's Discover tab, in the design's order: communities
+ * near you (asked of the API by city, DEV-434), your friends joined, view by
+ * type, and discover by city. All but the first are narrowed client-side from
+ * one shared pool of public communities (not the reader's own, not already
+ * followed), since the list has no "fresh" filter. Friends come on each
+ * community of the pool (DEV-384).
  */
 export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
   const { data: session } = useSession();
   const userId = session?.user?.id ?? undefined;
   const { needAuth } = useAuthDialog();
+  const { city: locationCity, homeCity } = useLocation();
+  const city = locationCity || homeCity;
 
   const { data, isLoading, isFetching, refetch } = useGetCommunities({
     page: 1,
     pageSize: DISCOVER_POOL_SIZE,
     enabled: true,
+  });
+
+  // The reader's city, asked of the API (DEV-434)
+  const { data: nearData, isLoading: isLoadingNear } = useGetCommunities({
+    page: 1,
+    pageSize: DISCOVER_POOL_SIZE,
+    city,
+    enabled: Boolean(city),
   });
 
   const { data: followingData } = useGetCommunities({
@@ -81,9 +93,12 @@ export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
     [pool, excludedIds],
   );
 
-  const byMembers = useMemo(
-    () => fresh.slice().sort((a, b) => (b.membersCount ?? 0) - (a.membersCount ?? 0)),
-    [fresh],
+  const near = useMemo(
+    () =>
+      ((nearData?.data?.results ?? []) as Community[])
+        .filter((community) => community.isPublic && !excludedIds.has(community.id))
+        .sort((a, b) => (b.membersCount ?? 0) - (a.membersCount ?? 0)),
+    [nearData, excludedIds],
   );
 
   return (
@@ -102,7 +117,7 @@ export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
         </div>
       ) : (
         <>
-          <AllCommunitiesSection communities={byMembers} />
+          <CommunitiesNearYouSection city={city} communities={near} isLoading={isLoadingNear} />
           {isSignedIn && <FriendsJoinedSection communities={fresh} />}
           <ViewByTypeSection communities={fresh} />
         </>

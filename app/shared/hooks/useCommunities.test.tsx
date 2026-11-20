@@ -81,6 +81,7 @@ describe('Communities Hooks', () => {
         undefined,
         undefined,
         undefined,
+        { joined: undefined, member: undefined, city: undefined },
       );
     });
 
@@ -126,6 +127,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           undefined,
+          { joined: undefined, member: undefined, city: undefined },
         );
       });
     });
@@ -155,6 +157,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           undefined,
+          { joined: undefined, member: undefined, city: undefined },
         );
       });
     });
@@ -184,6 +187,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           undefined,
+          { joined: undefined, member: undefined, city: undefined },
         );
       });
     });
@@ -213,6 +217,7 @@ describe('Communities Hooks', () => {
           true,
           undefined,
           undefined,
+          { joined: undefined, member: undefined, city: undefined },
         );
       });
     });
@@ -242,6 +247,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           'user-456',
+          { joined: undefined, member: undefined, city: undefined },
         );
       });
     });
@@ -271,6 +277,43 @@ describe('Communities Hooks', () => {
           undefined,
           true,
           undefined,
+          { joined: undefined, member: undefined, city: undefined },
+        );
+      });
+    });
+
+    // DEV-434 / DEV-436
+    it('passes joined, member and city through', async () => {
+      mockCommunityService.getCommunities.mockResolvedValue({
+        status: 200,
+        success: true,
+        data: { results: [], count: 0 },
+      });
+
+      renderHook(
+        () =>
+          useGetCommunities({
+            page: 1,
+            enabled: true,
+            joined: true,
+            member: 'u9',
+            city: 'Nairobi',
+          }),
+        { wrapper: createWrapper() },
+      );
+
+      await waitFor(() => {
+        expect(mockCommunityService.getCommunities).toHaveBeenCalledWith(
+          undefined,
+          1,
+          12,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          { joined: true, member: 'u9', city: 'Nairobi' },
         );
       });
     });
@@ -302,6 +345,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           'user-123',
+          { joined: undefined, member: undefined, city: undefined },
         );
       });
     });

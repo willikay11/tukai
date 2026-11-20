@@ -16,6 +16,15 @@ export async function getCommunities(
   popularCommunities?: boolean,
   following?: boolean,
   createdBy?: string,
+  // An object so the next filter is not an eleventh argument
+  options?: {
+    /** Accepted members only - unlike `following`, no pending invites or requests (DEV-436) */
+    joined?: boolean;
+    /** Whose memberships `joined` reads; the caller's when left out (DEV-436) */
+    member?: string;
+    /** Communities that own a place or host an experience in this city (DEV-434) */
+    city?: string;
+  },
 ) {
   try {
     const queryParams = new URLSearchParams();
@@ -28,6 +37,9 @@ export async function getCommunities(
     if (popularCommunities) queryParams.append('popular', '4');
     if (following) queryParams.append('following', 'true');
     if (createdBy) queryParams.append('created_by', createdBy);
+    if (options?.joined) queryParams.append('joined', 'true');
+    if (options?.member) queryParams.append('member', options.member);
+    if (options?.city) queryParams.append('city', options.city);
     queryParams.append('status', 'published');
 
     const api = await apiWithToken();

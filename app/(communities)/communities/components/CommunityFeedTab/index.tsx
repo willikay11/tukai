@@ -65,7 +65,7 @@ const SectionHeading = ({
 export interface CommunityFeedTabProps {
   isSignedIn: boolean;
   /** Which slice of the reader's communities this tab is: their follows, or the ones they run. */
-  query: { following?: boolean; createdBy?: string };
+  query: { following?: boolean; joined?: boolean; createdBy?: string };
   /** Heading over the grid - "Following", "Created or hosted by you". */
   listHeading: string;
   signedOutMessage: string;

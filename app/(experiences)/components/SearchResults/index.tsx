@@ -7,7 +7,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { FiltersDialog } from '@/app/shared/components/Filters';
-import { matchesYourCommunities } from '@/app/shared/components/Filters/community';
+import {
+  YOUR_COMMUNITIES_PAGE,
+  matchesYourCommunities,
+} from '@/app/shared/components/Filters/community';
 import { matchesDuration } from '@/app/shared/components/Filters/duration';
 import {
   FilterChip,
@@ -74,14 +77,14 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   const needsCategoryNames = Boolean(filters.city) || filters.interests.length > 0;
   const { data: categoriesResponse } = usePlaceCategories({ pageSize: 100 }, needsCategoryNames);
   const { lat, lng } = useLocation();
-  // Capped at the hook's own page size (12) - "Your communities" is a
-  // best-effort proxy already (followed, not joined; see `matchesYourCommunities`),
-  // so a reader following more than that sees it narrow imperfectly rather
-  // than not at all
+  // The communities the reader has joined (DEV-436) - not `following`, which
+  // counts pending invites and requests. One wide page; a reader in more than
+  // that sees it narrow imperfectly rather than not at all
   const { data: followedResponse } = useGetCommunities({
     page: 1,
+    pageSize: YOUR_COMMUNITIES_PAGE,
     enabled: filters.yourCommunitiesOnly,
-    following: true,
+    joined: true,
   });
 
   const categoryNames = useMemo(() => {

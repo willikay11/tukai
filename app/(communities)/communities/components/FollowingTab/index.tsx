@@ -19,7 +19,9 @@ export const FollowingTab = ({
     {isSignedIn && <CommunityInvites />}
     <CommunityFeedTab
       isSignedIn={isSignedIn}
-      query={{ following: true }}
+      // Joined, not `following`: an unanswered invite sits in the banner above,
+      // and a request waiting on its host is not a membership yet (DEV-436)
+      query={{ joined: true }}
       listHeading="Following"
       signedOutMessage="Sign in to see the communities you follow"
       signedOutBlurb="What they have coming up, and the moments they post, all in one place."
