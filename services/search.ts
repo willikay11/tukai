@@ -103,6 +103,8 @@ export const searchAll = async (filters: SearchFilters, perPage = 24): Promise<S
             ...(filters.sort === 'rating' ? { sortBy: 'popular' as const } : {}),
             ...(filters.takesBookingsOnly ? { claimed: true } : {}),
             ...(filters.hasOfferOnly ? { hasOffer: true } : {}),
+            // Places in a city a verified guide covers (DEV-440)
+            ...(filters.guidedToursOnly ? { guidedTours: true } : {}),
           },
         )
       : Promise.resolve({ data: { count: 0, results: [] } }),

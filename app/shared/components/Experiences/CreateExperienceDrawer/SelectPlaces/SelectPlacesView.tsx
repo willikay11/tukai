@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import { SelectField } from '@/app/shared/components/Forms';
+import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useGoogleMapsAutocomplete,
   usePlaceCategories,
@@ -37,14 +37,21 @@ interface SelectPlacesViewProps {
   onConfirm: (places: PlaceSelection[]) => void;
 }
 
-// Kenya only for now - other countries aren't modeled yet (no country
-// selector data source, and `usePlaces` has no country param).
+// Kenya only for now - there is no list of countries to offer. Both go to
+// the API as `country` and `city` (DEV-432), so City asks for that city's
+// places rather than narrowing the page that came back.
 const COUNTRIES = [{ value: 'KE', label: 'Kenya' }];
 
-// `usePlaces` has no server-side city param, so City only narrows whatever
-// page of Tukai results already came back - a client-side filter, not a
-// fresh query.
-const CITIES = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Nanyuki', 'Naivasha', 'Diani', 'Eldoret'];
+const CITIES = [
+  'Nairobi',
+  'Mombasa',
+  'Kisumu',
+  'Nakuru',
+  'Nanyuki',
+  'Naivasha',
+  'Diani',
+  'Eldoret',
+];
 
 const DISC =
   'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-surface transition-colors';
@@ -113,16 +120,11 @@ export const SelectPlacesView = ({
     page: 1,
     enabled: true,
     search: search || undefined,
+    city: city || undefined,
+    country,
   });
 
-  const allPlaces: Place[] = useMemo(() => placesResponse?.data?.results ?? [], [placesResponse]);
-  const places = useMemo(
-    () =>
-      city
-        ? allPlaces.filter((place) => place.location?.city?.toLowerCase() === city.toLowerCase())
-        : allPlaces,
-    [allPlaces, city],
-  );
+  const places: Place[] = useMemo(() => placesResponse?.data?.results ?? [], [placesResponse]);
 
   // Upgrade any placeholder (empty-name) selection to full data once its
   // place turns up in the fetched grid.
@@ -187,8 +189,8 @@ export const SelectPlacesView = ({
 
   return (
     <div className="flex min-h-full flex-col">
-      <div className="flex-1 flex flex-col gap-5">
-        <div className="sticky top-0 z-[3] -mx-6 -mt-5 flex flex-col gap-4 bg-white px-6 pt-5 pb-3.5 shadow-[0_1px_0_#EDF0EE]">
+      <div className="flex flex-1 flex-col gap-5">
+        <div className="sticky top-0 z-[3] -mx-6 -mt-5 flex flex-col gap-4 bg-white px-6 pb-3.5 pt-5 shadow-[0_1px_0_#EDF0EE]">
           <div className="flex items-center justify-between gap-3">
             <h2 className="min-w-0 flex-1 truncate text-22 font-bold tracking-[-0.4px] text-gray-800">
               {headerTitle}
@@ -207,7 +209,12 @@ export const SelectPlacesView = ({
 
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-2.5">
-              <SelectField label="Country" value={country} onChange={setCountry} options={COUNTRIES} />
+              <SelectField
+                label="Country"
+                value={country}
+                onChange={setCountry}
+                options={COUNTRIES}
+              />
               <SelectField
                 label="City"
                 value={city}

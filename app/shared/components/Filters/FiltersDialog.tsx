@@ -809,15 +809,19 @@ export const FiltersDialog = ({
                 isOn={draft.yourCommunitiesOnly}
                 onToggle={() => set('yourCommunitiesOnly', !draft.yourCommunitiesOnly)}
               />
-              {showsExperiences && (
-                <ToggleCard
-                  icon="UserStar01Icon"
-                  label="Guided tours"
-                  description="Led by a verified tour guide"
-                  isOn={draft.guidedToursOnly}
-                  onToggle={() => set('guidedToursOnly', !draft.guidedToursOnly)}
-                />
-              )}
+              {/* Experiences booked with a guide, and places in a city a
+                  verified guide covers (guided_tours, DEV-440) */}
+              <ToggleCard
+                icon="UserStar01Icon"
+                label="Guided tours"
+                description={
+                  showsExperiences
+                    ? 'Led by a verified tour guide'
+                    : 'A verified guide covers the area'
+                }
+                isOn={draft.guidedToursOnly}
+                onToggle={() => set('guidedToursOnly', !draft.guidedToursOnly)}
+              />
             </div>
           </Section>
 

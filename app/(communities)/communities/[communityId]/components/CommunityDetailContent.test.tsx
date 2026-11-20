@@ -53,6 +53,14 @@ jest.mock('@/app/shared/hooks/useToast', () => ({
   useToast: () => ({ toast: jest.fn() }),
 }));
 
+const useCommunityPlaces = jest.fn();
+jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  useCommunityPlaces: (id: string) => useCommunityPlaces(id),
+}));
+jest.mock('@/app/(experiences)/components/PlaceCard', () => ({
+  PlaceCard: ({ place }: { place: { title: string } }) => <div>{`place-${place.title}`}</div>,
+}));
+
 const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ needAuth }),
@@ -83,6 +91,7 @@ describe('CommunityDetailContent', () => {
     useScrollSpy.mockReturnValue({ activeId: 'about', scrollTo });
     useExperiences.mockReturnValue({ data: { data: { results: [] } }, isLoading: false });
     useMoments.mockReturnValue({ data: { data: { results: [] } }, isLoading: false });
+    useCommunityPlaces.mockReturnValue({ data: { data: { results: [] } }, isLoading: false });
   });
 
   describe('header', () => {
@@ -268,14 +277,41 @@ describe('CommunityDetailContent', () => {
     });
   });
 
-  // Neither has a backend; the sections exist so the page is complete but must
-  // not invent content
-  describe('sections with no backend', () => {
-    it('says places are unavailable rather than showing any', () => {
+  // DEV-433: the places the community is the verified owner of
+  describe('places', () => {
+    it('asks for the community’s own places', () => {
       renderPage();
-      expect(screen.getByText("Places for a community aren't available yet")).toBeInTheDocument();
+      expect(useCommunityPlaces).toHaveBeenCalledWith('c1');
     });
 
+    it('shows each place it owns', () => {
+      useCommunityPlaces.mockReturnValue({
+        data: { data: { results: [{ id: 'pl1', title: 'Karura Café' }] } },
+        isLoading: false,
+      });
+      renderPage();
+
+      expect(screen.getByText('place-Karura Café')).toBeInTheDocument();
+      expect(screen.getByText('These are the places owned by Nairobi Hikers')).toBeInTheDocument();
+    });
+
+    it('says so when it owns none', () => {
+      renderPage();
+      expect(
+        screen.getByText("Nairobi Hikers doesn't own any places on Tukai yet"),
+      ).toBeInTheDocument();
+    });
+
+    it('holds the space while the places load', () => {
+      useCommunityPlaces.mockReturnValue({ data: undefined, isLoading: true });
+      renderPage();
+      expect(screen.getByLabelText('Loading places')).toBeInTheDocument();
+    });
+  });
+
+  // No backend yet; the section exists so the page is complete but must not
+  // invent content
+  describe('sections with no backend', () => {
     it('says there are no reviews rather than showing a rating', () => {
       renderPage();
       expect(screen.getByText('No reviews for Nairobi Hikers yet')).toBeInTheDocument();
