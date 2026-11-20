@@ -4,7 +4,7 @@ import { ReactNode, createContext, useCallback, useContext, useMemo, useState } 
 
 import { PlaceDrawer } from '@/app/shared/components/Places';
 
-export type PlaceDrawerView = 'reservations' | 'requests';
+export type PlaceDrawerView = 'reservations' | 'requests' | 'boost';
 
 type PlaceDrawerValue = {
   /** The place currently open, or null. */

@@ -1,9 +1,12 @@
 import { api, apiWithToken } from '@/services/apiService';
 
 import {
+  buyPlaceBoost,
   changePlaceBooking,
+  fetchBoostPackages,
   fetchMyPlaceClaims,
   fetchPlaceAvailability,
+  fetchPlaceBoosts,
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
   markPlaceBookingNoShow,
@@ -234,5 +237,81 @@ describe('reorderPlacePhotos', () => {
     await expect(reorderPlacePhotos('pl1', ['ph1'])).rejects.toMatchObject({
       message: 'List every photo of the place exactly once.',
     });
+  });
+});
+
+// DEV-392: boosting a place
+describe('place boosts', () => {
+  const mockPost = jest.fn();
+  beforeEach(() => {
+    (apiWithToken as jest.Mock).mockResolvedValue({ get: mockGet, post: mockPost });
+  });
+
+  it('reads the packages on offer', async () => {
+    mockGet.mockResolvedValue({
+      data: [
+        {
+          id: 'pk1',
+          name: 'Week',
+          description: '',
+          duration_days: 7,
+          price: { amount: '1000', currency: 'KES' },
+        },
+      ],
+    });
+
+    await expect(fetchBoostPackages()).resolves.toEqual([
+      {
+        id: 'pk1',
+        name: 'Week',
+        description: '',
+        durationDays: 7,
+        price: { amount: '1000', currency: 'KES' },
+      },
+    ]);
+    expect(mockGet).toHaveBeenCalledWith('/v1/places/boost-packages/');
+  });
+
+  it('reads a place’s boosts', async () => {
+    mockGet.mockResolvedValue({ data: { results: [{ id: 'b1', is_live: true }] } });
+
+    await expect(fetchPlaceBoosts('pl1')).resolves.toEqual([{ id: 'b1', isLive: true }]);
+    expect(mockGet).toHaveBeenCalledWith('/v1/places/pl1/boosts/', { params: { page_size: 50 } });
+  });
+
+  it('buys a boost, once per key, and hands back its checkout', async () => {
+    mockPost.mockResolvedValue({
+      data: {
+        boost: { id: 'b9', status: 'pending' },
+        payment: { authorization_url: 'https://checkout.paystack.com/x' },
+      },
+    });
+
+    await expect(buyPlaceBoost('pl1', 'pk1', 'key-1')).resolves.toEqual({
+      boost: { id: 'b9', status: 'pending' },
+      checkoutUrl: 'https://checkout.paystack.com/x',
+    });
+    expect(mockPost).toHaveBeenCalledWith('/v1/places/pl1/boosts/', {
+      package_id: 'pk1',
+      idempotency_key: 'key-1',
+    });
+  });
+
+  it('says why a boost could not be bought', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockPost.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          errors: [
+            { code: 'place_not_published', detail: 'Publish the place before boosting it.' },
+          ],
+        },
+      },
+    });
+
+    await expect(buyPlaceBoost('pl1', 'pk1', 'key-1')).rejects.toThrow(
+      'Publish the place before boosting it.',
+    );
   });
 });

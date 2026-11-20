@@ -52,4 +52,20 @@ describe('PlaceManagerBanner', () => {
 
     expect(screen.getAllByRole('button')).toHaveLength(1);
   });
+
+  // DEV-392
+  it('opens Boost when the button is pressed', () => {
+    const onBoost = jest.fn();
+    render(<PlaceManagerBanner rules={[]} onOpenSettings={jest.fn()} onBoost={onBoost} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Boost/ }));
+
+    expect(onBoost).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows no Boost button without a way to open it', () => {
+    render(<PlaceManagerBanner rules={[]} onOpenSettings={jest.fn()} />);
+
+    expect(screen.queryByRole('button', { name: /Boost/ })).not.toBeInTheDocument();
+  });
 });

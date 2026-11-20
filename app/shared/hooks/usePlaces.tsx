@@ -28,6 +28,7 @@ import {
   deletePlaceReview,
   deletePlaceReviewImage,
   deletePlaceSocialLink,
+  fetchBoostPackages,
   fetchFeaturedPlaces,
   fetchFollowing,
   fetchGoogleMapsAutocomplete,
@@ -38,6 +39,7 @@ import {
   fetchPlaceAvailability,
   fetchPlaceBookingRequests,
   fetchPlaceBookings,
+  fetchPlaceBoosts,
   fetchPlaceCategories,
   fetchPlaceOwnership,
   fetchPlaceReservationProfile,
@@ -455,6 +457,23 @@ export const usePlaceClaims = (enabled = true) => {
     enabled: enabled && Boolean(session?.user?.id),
   });
 };
+
+/** The boost packages on offer (DEV-392) */
+export const useBoostPackages = (enabled = true) =>
+  useQuery({
+    queryKey: ['boostPackages'],
+    queryFn: fetchBoostPackages,
+    enabled,
+    staleTime: 60 * 60 * 1000,
+  });
+
+/** A place's boosts; the place's managers only */
+export const usePlaceBoosts = (placeId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['placeBoosts', placeId],
+    queryFn: () => fetchPlaceBoosts(placeId),
+    enabled: enabled && Boolean(placeId),
+  });
 
 /** Bookings at places across every place, in one request (DEV-387/388) */
 export const usePlaceBookings = (
