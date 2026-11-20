@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
+import { Provider } from 'react-redux';
 
 import { render, waitFor } from '@testing-library/react';
-import { Provider } from 'react-redux';
 
 import { store } from '@/store/store';
 
@@ -11,6 +11,9 @@ import { ConnectPlaceDrawerProvider, useConnectPlaceDrawer } from './ConnectPlac
 // exercised elsewhere (ConnectPlaceDrawer.test.tsx)
 jest.mock('@/app/shared/components/Places/ConnectPlaceDrawer', () => ({
   ConnectPlaceDrawer: () => null,
+}));
+jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  usePlaceClaims: () => ({ data: undefined, dataUpdatedAt: 0, refetch: jest.fn() }),
 }));
 
 const SubmitOnMount = () => {

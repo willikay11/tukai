@@ -1,5 +1,6 @@
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
+import { PlaceClaimRow } from '@/types/claim';
 import { PlaceCategoryParams } from '@/types/networkParam';
 import {
   CreatePlaceAvailabilityException,
@@ -835,6 +836,27 @@ export async function fetchFollowing(userId: string): Promise<ApiResponse> {
  * Only a 404 means "nobody owns this". Every other failure is "could not ask",
  * and is thrown so callers do not read a broken request as an empty answer.
  */
+/**
+ * The person's place claims, newest first: ones they made, and ones made for
+ * communities they run - each with its status, when it was decided and the
+ * community's documents (DEV-391/427).
+ */
+export async function fetchMyPlaceClaims(): Promise<PlaceClaimRow[]> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get('/v1/places/claims/', { params: { page_size: 100 } });
+    const data = parseSnakeToCamel(res.data);
+    return Array.isArray(data) ? data : (data?.results ?? []);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Your claims could not be loaded'),
+    };
+  }
+}
+
 export async function fetchPlaceOwnership(placeId: string): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();

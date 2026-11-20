@@ -59,7 +59,11 @@ const PLACE = {
 const deleteOwnership = jest.fn().mockResolvedValue({});
 let placeOwnerships: Record<string, unknown> = {};
 let searchResults: unknown[] = [];
+// The server's claims list (DEV-391): undefined until it has been read
+let claimRows: unknown[] | undefined;
+let claimsListedAt = 0;
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  usePlaceClaims: () => ({ data: claimRows, dataUpdatedAt: claimsListedAt, refetch: jest.fn() }),
   useClaimPlaceOwnership: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
   useDeletePlaceOwnership: () => ({ mutateAsync: deleteOwnership }),
   usePlaceReservationProfiles: () => ({ data: undefined }),
@@ -117,6 +121,8 @@ const resetBackend = () => {
   verificationDocuments = undefined;
   placeOwnerships = {};
   searchResults = [];
+  claimRows = undefined;
+  claimsListedAt = 0;
 };
 
 describe('ConnectPlaceDrawer', () => {
@@ -273,68 +279,94 @@ const renderSentClaim = (view: 'claim' | 'documents', ...sent: SentDocument[]) =
     </ConnectPlaceDrawerProvider>,
   );
 
-const ownership = (approved: boolean) => ({ success: true, data: { community: 'c1', approved } });
+// One row of the server's claims list for this claim's place
+const claimRow = (extra: Record<string, unknown> = {}) => ({
+  id: 'own-1',
+  place: { id: 'place-1', title: 'Karura Forest', slug: 'karura-forest' },
+  community: { id: 'c1', title: 'Weekend Readers' },
+  status: 'pending',
+  decidedAt: null,
+  verificationStatus: 'under_review',
+  documents: [],
+  dateCreated: new Date().toISOString(),
+  ...extra,
+});
+
+const listClaims = (...rows: unknown[]) => {
+  claimRows = rows;
+  // Read after the claim was sent
+  claimsListedAt = Date.now() + 60_000;
+};
 
 describe('ConnectPlaceDrawer claim status', () => {
   beforeEach(resetBackend);
 
-  it('is under review while the ownership claim has not been approved', async () => {
-    placeOwnerships = { 'place-1': ownership(false) };
-    communityVerificationStatus = 'under_review';
+  it('is under review while the claim is pending', async () => {
+    listClaims(claimRow());
     renderSentClaim('claim', SENT.certificate, SENT.license);
 
     expect(await screen.findByText('Under review')).toBeInTheDocument();
   });
 
-  it('stays under review until the API has answered', async () => {
+  it('stays under review until the server has answered', async () => {
     renderSentClaim('claim', SENT.certificate, SENT.license);
 
     expect(await screen.findByText('Under review')).toBeInTheDocument();
   });
 
-  it('is approved once the ownership claim is approved, and offers reservation setup', async () => {
-    placeOwnerships = { 'place-1': ownership(true) };
-    communityVerificationStatus = 'approved';
+  it('is approved once the claim is, says when, and offers reservation setup', async () => {
+    listClaims(
+      claimRow({
+        status: 'approved',
+        verificationStatus: 'approved',
+        decidedAt: '2026-11-18T10:30:00Z',
+      }),
+    );
     renderSentClaim('claim', SENT.certificate, SENT.license);
 
     expect(await screen.findByText('Approved')).toBeInTheDocument();
+    // DEV-427: when it was decided, not when it was sent
+    expect(screen.getByText(/^Approved .*18/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Sent /)).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /Set up reservations/ }).length).toBeGreaterThan(
       0,
     );
   });
 
   it('is not approved when Tukai rejected the verification, and offers a new claim', async () => {
-    placeOwnerships = { 'place-1': ownership(false) };
-    communityVerificationStatus = 'rejected';
+    listClaims(claimRow({ verificationStatus: 'rejected' }));
     renderSentClaim('claim', SENT.certificate, SENT.license);
 
     expect(await screen.findByText('Not approved')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Start a new claim' })).toBeInTheDocument();
   });
 
-  it('is cancelled when the place no longer carries the ownership claim', async () => {
-    placeOwnerships = { 'place-1': { success: true, data: null } };
+  it('is cancelled when the server no longer lists its place', async () => {
+    listClaims();
     renderSentClaim('claim', SENT.certificate, SENT.license);
 
     expect(await screen.findByText('Cancelled')).toBeInTheDocument();
   });
 
-  it('lists the documents the API holds, naming each by its file', async () => {
-    verificationDocuments = {
-      data: {
-        results: [
+  it('lists the documents the server holds, naming each by its file', async () => {
+    listClaims(
+      claimRow({
+        documents: [
           {
             id: 'srv-1',
             documentType: 'tax_registration',
             fileUrl: 'https://cdn.tukai.co/verification_documents/pin%20certificate.pdf?sig=1',
             notes: 'Registered in 2019',
+            dateCreated: '2026-11-01T09:00:00Z',
           },
         ],
-      },
-    };
+      }),
+    );
     renderSentClaim('claim', SENT.certificate);
 
-    expect(await screen.findByText('pin certificate.pdf')).toBeInTheDocument();
+    // In the drawer, and on the claim the rest of the app reads
+    expect(await screen.findAllByText('pin certificate.pdf')).toHaveLength(2);
+    expect(screen.getByTestId('claim-files')).toHaveTextContent('pin certificate.pdf');
     expect(screen.getByText('Tax registration')).toBeInTheDocument();
     expect(screen.getByText('Registered in 2019')).toBeInTheDocument();
   });

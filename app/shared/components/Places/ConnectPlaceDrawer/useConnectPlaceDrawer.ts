@@ -27,14 +27,9 @@ import { ClaimDocument } from '@/types/claim';
 import { Community } from '@/types/community';
 import { Place } from '@/types/place';
 
-import {
-  EMPTY_NEW_PLACE_FIELDS,
-  NewPlaceDraftFields,
-  isNewPlaceComplete,
-} from './claimSchema';
 import type { PlaceCardLockReason } from './PlaceResultCard';
+import { EMPTY_NEW_PLACE_FIELDS, NewPlaceDraftFields, isNewPlaceComplete } from './claimSchema';
 import { OWNERSHIP_DOCUMENT_TYPES, REQUIRED_DOCUMENT_COUNT } from './documentTypes';
-import { useResolvedClaim } from './useResolvedClaim';
 
 export type CommunityVisibility = 'public' | 'private';
 export type PlaceSource = 'existing' | 'new';
@@ -59,8 +54,8 @@ export const joinPlaceNames = (names: string[]) => {
 
 /**
  * Everything the Connect a place drawer needs: the draft itself, plus the
- * claims sent in this session (see ConnectPlaceDrawerContext), whose live
- * status and documents useResolvedClaim reads back from the API.
+ * person's claims (see ConnectPlaceDrawerContext), with their status and
+ * documents from the server's claims list.
  */
 export const useConnectPlaceDrawer = () => {
   // Always rendered inside its own provider (ConnectPlaceDrawerContext), so
@@ -96,11 +91,9 @@ export const useConnectPlaceDrawer = () => {
 
   const [justSubmittedClaimId, setJustSubmittedClaimId] = useState<string | null>(null);
   const activeClaimId = justSubmittedClaimId ?? options.claimId;
-  const displayedClaim = useResolvedClaim(
-    activeClaimId ? getClaim(activeClaimId) : undefined,
-    communities,
-    isOpen,
-  );
+  // Status, documents and when it was decided come merged in from the
+  // server's claims list (DEV-391)
+  const displayedClaim = activeClaimId ? getClaim(activeClaimId) : undefined;
 
   const view: 'form' | 'documents' | 'claim' = displayedClaim
     ? justSubmittedClaimId
@@ -114,7 +107,8 @@ export const useConnectPlaceDrawer = () => {
   const [selectedCommunityId, setSelectedCommunityId] = useState(options.communityId ?? '');
   const [isNewCommunityBoxOpen, setIsNewCommunityBoxOpen] = useState(false);
   const [newCommunityName, setNewCommunityName] = useState('');
-  const [newCommunityVisibility, setNewCommunityVisibility] = useState<CommunityVisibility>('public');
+  const [newCommunityVisibility, setNewCommunityVisibility] =
+    useState<CommunityVisibility>('public');
 
   useEffect(() => {
     if (!isOpen || view !== 'form') return;
@@ -328,14 +322,18 @@ export const useConnectPlaceDrawer = () => {
 
   const removeDocument = (documentType: string) => {
     if (pendingDocuments.some((entry) => entry.documentType === documentType)) {
-      setPendingDocuments((current) => current.filter((entry) => entry.documentType !== documentType));
+      setPendingDocuments((current) =>
+        current.filter((entry) => entry.documentType !== documentType),
+      );
       return;
     }
     setRemovedDocumentTypes((current) => [...current, documentType]);
   };
 
   const prefillKey = displayedClaim
-    ? [displayedClaim.id, displayedClaim.notes, ...displayedClaim.documents.map((d) => d.id)].join('|')
+    ? [displayedClaim.id, displayedClaim.notes, ...displayedClaim.documents.map((d) => d.id)].join(
+        '|',
+      )
     : '';
 
   // Documents mode opens prefilled with whatever was already sent
@@ -480,8 +478,13 @@ export const useConnectPlaceDrawer = () => {
     setIsSubmitting(true);
 
     try {
-      const replacedTypes = [...removedDocumentTypes, ...pendingDocuments.map((d) => d.documentType)];
-      for (const document of sentDocuments.filter((sent) => replacedTypes.includes(sent.documentType))) {
+      const replacedTypes = [
+        ...removedDocumentTypes,
+        ...pendingDocuments.map((d) => d.documentType),
+      ];
+      for (const document of sentDocuments.filter((sent) =>
+        replacedTypes.includes(sent.documentType),
+      )) {
         await deleteDocument({ communityId: displayedClaim.communityId, documentId: document.id });
       }
 

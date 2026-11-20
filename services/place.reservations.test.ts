@@ -2,6 +2,7 @@ import { api, apiWithToken } from '@/services/apiService';
 
 import {
   changePlaceBooking,
+  fetchMyPlaceClaims,
   fetchPlaceAvailability,
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
@@ -181,5 +182,22 @@ describe('changePlaceBooking', () => {
         partySize: 2,
       }),
     ).rejects.toMatchObject({ status: 400, message: 'Paid bookings can’t be changed.' });
+  });
+});
+
+// DEV-391: the person's claims, from the server
+describe('fetchMyPlaceClaims', () => {
+  it('reads every claim, with its status and decided date', async () => {
+    mockGet.mockResolvedValue({
+      status: 200,
+      data: {
+        results: [{ id: 'o1', status: 'approved', decided_at: '2026-11-11T08:00:00Z' }],
+      },
+    });
+
+    const rows = await fetchMyPlaceClaims();
+
+    expect(mockGet).toHaveBeenCalledWith('/v1/places/claims/', { params: { page_size: 100 } });
+    expect(rows).toEqual([{ id: 'o1', status: 'approved', decidedAt: '2026-11-11T08:00:00Z' }]);
   });
 });

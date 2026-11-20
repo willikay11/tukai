@@ -49,6 +49,8 @@ let ownership: { community: string; approved: boolean } | null = null;
 let isLoadingOwnership = false;
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  // The server's claims list; not read yet here, so the browser's claims stand
+  usePlaceClaims: () => ({ data: undefined, dataUpdatedAt: 0, refetch: jest.fn() }),
   useClaimPlaceOwnership: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
   useDeletePlaceOwnership: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
   usePlaceOwnership: () => ({ data: { data: ownership }, isLoading: isLoadingOwnership }),
