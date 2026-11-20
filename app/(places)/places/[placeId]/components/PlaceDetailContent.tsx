@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
 import { Photo } from '@/types/photo';
-import { Place } from '@/types/place';
+import { Place, placeFacts } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
 import { haversineKm } from '@/utils/geo-utils';
 
@@ -140,7 +140,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
               do. The gallery and description above are not wrapped - they are
               on screen at load, so there is nothing to reveal. */}
           <RevealOnScroll>
-            <PlaceDetailsSection properties={place.properties ?? []} />
+            <PlaceDetailsSection properties={placeFacts(place)} />
           </RevealOnScroll>
 
           <RevealOnScroll>

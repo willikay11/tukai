@@ -13,6 +13,8 @@ export type PlaceEditDraft = {
     description?: string;
     googleMapPlaceId?: string;
     categoriesIds?: string[];
+    /** Free or paid entry (DEV-408) */
+    entryType?: 'free' | 'paid';
   };
   photos?: {
     /** `localId` is the photo's id on the grid, until the upload gives it one */

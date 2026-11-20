@@ -12,7 +12,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Photo } from '@/types/photo';
-import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
+import { Place, PlaceProperty, PlaceSocialLink, isEntryProperty } from '@/types/place';
 import { PlaceEditDraft } from '@/types/placeEdit';
 import { placePath } from '@/utils/detail-paths';
 
@@ -48,11 +48,16 @@ const STEP_FOR_FIELD: Record<string, StepId> = {
   socialLinks: 'social-links',
 };
 
-// Free or paid entry is not a field on a place - the API has no such column -
-// so it is kept as the property of this name, which is also how it reaches the
-// place page. The pill and the Properties row are therefore one value.
-const ENTRY_KEY = 'Entry';
-const ENTRY_LABEL = { free: 'Free entry', paid: 'Paid entry' };
+/**
+ * Free or paid entry is the place's `entry_type` (DEV-408). Places from
+ * before it kept entry as a property named "Entry": that is read when the
+ * field is blank, and kept off the Properties step, so it isn't edited twice.
+ */
+const entryOf = (place: Place): 'free' | 'paid' => {
+  if (place.entryType === 'free' || place.entryType === 'paid') return place.entryType;
+  const legacy = place.properties?.find(isEntryProperty);
+  return /paid/i.test(legacy?.value ?? '') ? 'paid' : 'free';
+};
 
 const isNew = (id: string) => id.startsWith('new-');
 
@@ -112,7 +117,8 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
       description: place.description ?? '',
       address: place.location?.formattedAddress ?? place.location?.name ?? '',
       photos: toEditPhotos(place.photos),
-      properties: toPropertyValues(place.properties),
+      properties: toPropertyValues((place.properties ?? []).filter((p) => !isEntryProperty(p))),
+      entry: entryOf(place),
       socialLinks: toSocialLinkValues(place.socialLinks),
     }),
     [place],
@@ -129,21 +135,13 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
   // Shown as the source of the pill groups, exactly as the API lists them
   const categoryNames = (place.categories ?? []).map((category) => category.name).filter(Boolean);
 
-  const entryProperty = properties.find(
-    (property) => property.key.trim().toLowerCase() === ENTRY_KEY.toLowerCase(),
-  );
-  const entry: 'free' | 'paid' = /paid/i.test(entryProperty?.value ?? '') ? 'paid' : 'free';
-
+  const [entry, setEntryState] = useState<'free' | 'paid'>(initial.entry);
+  // A place with no entry type yet takes one as soon as a pill is pressed,
+  // even the one already showing
+  const [isEntryPicked, setIsEntryPicked] = useState(false);
   const setEntry = (next: 'free' | 'paid') => {
-    const value = ENTRY_LABEL[next];
-
-    setProperties((current) =>
-      entryProperty
-        ? current.map((property) =>
-            property.id === entryProperty.id ? { ...property, value } : property,
-          )
-        : [...current, { id: `new-entry-${Date.now()}`, key: ENTRY_KEY, value }],
-    );
+    setEntryState(next);
+    setIsEntryPicked(true);
   };
 
   const values: EditPlaceValues = {
@@ -169,14 +167,19 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
   const buildDraft = (): PlaceEditDraft => {
     const draft: PlaceEditDraft = {};
 
+    const entryChanged = entry !== initial.entry || (isEntryPicked && place.entryType !== entry);
     const aboutChanged =
-      title !== initial.title || description !== initial.description || Boolean(googleMapPlaceId);
+      title !== initial.title ||
+      description !== initial.description ||
+      Boolean(googleMapPlaceId) ||
+      entryChanged;
 
     if (aboutChanged) {
       draft.about = {
         title,
         description,
         ...(googleMapPlaceId ? { googleMapPlaceId } : {}),
+        ...(entryChanged ? { entryType: entry } : {}),
       };
     }
 
