@@ -20,15 +20,16 @@ export const AboutSection = ({
 
   const memberCount = community.membersCount ?? community.members?.length ?? 0;
 
-  // ⚠️ Only these two rows have a source. The API returns no phone, email,
-  // location, meeting schedule or social links for a community, so those rows
-  // from the design are not rendered rather than filled with placeholders.
+  // The API's own counts (DEV-413/414), which cover more than the page of
+  // experiences this page loads; that page's length is only the fallback
+  const upcoming = community.upcomingExperiencesCount ?? upcomingCount;
+  const past = community.pastExperiencesCount;
   const details = [
     { icon: 'UserGroupIcon', label: 'Members', value: `${memberCount}` },
     {
       icon: 'Calendar03Icon',
       label: 'Experiences hosted',
-      value: `${upcomingCount} upcoming`,
+      value: past !== undefined ? `${upcoming} upcoming, ${past} past` : `${upcoming} upcoming`,
     },
   ];
 

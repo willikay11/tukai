@@ -81,9 +81,16 @@ export const CommunityCard = ({
   const friendNames = ownerFaces(friends, friends.length)
     .map((friend) => friend.name.split(' ')[0])
     .filter(Boolean);
+
+  // `upcoming_experiences_count` (DEV-413): shown, as the design does, only
+  // when there is something coming up
+  const upcomingCount = community.upcomingExperiencesCount;
+  const hasUpcoming = (upcomingCount ?? 0) > 0;
+
   const ariaLabel = communityCardAriaLabel(community, {
     memberCount,
     friendNames: friendNames.length ? friendNames : undefined,
+    upcomingCount: hasUpcoming ? upcomingCount : undefined,
   });
 
   return (
@@ -138,17 +145,33 @@ export const CommunityCard = ({
           </div>
         )}
 
-        {showMeta && interests.length > 0 && (
-          <div className="flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden">
-            {interests.map((interest) => (
-              <IconComponent
-                key={interest.id}
-                iconName={interest.icon}
-                size={15}
-                color="currentColor"
-                className="flex-shrink-0 text-ink-muted"
-              />
-            ))}
+        {showMeta && (interests.length > 0 || hasUpcoming) && (
+          <div className="flex min-w-0 flex-nowrap items-center gap-2">
+            {interests.length > 0 && (
+              <span className="flex min-w-0 flex-[0_1_auto] items-center gap-1 overflow-hidden">
+                {interests.map((interest) => (
+                  <IconComponent
+                    key={interest.id}
+                    iconName={interest.icon}
+                    size={15}
+                    color="currentColor"
+                    className="flex-shrink-0 text-ink-muted"
+                  />
+                ))}
+              </span>
+            )}
+            {interests.length > 0 && hasUpcoming && (
+              <span aria-hidden className="h-1 w-1 flex-none rounded-full bg-distance" />
+            )}
+            {hasUpcoming && (
+              <span
+                data-testid="upcoming-count"
+                className="flex flex-none items-center gap-1 text-xs font-semibold text-ink-muted"
+              >
+                <IconComponent iconName="Calendar03Icon" size={15} color="currentColor" />
+                {upcomingCount}
+              </span>
+            )}
           </div>
         )}
       </div>

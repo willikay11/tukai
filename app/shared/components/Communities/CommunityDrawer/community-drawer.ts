@@ -30,6 +30,14 @@ export const nameOfMember = (member: CommunityMember): string =>
   (member as CommunityMember & { email?: string }).email ||
   'Member';
 
+/** The user ids of its co-hosts - `hosts` past the owner (DEV-415). */
+export const coHostIdsOf = (community: Community): Set<string> =>
+  new Set(
+    (community.hosts ?? [])
+      .filter((host) => host.role !== 'owner' && host.user?.id)
+      .map((host) => host.user.id),
+  );
+
 /** The community's owner, from the detail endpoint's own member records. */
 export const ownerOf = (members: CommunityMember[]): CommunityMember | undefined =>
   members.find((member) => member.role === 'owner');

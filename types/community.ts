@@ -59,6 +59,14 @@ export type Community = {
   membersCount?: number;
   /** The detail endpoint only. The claimed places that make it a verified business. */
   verifiedPlaces?: CommunityPlace[];
+  /** Public phone, email and socials, or null (DEV-412) */
+  contact?: CommunityPublicContact | null;
+  /** Published, public experiences still to come, hosted or shared with it (DEV-413) */
+  upcomingExperiencesCount?: number;
+  /** Experiences it hosted that are over (DEV-414) */
+  pastExperiencesCount?: number;
+  /** The owner first, then co-hosts (DEV-415) */
+  hosts?: CommunityHost[];
   /** How many people the reader follows have joined - 0 signed out (DEV-384) */
   friendsCount?: number;
   /** Up to a few of them, earliest to join first (DEV-384) */
@@ -98,6 +106,49 @@ export type CommunityRatingSummary = {
  * `/communities/{id}/contact/` - kept off the detail payload. Every field is
  * optional in practice: Create community collects none of them yet.
  */
+/**
+ * `contact` on the community list and detail (DEV-412): what it shows the
+ * public. Null when it has set none. The contact person's name stays behind
+ * the hosts-only `/contact/`.
+ */
+export type CommunityPublicContact = {
+  email?: string | null;
+  emailVerified?: boolean;
+  phone?: string | null;
+  phoneVerified?: boolean;
+  whatsapp?: string | null;
+  websiteUrl?: string | null;
+  youtubeUrl?: string | null;
+  instagramUrl?: string | null;
+  tiktokUrl?: string | null;
+  xUrl?: string | null;
+};
+
+/** The public contact in the shape the drawer's contact parts read. */
+export const contactFromPublic = (
+  contact: CommunityPublicContact | null | undefined,
+): CommunityContact | undefined =>
+  contact
+    ? {
+        id: '',
+        contactEmail: contact.email,
+        contactPhone: contact.phone,
+        whatsapp: contact.whatsapp,
+        websiteUrl: contact.websiteUrl,
+        instagramUrl: contact.instagramUrl,
+        tiktokUrl: contact.tiktokUrl,
+        youtubeUrl: contact.youtubeUrl,
+        xUrl: contact.xUrl,
+      }
+    : undefined;
+
+/** Someone who runs the community: its owner, or a co-host (`admin`) (DEV-415). */
+export type CommunityHost = { user: CommunityOwner; role: 'owner' | 'admin' | string };
+
+/** Whether this person runs the community - its owner or a co-host. */
+export const isHostOf = (community: Community, userId: string | undefined): boolean =>
+  Boolean(userId) && (community.hosts ?? []).some((host) => host.user?.id === userId);
+
 export type CommunityContact = {
   id: string;
   contactName?: string | null;

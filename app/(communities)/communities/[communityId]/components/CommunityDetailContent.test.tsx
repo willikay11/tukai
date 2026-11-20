@@ -207,6 +207,19 @@ describe('CommunityDetailContent', () => {
 
   describe('sections', () => {
     // The About section leads with its photos; the pill already labels it
+    // DEV-413/414: the API's counts, not the page of experiences loaded
+    it('counts the upcoming and past experiences from the community', () => {
+      renderPage({ upcomingExperiencesCount: 14, pastExperiencesCount: 52 });
+
+      expect(screen.getByText('14 upcoming, 52 past')).toBeInTheDocument();
+    });
+
+    it('counts the experiences it loaded when the community has no counts', () => {
+      renderPage();
+
+      expect(screen.getByText('0 upcoming')).toBeInTheDocument();
+    });
+
     it('does not repeat an About heading', () => {
       renderPage();
 
