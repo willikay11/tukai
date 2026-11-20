@@ -70,8 +70,17 @@ const decodeEntities = (text: string): string =>
 
 // Descriptions are stored as HTML. Strip every tag for contexts that render
 // text rather than markup - card excerpts, meta tags, line-clamped summaries.
+// The end of a block, or a line break, stands for a space once tags go - else
+// "<p>One.</p><p>Two.</p>" reads "One.Two."
+const BLOCK_BREAK = /<br\s*\/?>|<\/(?:p|div|li|h[1-6]|blockquote|tr|td|th|section|article)>/gi;
+
 export const toPlainText = (text: string | null | undefined): string =>
-  decodeEntities(sanitizeHtml(text || '', { allowedTags: [], allowedAttributes: {} }))
+  decodeEntities(
+    sanitizeHtml((text || '').replace(BLOCK_BREAK, '$& '), {
+      allowedTags: [],
+      allowedAttributes: {},
+    }),
+  )
     .replace(/\s+/g, ' ')
     .trim();
 
