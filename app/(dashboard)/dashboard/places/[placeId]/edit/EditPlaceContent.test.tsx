@@ -245,6 +245,32 @@ describe('EditPlaceContent', () => {
     expect(draft.properties).toBeUndefined();
   });
 
+  // DEV-410: a changed property says how its value links
+  it('sends each changed property with the link type its value reads as', async () => {
+    const user = userEvent.setup();
+    renderEdit(
+      place({
+        properties: [
+          { id: 'pr1', key: 'Opening hours', value: 'Mon-Sun' },
+          { id: 'pr2', key: 'Email', value: 'old@kazuri.co.ke', linkType: 'email' },
+        ],
+      }),
+    );
+
+    await user.click(screen.getByRole('tab', { name: /Properties/ }));
+    await user.clear(screen.getByLabelText('Email'));
+    await user.type(screen.getByLabelText('Email'), 'hello@kazuri.co.ke');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => expect(save).toHaveBeenCalled());
+    const [draft] = save.mock.calls[0];
+    // Clearing the field drops the old row; the address typed in is a new one
+    expect(draft.properties.removedIds).toEqual(['pr2']);
+    expect(draft.properties.added).toEqual([
+      expect.objectContaining({ key: 'Email', value: 'hello@kazuri.co.ke', linkType: 'email' }),
+    ]);
+  });
+
   it('marks a removed photo for deletion and a picked one for upload', async () => {
     const user = userEvent.setup();
     const { container } = renderEdit();

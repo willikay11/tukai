@@ -40,15 +40,19 @@ export type PlaceVerifiedOwner = {
   admins: { id: string }[];
 };
 
+export type PropertyLinkType = 'website' | 'email' | 'phone';
+
 export type PlaceProperty = {
   id: string;
   key: string;
   value: string;
   icon?: string;
   canCopy?: boolean;
-  // Set when the value is a website or email address, so the drawer can link it.
-  // The API does not send this yet; until it does, the value renders as text.
-  linkType?: 'website' | 'email';
+  /**
+   * How the value links (DEV-410): a website, an email (mailto:) or a phone
+   * number (tel:). Blank for plain text.
+   */
+  linkType?: PropertyLinkType | '' | null;
 };
 
 export type PlaceSocialLink = {
@@ -85,4 +89,43 @@ export const placeFacts = (place: Pick<Place, 'properties' | 'entryType'>): Plac
     },
     ...properties.filter((property) => !isEntryProperty(property)),
   ];
+};
+
+/** Where a property's value links to, or null for plain text (DEV-410) */
+export const propertyHref = (
+  property: Pick<PlaceProperty, 'value' | 'linkType'>,
+): string | null => {
+  const value = property.value.trim();
+  if (!value) return null;
+  switch (property.linkType) {
+    case 'website':
+      // One saved without its scheme would resolve relative to the page
+      return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    case 'email':
+      return `mailto:${value}`;
+    case 'phone':
+      return `tel:${value.replace(/[^\d+]/g, '')}`;
+    default:
+      return null;
+  }
+};
+
+const PHONE_VALUE = /^\+?[\d\s().-]{6,24}$/;
+const PHONE_KEY = /phone|mobile|whats ?app|telephone|\btel\b|call/i;
+const EMAIL_VALUE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const WEBSITE_VALUE = /^https?:\/\/[^\s/]+\.[^\s]+$/i;
+
+/**
+ * The link type a property's value reads as, for one added or changed in
+ * Edit place (DEV-410). The API checks the value against it, so it's only
+ * set where the value would pass: a website with its http(s)://, an email
+ * address, or a phone number on a row named for one - a number alone could
+ * be a capacity or a year. Anything else is plain text.
+ */
+export const linkTypeFor = (key: string, value: string): PropertyLinkType | '' => {
+  const text = value.trim();
+  if (EMAIL_VALUE.test(text)) return 'email';
+  if (WEBSITE_VALUE.test(text)) return 'website';
+  if (PHONE_KEY.test(key) && PHONE_VALUE.test(text)) return 'phone';
+  return '';
 };
