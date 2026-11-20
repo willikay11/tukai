@@ -23,7 +23,15 @@ export async function fetchPlaces(
   // accepted. An object so the next one does not become an eighth argument.
   // `withAuth` sends the reader's token, without which the API cannot tell
   // which places they have saved and reports `is_bookmarked: false` on all.
-  options?: { sortBy?: 'popular'; hasExperiences?: boolean; withAuth?: boolean },
+  options?: {
+    sortBy?: 'popular';
+    hasExperiences?: boolean;
+    withAuth?: boolean;
+    /** Only places a community has claimed (DEV-411) */
+    claimed?: boolean;
+    /** Only places with something on: reservations open, or an experience (DEV-411) */
+    hasOffer?: boolean;
+  },
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
@@ -47,6 +55,8 @@ export async function fetchPlaces(
     // The API reads a parameter's presence as the filter, so this goes in only
     // when it is wanted
     if (options?.hasExperiences) queryParams.append('has_experiences', 'true');
+    if (options?.claimed) queryParams.append('claimed', 'true');
+    if (options?.hasOffer) queryParams.append('has_offer', 'true');
 
     const axiosInstance = options?.withAuth ? await apiWithToken() : api;
     const res = await axiosInstance.get(`/v1/places/?${queryParams.toString()}`);

@@ -11,6 +11,7 @@ import {
   fetchPlaceGuides,
   fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
+  fetchPlaces,
   markPlaceBookingNoShow,
   reorderPlacePhotos,
   updatePlace,
@@ -376,5 +377,32 @@ describe('updatePlace, entry type', () => {
     await updatePlace('pl1', { title: 'Kraftory' });
 
     expect((mockPatch.mock.calls[0][1] as FormData).has('entry_type')).toBe(false);
+  });
+});
+
+// DEV-411: the place search toggles
+describe('fetchPlaces', () => {
+  const sentUrl = () => (api.get as jest.Mock).mock.calls[0][0] as string;
+
+  beforeEach(() => {
+    (api.get as jest.Mock).mockResolvedValue({ status: 200, data: { count: 0, results: [] } });
+  });
+
+  it('asks for claimed places and places with something on', async () => {
+    await fetchPlaces(1, 12, undefined, 'karura', undefined, undefined, {
+      claimed: true,
+      hasOffer: true,
+    });
+
+    const params = new URLSearchParams(sentUrl().split('?')[1]);
+    expect(params.get('claimed')).toBe('true');
+    expect(params.get('has_offer')).toBe('true');
+  });
+
+  it('leaves both out unless asked', async () => {
+    await fetchPlaces(1, 12, undefined, 'karura');
+
+    expect(sentUrl()).not.toContain('claimed');
+    expect(sentUrl()).not.toContain('has_offer');
   });
 });

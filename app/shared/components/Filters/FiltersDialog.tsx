@@ -708,23 +708,23 @@ export const FiltersDialog = ({
 
               {showsPlaces && (
                 <>
-                  {/* No `isClaimed`/offer field exists on Place yet - shown to
-                      match the canvas, but inert until the API carries them. */}
+                  {/* Sent as claimed=true and has_offer=true (DEV-411). The API's
+                      "offer" is something to book or join there now - open
+                      reservations or a published experience - not a discount,
+                      so the toggle says that rather than the canvas's "deal" */}
                   <ToggleCard
                     icon="CalendarCheckIn01Icon"
                     label="Takes bookings"
                     description="Claimed places you can book"
-                    isOn={false}
-                    onToggle={() => {}}
-                    disabled
+                    isOn={draft.takesBookingsOnly}
+                    onToggle={() => set('takesBookingsOnly', !draft.takesBookingsOnly)}
                   />
                   <ToggleCard
                     icon="DiscountTag01Icon"
-                    label="Has an offer"
-                    description="A deal or discount right now"
-                    isOn={false}
-                    onToggle={() => {}}
-                    disabled
+                    label="Something on"
+                    description="Reservations open, or an experience there"
+                    isOn={draft.hasOfferOnly}
+                    onToggle={() => set('hasOfferOnly', !draft.hasOfferOnly)}
                   />
                 </>
               )}

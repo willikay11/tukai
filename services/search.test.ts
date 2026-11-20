@@ -1,7 +1,9 @@
+import { EMPTY_FILTERS } from '@/types/search';
+
 import { getCommunities } from './community';
 import { fetchExperiences } from './experience';
 import { fetchPlaces } from './place';
-import { searchPlaces } from './search';
+import { searchAll, searchPlaces } from './search';
 
 jest.mock('./place', () => ({ fetchPlaces: jest.fn() }));
 jest.mock('./experience', () => ({ fetchExperiences: jest.fn() }));
@@ -88,5 +90,47 @@ describe('searchPlaces', () => {
     expect(mockPlaces).toHaveBeenCalledWith(1, 12, undefined, 'karura');
     expect(mockExperiences).toHaveBeenCalledWith(expect.objectContaining({ page_size: 12 }));
     expect(mockCommunities).toHaveBeenCalledWith(undefined, 1, 12, 'karura');
+  });
+});
+
+describe('searchAll', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPlaces.mockResolvedValue(page(0, []));
+    mockExperiences.mockResolvedValue(page(0, []));
+    mockCommunities.mockResolvedValue(page(0, []));
+  });
+
+  const placeOptions = () => mockPlaces.mock.calls[0][6];
+
+  // DEV-411
+  it('asks for claimed places when only places that take bookings are wanted', async () => {
+    await searchAll({ ...EMPTY_FILTERS, query: 'karura', takesBookingsOnly: true });
+
+    expect(placeOptions()).toEqual({ claimed: true });
+  });
+
+  it('asks for places with something on when only those are wanted', async () => {
+    await searchAll({ ...EMPTY_FILTERS, query: 'karura', hasOfferOnly: true });
+
+    expect(placeOptions()).toEqual({ hasOffer: true });
+  });
+
+  it('sends both alongside the rating hint', async () => {
+    await searchAll({
+      ...EMPTY_FILTERS,
+      query: 'karura',
+      sort: 'rating',
+      takesBookingsOnly: true,
+      hasOfferOnly: true,
+    });
+
+    expect(placeOptions()).toEqual({ sortBy: 'popular', claimed: true, hasOffer: true });
+  });
+
+  it('sends neither by default', async () => {
+    await searchAll({ ...EMPTY_FILTERS, query: 'karura' });
+
+    expect(placeOptions()).toEqual({});
   });
 });

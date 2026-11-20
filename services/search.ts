@@ -99,7 +99,11 @@ export const searchAll = async (filters: SearchFilters, perPage = 24): Promise<S
           // A hint for which page comes back, not the final order - the
           // results view re-sorts the page itself (see `sortPlaces`), since
           // `sort_by` is the only ordering this endpoint accepts
-          filters.sort === 'rating' ? { sortBy: 'popular' } : undefined,
+          {
+            ...(filters.sort === 'rating' ? { sortBy: 'popular' as const } : {}),
+            ...(filters.takesBookingsOnly ? { claimed: true } : {}),
+            ...(filters.hasOfferOnly ? { hasOffer: true } : {}),
+          },
         )
       : Promise.resolve({ data: { count: 0, results: [] } }),
     wants('experiences')
