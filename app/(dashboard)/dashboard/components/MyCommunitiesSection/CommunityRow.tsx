@@ -7,17 +7,26 @@ import { Photo } from '@/types/photo';
 import { communityPath } from '@/utils/detail-paths';
 
 /**
- * ⚠️ The handoff's "{n} past experiences hosted" line has no backing count
- * anywhere in the API (its own prototype generates that number from a hash of
- * the community id - explicitly sample data, not logic to port). This shows
- * the community's real member count instead - see the Dashboard backend-gaps
- * note.
+ * The handoff's "You run this, {n} past experiences hosted", from
+ * `past_experiences_count` (DEV-414). The member count stands in only when a
+ * response does not carry it.
  */
-export const CommunityRow = ({ community, isOwned }: { community: Community; isOwned: boolean }) => {
+export const CommunityRow = ({
+  community,
+  isOwned,
+}: {
+  community: Community;
+  isOwned: boolean;
+}) => {
   const cover =
     community.photos?.find((photo: Photo) => photo.isCover)?.photo || community.photos?.[0]?.photo;
   const members = community.membersCount ?? 0;
-  const line = `${isOwned ? 'You run this · ' : ''}${members} ${members === 1 ? 'member' : 'members'}`;
+  const past = community.pastExperiencesCount;
+  const tally =
+    past !== undefined
+      ? `${past} past ${past === 1 ? 'experience' : 'experiences'} hosted`
+      : `${members} ${members === 1 ? 'member' : 'members'}`;
+  const line = `${isOwned ? 'You run this, ' : ''}${tally}`;
 
   return (
     <Link
@@ -35,7 +44,12 @@ export const CommunityRow = ({ community, isOwned }: { community: Community; isO
           </span>
           {community.verified && (
             <span role="img" aria-label="Verified business" className="flex-shrink-0">
-              <IconComponent iconName="Briefcase01Icon" size={19} color="currentColor" className="text-brand" />
+              <IconComponent
+                iconName="Briefcase01Icon"
+                size={19}
+                color="currentColor"
+                className="text-brand"
+              />
             </span>
           )}
           <IconComponent

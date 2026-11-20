@@ -18,11 +18,15 @@ export const CommunityAdminBand = ({
   community,
   owner,
   isOwnerSelf,
+  isHostSelf = isOwnerSelf,
   pastExperiences,
 }: {
   community: Pick<Community, 'id' | 'title'>;
   owner?: CommunityMember;
   isOwnerSelf: boolean;
+  /** Owner or co-host: writes to the members rather than the host (DEV-415) */
+  isHostSelf?: boolean;
+  /** `past_experiences_count` (DEV-414) */
   pastExperiences: number;
 }) => {
   const { toast } = useToast();
@@ -80,10 +84,10 @@ export const CommunityAdminBand = ({
         className="inline-flex h-12 flex-none items-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-5 text-[14.5px] font-bold text-white active:scale-[0.98]"
       >
         <IconComponent iconName="BubbleChatIcon" size={18} color="currentColor" />
-        {isOwnerSelf ? 'Message members' : 'Message host'}
+        {isHostSelf ? 'Message members' : 'Message host'}
       </button>
 
-      {isOwnerSelf ? (
+      {isHostSelf ? (
         <SendMessage
           open={isMessageOpen}
           setOpen={setIsMessageOpen}

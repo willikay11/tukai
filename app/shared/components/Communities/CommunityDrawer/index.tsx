@@ -11,11 +11,7 @@ import {
   useMomentComposer,
 } from '@/app/shared/components/Moments';
 import { Share, communityShare } from '@/app/shared/components/Share';
-import {
-  useCommunityContact,
-  useCommunityDetail,
-  useCommunityRatings,
-} from '@/app/shared/hooks/useCommunities';
+import { useCommunityDetail, useCommunityRatings } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
@@ -24,7 +20,13 @@ import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { Community, CommunityContact, CommunityRating } from '@/types/community';
+import {
+  Community,
+  CommunityContact,
+  CommunityRating,
+  contactFromPublic,
+  isHostOf,
+} from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
 
@@ -41,6 +43,7 @@ import { CommunityReviews } from './CommunityReviews';
 import { CommunityUpcomingExperiences, UPCOMING_PAGE_SIZE } from './CommunityUpcomingExperiences';
 import {
   accessOf,
+  coHostIdsOf,
   communityPlaces,
   drawerPhotos,
   ownerOf,
@@ -136,10 +139,9 @@ const CommunityBody = ({
   );
   const moments: Moment[] = useMemo(() => momentsResponse?.data?.results ?? [], [momentsResponse]);
 
-  const { data: contactResponse } = useCommunityContact(community.id, isFullView);
-  const contact: CommunityContact | undefined = contactResponse?.success
-    ? contactResponse.data
-    : undefined;
+  // The community's own public contact (DEV-412). `/contact/` is for its
+  // hosts only, so read from there everyone else saw none
+  const contact: CommunityContact | undefined = contactFromPublic(community.contact);
 
   const { data: ratingsResponse } = useCommunityRatings(community.id, isFullView);
   const ratings: CommunityRating[] = ratingsResponse?.data?.results ?? [];
@@ -201,6 +203,8 @@ const CommunityBody = ({
   }
 
   const isOwnerSelf = access === 'owner';
+  // Owner or co-host: both can write to every member (DEV-415)
+  const isHostSelf = isOwnerSelf || isHostOf(community, currentUserId);
   const isMember = access === 'member';
 
   return (
@@ -227,6 +231,7 @@ const CommunityBody = ({
           memberCount={memberCount}
           currentUserId={currentUserId}
           isOwnerSelf={isOwnerSelf}
+          coHostIds={coHostIdsOf(community)}
         />
         <Divider />
 
@@ -248,7 +253,8 @@ const CommunityBody = ({
           community={community}
           owner={owner}
           isOwnerSelf={isOwnerSelf}
-          pastExperiences={pastExperienceCount(experiences)}
+          isHostSelf={isHostSelf}
+          pastExperiences={community.pastExperiencesCount ?? pastExperienceCount(experiences)}
         />
 
         <CommunityPlaces communityTitle={community.title} places={places} isOwned={isOwned} />
@@ -278,6 +284,7 @@ const CommunityBody = ({
           community={community}
           isMember={isMember}
           isOwnerSelf={isOwnerSelf}
+          isHostSelf={isHostSelf}
           owner={owner}
           isJoining={actions.isJoining}
           onJoin={actions.join}

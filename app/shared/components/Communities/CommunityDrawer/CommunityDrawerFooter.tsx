@@ -18,6 +18,7 @@ export const CommunityDrawerFooter = ({
   community,
   isMember,
   isOwnerSelf,
+  isHostSelf = isOwnerSelf,
   owner,
   isJoining,
   onJoin,
@@ -26,6 +27,8 @@ export const CommunityDrawerFooter = ({
   community: Pick<Community, 'id' | 'title'>;
   isMember: boolean;
   isOwnerSelf: boolean;
+  /** Owner or co-host: Message members (DEV-415) */
+  isHostSelf?: boolean;
   owner?: CommunityMember;
   isJoining: boolean;
   onJoin: () => void;
@@ -42,7 +45,7 @@ export const CommunityDrawerFooter = ({
           className={`${BUTTON} bg-gradient-to-b from-brand-mid to-brand-deep text-white hover:shadow-[0_6px_16px_rgba(1,51,52,.16)] hover:brightness-[1.04]`}
         >
           <IconComponent iconName="BubbleChatIcon" size={20} color="currentColor" />
-          {isOwnerSelf ? 'Message members' : 'Message host'}
+          {isHostSelf ? 'Message members' : 'Message host'}
         </button>
       ) : (
         <button
@@ -65,14 +68,14 @@ export const CommunityDrawerFooter = ({
         Share moment
       </button>
 
-      {isOwnerSelf && (
+      {isHostSelf && (
         <SendMessage
           open={isMessageOpen}
           setOpen={setIsMessageOpen}
           community={{ id: community.id, title: community.title }}
         />
       )}
-      {isMember && !isOwnerSelf && owner?.user?.id && (
+      {isMember && !isHostSelf && owner?.user?.id && (
         <SendMessage open={isMessageOpen} setOpen={setIsMessageOpen} recipientId={owner.user.id} />
       )}
     </>

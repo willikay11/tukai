@@ -60,7 +60,6 @@ jest.mock('@/app/shared/components/Moments', () => ({
 }));
 
 let communityResponse: unknown;
-let contactResponse: unknown;
 let ratingsResponse: unknown;
 const joinCommunity = jest.fn();
 const leaveCommunity = jest.fn();
@@ -69,7 +68,6 @@ const acceptInvite = jest.fn();
 const declineInvite = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCommunityDetail: () => ({ data: communityResponse, isLoading: !communityResponse }),
-  useCommunityContact: () => ({ data: contactResponse }),
   useCommunityRatings: () => ({ data: ratingsResponse }),
   useJoinCommunity: () => ({ mutate: joinCommunity, isPending: false }),
   useLeaveCommunity: () => ({ mutate: leaveCommunity, isPending: false }),
@@ -130,7 +128,6 @@ describe('CommunityDrawer', () => {
     jest.clearAllMocks();
     sessionUserId = 'u1';
     communityResponse = community();
-    contactResponse = { success: true, data: {} };
     ratingsResponse = { success: true, data: { count: 0, results: [] } };
     experiences = [];
     moments = [];
@@ -248,15 +245,15 @@ describe('CommunityDrawer', () => {
       expect(screen.queryByRole('heading', { name: 'Socials' })).not.toBeInTheDocument();
     });
 
+    // DEV-412: the community's own public `contact`, not the hosts-only /contact/
     it('shows the phone, email and socials it has', () => {
-      contactResponse = {
-        success: true,
-        data: {
-          contactPhone: '+254 712 345 678',
-          contactEmail: 'runners@gmail.com',
+      communityResponse = community({
+        contact: {
+          phone: '+254 712 345 678',
+          email: 'runners@gmail.com',
           instagramUrl: 'https://instagram.com/runners',
         },
-      };
+      });
       renderDrawer();
 
       expect(screen.getByRole('link', { name: '+254 712 345 678' })).toHaveAttribute(
@@ -283,6 +280,36 @@ describe('CommunityDrawer', () => {
       renderDrawer();
 
       expect(screen.getByText('1 past experience organised')).toBeInTheDocument();
+    });
+
+    // DEV-414: the API's count, not just what the upcoming page holds
+    it('takes the past count from the community', () => {
+      communityResponse = community({ pastExperiencesCount: 37 });
+      renderDrawer();
+
+      expect(screen.getByText('37 past experiences organised')).toBeInTheDocument();
+    });
+
+    // DEV-415
+    it('labels co-hosts after the admin', () => {
+      communityResponse = community({
+        members: [
+          ownerRecord(),
+          {
+            id: 'm2',
+            role: 'admin',
+            inviteStatus: 'accepted',
+            user: { id: 'co-1', displayName: 'Kevo' },
+          },
+        ],
+        hosts: [
+          { user: { id: 'owner-1' }, role: 'owner' },
+          { user: { id: 'co-1' }, role: 'admin' },
+        ],
+      });
+      renderDrawer();
+
+      expect(screen.getByText('Co-host')).toBeInTheDocument();
     });
 
     it('names the experience a review is of, with the average and count', () => {
@@ -345,6 +372,27 @@ describe('CommunityDrawer', () => {
 
       expect(needAuth).toHaveBeenCalledWith('join', expect.any(Function));
       expect(joinCommunity).not.toHaveBeenCalled();
+    });
+
+    // DEV-415: a co-host writes to the members, like the owner
+    it('offers a co-host Message members', async () => {
+      communityResponse = community({
+        members: [
+          ownerRecord(),
+          { id: 'm1', role: 'admin', inviteStatus: 'accepted', user: { id: 'u1' } },
+        ],
+        hosts: [
+          { user: { id: 'owner-1' }, role: 'owner' },
+          { user: { id: 'u1' }, role: 'admin' },
+        ],
+      });
+      renderDrawer();
+
+      expect(screen.queryByRole('button', { name: /Message host/ })).not.toBeInTheDocument();
+      await userEvent.click(screen.getAllByRole('button', { name: /Message members/ })[0]);
+      expect(sendMessageProps).toHaveBeenCalledWith(
+        expect.objectContaining({ open: true, community: expect.objectContaining({ id: 'c1' }) }),
+      );
     });
 
     it('offers Message host and Leave community to a member', async () => {

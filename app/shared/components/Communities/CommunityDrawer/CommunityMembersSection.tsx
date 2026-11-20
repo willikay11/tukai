@@ -101,6 +101,7 @@ export const CommunityMembersSection = ({
   memberCount,
   currentUserId,
   isOwnerSelf,
+  coHostIds,
 }: {
   communityId: string;
   communityTitle: string;
@@ -109,6 +110,8 @@ export const CommunityMembersSection = ({
   memberCount: number;
   currentUserId?: string;
   isOwnerSelf: boolean;
+  /** Labelled Co-host, after the owner (DEV-415) */
+  coHostIds?: Set<string>;
 }) => {
   const { toast } = useToast();
   const accepted = acceptedMembers(members);
@@ -117,11 +120,16 @@ export const CommunityMembersSection = ({
   const self = accepted.find(
     (member) => member.user?.id === currentUserId && member.id !== owner?.id,
   );
-  const rest = accepted.filter((member) => member.id !== owner?.id && member.id !== self?.id);
+  const isCoHost = (member: CommunityMember) =>
+    Boolean(member.user?.id && coHostIds?.has(member.user.id));
+  const others = accepted.filter((member) => member.id !== owner?.id && member.id !== self?.id);
+  const coHosts = others.filter(isCoHost);
+  const rest = others.filter((member) => !isCoHost(member));
 
   const ordered = [
     ...(owner ? [{ member: owner, role: isOwnerSelf ? 'You' : 'Admin' }] : []),
     ...(self ? [{ member: self, role: 'You' }] : []),
+    ...coHosts.map((member) => ({ member, role: 'Co-host' })),
     ...rest.map((member) => ({ member, role: undefined })),
   ];
 
