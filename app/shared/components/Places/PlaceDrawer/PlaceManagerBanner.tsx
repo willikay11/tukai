@@ -8,18 +8,21 @@ import { reservationSummary } from './reservation-summary';
 
 /**
  * What a manager sees at the top of their own place: which of their
- * communities holds it, how it is set up, and the way into the settings.
+ * communities holds it, how it is set up, the way into the settings, and
+ * Boost (DEV-392).
  */
 export const PlaceManagerBanner = ({
   communityName,
   profile,
   rules,
   onOpenSettings,
+  onBoost,
 }: {
   communityName?: string;
   profile?: PlaceReservationProfile;
   rules: PlaceAvailabilityRule[];
   onOpenSettings: () => void;
+  onBoost?: () => void;
 }) => (
   <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl bg-surface-brand p-4">
     <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white">
@@ -49,5 +52,17 @@ export const PlaceManagerBanner = ({
       <IconComponent iconName="Calendar03Icon" size={18} color="currentColor" />
       {profile ? 'Reservation settings' : 'Set up reservations'}
     </Button>
+
+    {onBoost && (
+      <Button
+        type="button"
+        variant="outline-primary"
+        onClick={onBoost}
+        className="h-11 flex-shrink-0 rounded-full px-[18px] text-[14px] font-semibold"
+      >
+        <IconComponent iconName="RocketIcon" size={18} color="currentColor" />
+        Boost
+      </Button>
+    )}
   </div>
 );

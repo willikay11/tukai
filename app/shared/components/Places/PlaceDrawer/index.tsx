@@ -38,6 +38,7 @@ import { HostReservationsSection } from './HostReservationsSection';
 import { MyReservations } from './MyReservations';
 import { PlaceAboutSection } from './PlaceAboutSection';
 import { PlaceBookingForm } from './PlaceBookingForm';
+import { PlaceBoostView } from './PlaceBoostView';
 import { PlaceCommunity } from './PlaceCommunity';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
@@ -63,6 +64,7 @@ const VIEW_TITLES: Record<string, string | undefined> = {
   requests: 'Reservations',
   'hold-off': 'Hold off reservations',
   booking: 'Make a booking',
+  boost: 'Boost this place',
 };
 
 const Loading = () => (
@@ -89,7 +91,7 @@ export const PlaceDrawer = ({
 }: {
   placeId: string | null;
   isOpen: boolean;
-  initialView?: 'reservations' | 'requests';
+  initialView?: 'reservations' | 'requests' | 'boost';
   onClose: () => void;
 }) => {
   // The panel itself, held in state rather than a ref: it mounts only once the
@@ -102,7 +104,7 @@ export const PlaceDrawer = ({
    * opens on a different place.
    */
   const [view, setView] = useState<
-    'place' | 'review' | 'moment' | 'reservations' | 'requests' | 'hold-off' | 'booking'
+    'place' | 'review' | 'moment' | 'reservations' | 'requests' | 'hold-off' | 'booking' | 'boost'
   >('place');
   // The booking being changed, while the booking form is open on it (DEV-389)
   const [changingBooking, setChangingBooking] = useState<PlaceBookingRequest | null>(null);
@@ -258,6 +260,8 @@ export const PlaceDrawer = ({
                 rules={rules}
                 exceptions={exceptions}
               />
+            ) : view === 'boost' && isManager ? (
+              <PlaceBoostView place={place} onDone={() => setView('place')} />
             ) : view === 'booking' && bookingProfile ? (
               <PlaceBookingForm
                 key={changingBooking?.id ?? 'new'}
@@ -299,6 +303,7 @@ export const PlaceDrawer = ({
                         profile={profile}
                         rules={rules}
                         onOpenSettings={() => setView('reservations')}
+                        onBoost={() => setView('boost')}
                       />
                     )}
 

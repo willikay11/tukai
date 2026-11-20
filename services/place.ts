@@ -2,6 +2,7 @@ import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { PlaceClaimRow } from '@/types/claim';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { BoostPackage, PlaceBoost } from '@/types/placeBoost';
 import {
   CreatePlaceAvailabilityException,
   CreatePlaceBookingRequest,
@@ -854,6 +855,62 @@ export async function fetchMyPlaceClaims(): Promise<PlaceClaimRow[]> {
       success: false,
       message: parseApiError(error.response?.data, 'Your claims could not be loaded'),
     };
+  }
+}
+
+/** The boost packages on offer (DEV-392) */
+export async function fetchBoostPackages(): Promise<BoostPackage[]> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get('/v1/places/boost-packages/');
+    const data = parseSnakeToCamel(res.data);
+    return Array.isArray(data) ? data : (data?.results ?? []);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Boosts could not be loaded'));
+  }
+}
+
+/** A place's boosts, newest first. The place's managers only. */
+export async function fetchPlaceBoosts(placeId: string): Promise<PlaceBoost[]> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/${placeId}/boosts/`, {
+      params: { page_size: 50 },
+    });
+    const data = parseSnakeToCamel(res.data);
+    return Array.isArray(data) ? data : (data?.results ?? []);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, "This place's boosts could not be loaded"));
+  }
+}
+
+/**
+ * Buys a boost for a place: the boost comes back pending, with the Paystack
+ * checkout to pay it on. Once paid the place ranks first in listings and
+ * search for the package's days.
+ */
+export async function buyPlaceBoost(
+  placeId: string,
+  packageId: string,
+  idempotencyKey: string,
+): Promise<{ boost: PlaceBoost; checkoutUrl: string | null }> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(`/v1/places/${placeId}/boosts/`, {
+      package_id: packageId,
+      idempotency_key: idempotencyKey,
+    });
+    const data = parseSnakeToCamel(res.data);
+    const payment = data?.payment ?? {};
+    return {
+      boost: data?.boost,
+      checkoutUrl: payment.authorizationUrl ?? payment.paymentDetails?.authorizationUrl ?? null,
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'This boost could not be started'));
   }
 }
 

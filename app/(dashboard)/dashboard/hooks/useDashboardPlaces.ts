@@ -5,10 +5,11 @@ import { useQueries } from '@tanstack/react-query';
 import { useMyPlaces, usePlaceBookings } from '@/app/shared/hooks/usePlaces';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
-import { fetchPlaceReservationProfiles } from '@/services/place';
+import { fetchPlaceBoosts, fetchPlaceReservationProfiles } from '@/services/place';
 import { Claim } from '@/types/claim';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
+import { boostDay, boostStateOf } from '@/types/placeBoost';
 import { placePath } from '@/utils/detail-paths';
 
 const coverOf = (place: Place): string | undefined =>
@@ -34,8 +35,7 @@ export interface DashboardPlaceItem {
  * The Dashboard's "My places" section: places claimed by a community this
  * person owns, each with how many reservation requests are waiting - read in
  * one request across every place they manage (DEV-388), not one per place.
- * Boost has no data model anywhere in the app yet, so its stat chip is
- * omitted - see the Dashboard backend-gaps note.
+ * Each place also says whether it's boosted, and opens Boost (DEV-392).
  */
 export const useDashboardPlaces = (userId: string | undefined) => {
   const { data: placesResponse, isLoading: isLoadingPlaces } = useMyPlaces(Boolean(userId));
@@ -69,7 +69,17 @@ export const useDashboardPlaces = (userId: string | undefined) => {
     if (placeId) waitingByPlace.set(placeId, (waitingByPlace.get(placeId) ?? 0) + 1);
   }
 
-  const items: DashboardPlaceItem[] = places.map((place) => {
+  // Each place's boosts, for "Boosted until" (DEV-392)
+  const boostQueries = useQueries({
+    queries: places.map((place) => ({
+      queryKey: ['placeBoosts', place.id],
+      queryFn: () => fetchPlaceBoosts(place.id),
+      enabled: Boolean(userId),
+      retry: false,
+    })),
+  });
+
+  const items: DashboardPlaceItem[] = places.map((place, index) => {
     const profileId = profileIdByPlace.get(place.id);
     const pending = waitingByPlace.get(place.id) ?? 0;
 
@@ -90,13 +100,22 @@ export const useDashboardPlaces = (userId: string | undefined) => {
           onClick: () => placeDrawer?.openPlace(place.id, { view: 'reservations' }),
         };
 
+    const boosts = boostQueries[index]?.data;
+    const { boostedUntil } = boostStateOf(Array.isArray(boosts) ? boosts : []);
+    const boostStat: DashboardPlaceStat = {
+      label: boostedUntil ? 'Boosted until' : 'Boost this place',
+      value: boostedUntil ? boostDay(boostedUntil) : '',
+      alert: false,
+      onClick: () => placeDrawer?.openPlace(place.id, { view: 'boost' }),
+    };
+
     return {
       id: place.id,
       name: place.title,
       locality: place.location?.city ?? '',
       image: coverOf(place),
       onOpenHref: placePath(place),
-      stats: [reservationStat],
+      stats: [reservationStat, boostStat],
     };
   });
 

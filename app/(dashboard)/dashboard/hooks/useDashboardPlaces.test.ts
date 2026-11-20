@@ -7,7 +7,14 @@ import { Claim } from '@/types/claim';
 import { useDashboardPlaces } from './useDashboardPlaces';
 
 let mockProfiles: unknown[] = [];
-jest.mock('@tanstack/react-query', () => ({ useQueries: () => mockProfiles }));
+let mockBoosts: Record<string, unknown[]> = {};
+// Each place's reservation profile, or its boosts (DEV-392), by query
+jest.mock('@tanstack/react-query', () => ({
+  useQueries: ({ queries }: { queries: { queryKey: string[] }[] }) =>
+    queries[0]?.queryKey[0] === 'placeBoosts'
+      ? queries.map((query) => ({ data: mockBoosts[query.queryKey[1]] }))
+      : mockProfiles,
+}));
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useMyPlaces: jest.fn(),
   usePlaceBookings: jest.fn(() => ({ data: [] })),
@@ -116,5 +123,63 @@ describe('useDashboardPlaces reservation requests', () => {
       alert: false,
     });
     expect(result.current.places[1].stats[0].label).toBe('Set up reservations');
+  });
+});
+
+// DEV-392: each place says whether it's boosted, and opens Boost
+describe('useDashboardPlaces boosts', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockProfiles = [];
+    mockBoosts = {};
+    mockUseMyPlaces.mockReturnValue({
+      data: { data: { results: [{ id: 'place-a', title: 'Kraftory', photos: [] }] } },
+      isLoading: false,
+    });
+    mockUseConnectPlaceDrawer.mockReturnValue({ claims: [] });
+  });
+
+  afterAll(() => {
+    mockBoosts = {};
+  });
+
+  it('offers to boost a place that is not boosted', () => {
+    const { result } = renderHook(() => useDashboardPlaces('user-1'));
+
+    expect(result.current.places[0].stats[1]).toMatchObject({
+      label: 'Boost this place',
+      value: '',
+      alert: false,
+    });
+  });
+
+  it('says until when a boosted place is boosted', () => {
+    mockBoosts = {
+      'place-a': [
+        {
+          id: 'b1',
+          status: 'paid',
+          isLive: true,
+          startsAt: '2026-01-01T00:00:00Z',
+          endsAt: '2099-11-28T12:00:00',
+        },
+      ],
+    };
+
+    const { result } = renderHook(() => useDashboardPlaces('user-1'));
+
+    expect(result.current.places[0].stats[1]).toMatchObject({
+      label: 'Boosted until',
+      value: 'Sat 28 Nov',
+    });
+  });
+
+  it('keeps the reservation stat first, for the request count', () => {
+    const { result } = renderHook(() => useDashboardPlaces('user-1'));
+
+    expect(result.current.places[0].stats.map((stat) => stat.label)).toEqual([
+      'Set up reservations',
+      'Boost this place',
+    ]);
   });
 });
