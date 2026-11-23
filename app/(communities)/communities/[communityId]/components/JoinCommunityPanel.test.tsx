@@ -19,9 +19,13 @@ jest.mock('@/context/AuthDialogContext', () => ({
 
 const joinMutate = jest.fn();
 const leaveMutate = jest.fn();
+const acceptMutate = jest.fn();
+const declineMutate = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useJoinCommunity: () => ({ mutate: joinMutate, isPending: false }),
   useLeaveCommunity: () => ({ mutate: leaveMutate, isPending: false }),
+  useAcceptCommunityInvite: () => ({ mutate: acceptMutate, isPending: false }),
+  useDeclineCommunityInvite: () => ({ mutate: declineMutate, isPending: false }),
 }));
 
 const member = (id: string, inviteStatus: CommunityMember['inviteStatus']): CommunityMember =>
@@ -68,7 +72,8 @@ describe('JoinCommunityPanel', () => {
     expect(screen.queryByRole('button', { name: 'Join Community' })).not.toBeInTheDocument();
   });
 
-  it('shows a pending request rather than a leave action', () => {
+  // DEV-447: a private community keeps admin approval
+  it('shows a request as Requested, with a way to withdraw it', () => {
     render(
       <JoinCommunityPanel
         community={community({ isPublic: false, members: [member('u1', 'requested')] })}
@@ -76,7 +81,65 @@ describe('JoinCommunityPanel', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: 'Request pending' })).toBeDisabled();
+    expect(screen.getByText('Requested')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Withdraw request' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: /Leave community/ })).not.toBeInTheDocument();
+  });
+
+  it('withdraws the request through leave, and offers to ask again', async () => {
+    const user = userEvent.setup();
+    leaveMutate.mockImplementation((_vars, { onSuccess }) => onSuccess());
+    render(
+      <JoinCommunityPanel
+        community={community({ isPublic: false, members: [member('u1', 'requested')] })}
+        currentUserId="u1"
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Withdraw request' }));
+
+    expect(leaveMutate).toHaveBeenCalledWith(
+      { communityId: 'c1', userId: 'u1' },
+      expect.anything(),
+    );
+    expect(await screen.findByRole('button', { name: 'Request to Join' })).toBeEnabled();
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Request to join Hikers withdrawn.' }),
+    );
+  });
+
+  // An invite was a disabled "Request pending" with no way to accept it
+  it('lets an invited reader accept straight away', async () => {
+    const user = userEvent.setup();
+    acceptMutate.mockImplementation((_id, { onSuccess }) => onSuccess());
+    render(
+      <JoinCommunityPanel
+        community={community({ isPublic: false, members: [member('u1', 'pending')] })}
+        currentUserId="u1"
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Accept invite' }));
+
+    expect(acceptMutate).toHaveBeenCalledWith('c1', expect.anything());
+    expect(joinMutate).not.toHaveBeenCalled();
+    expect(await screen.findByRole('button', { name: /Leave community/ })).toBeInTheDocument();
+  });
+
+  it('lets an invited reader decline', async () => {
+    const user = userEvent.setup();
+    declineMutate.mockImplementation((_id, { onSuccess }) => onSuccess());
+    render(
+      <JoinCommunityPanel
+        community={community({ isPublic: false, members: [member('u1', 'pending')] })}
+        currentUserId="u1"
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Decline' }));
+
+    expect(declineMutate).toHaveBeenCalledWith('c1', expect.anything());
+    expect(await screen.findByRole('button', { name: 'Request to Join' })).toBeInTheDocument();
   });
 
   it('switches to leave once a public join succeeds', async () => {
@@ -97,7 +160,8 @@ describe('JoinCommunityPanel', () => {
     render(<JoinCommunityPanel community={community({ isPublic: false })} currentUserId="u1" />);
     await user.click(screen.getByRole('button', { name: 'Request to Join' }));
 
-    expect(await screen.findByRole('button', { name: 'Request pending' })).toBeDisabled();
+    expect(await screen.findByText('Requested')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Withdraw request' })).toBeInTheDocument();
   });
 
   it('confirms before leaving, then removes the reader by id', async () => {

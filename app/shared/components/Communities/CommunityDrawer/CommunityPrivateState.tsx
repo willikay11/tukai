@@ -82,8 +82,19 @@ export const CommunityInvitedState = ({
   );
 };
 
-/** Anyone else on a private community. A forwarded link grants nothing. */
-export const CommunityClosedState = () => (
+/**
+ * A private community. Anyone with no record of it is refused by the API and
+ * gets the plain version - a forwarded link grants nothing. Someone who
+ * declined an invite or was turned down can still see it, and may ask to
+ * join: its hosts approve requests (DEV-447).
+ */
+export const CommunityClosedState = ({
+  onRequest,
+  isRequesting = false,
+}: {
+  onRequest?: () => void;
+  isRequesting?: boolean;
+} = {}) => (
   <div className="flex flex-col items-center gap-3 rounded-xl bg-surface px-6 py-10 text-center">
     <IconComponent
       iconName="SquareLock02Icon"
@@ -95,7 +106,50 @@ export const CommunityClosedState = () => (
       This community is private
     </span>
     <p className="max-w-[40ch] text-[15px] leading-[1.55] text-ink-muted [text-wrap:pretty]">
-      Only people its owner invites can open it. A forwarded link grants nothing.
+      {onRequest
+        ? 'Only its members can open it. Ask to join and its admins will review your request.'
+        : 'Only people its owner invites can open it. A forwarded link grants nothing.'}
     </p>
+    {onRequest && (
+      <button
+        type="button"
+        onClick={onRequest}
+        disabled={isRequesting}
+        className={`mt-1 ${GRADIENT_BUTTON}`}
+      >
+        Request to join
+      </button>
+    )}
+  </div>
+);
+
+/**
+ * Asked to join a private community, waiting on its hosts - with a way to
+ * take the request back (DEV-447).
+ */
+export const CommunityRequestedState = ({
+  community,
+  isWithdrawing,
+  onWithdraw,
+}: {
+  community: Community;
+  isWithdrawing: boolean;
+  onWithdraw: () => void;
+}) => (
+  <div className="flex flex-col items-center gap-3 rounded-xl bg-surface-brand px-6 py-10 text-center">
+    <IconComponent iconName="Clock01Icon" size={36} color="currentColor" className="text-brand" />
+    <span className="text-lg font-semibold text-brand-ink [text-wrap:balance]">Requested</span>
+    <p className="max-w-[40ch] text-[15px] leading-[1.55] text-ink [text-wrap:pretty]">
+      You asked to join {community.title}. Its admins will review your request, and you will hear
+      once they do.
+    </p>
+    <button
+      type="button"
+      onClick={onWithdraw}
+      disabled={isWithdrawing}
+      className="mt-1 h-12 whitespace-nowrap rounded-full bg-white px-[22px] text-[15px] font-semibold text-brand-ink hover:bg-surface active:scale-[0.97] disabled:opacity-60"
+    >
+      Withdraw request
+    </button>
   </div>
 );

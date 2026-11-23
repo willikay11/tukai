@@ -180,7 +180,30 @@ export async function messageCommunityMembers(
 }
 
 /**
- * The swagger's own `leave` route. `remove-member`, which this used before, is
+ * A host answering join requests: `accepted` lets them in, `rejected` turns
+ * them down - they can ask again later (DEV-447).
+ */
+export async function answerJoinRequest(
+  communityId: string,
+  userId: string,
+  answer: 'accepted' | 'rejected',
+) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/communities/${communityId}/update-join-status/`, {
+      invite_status: answer,
+      user_ids: [userId],
+    });
+    return { status: response.status, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'The request could not be answered'));
+  }
+}
+
+/**
+ * The swagger's own `leave` route. It also withdraws a join request still
+ * waiting on a host (DEV-447). `remove-member`, which this used before, is
  * documented as owner/admin only, so a member removing themselves could be
  * turned away. Owners cannot leave their own community.
  */

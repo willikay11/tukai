@@ -68,6 +68,7 @@ const leaveCommunity = jest.fn();
 const cancelInvite = jest.fn();
 const acceptInvite = jest.fn();
 const declineInvite = jest.fn();
+const answerRequest = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCommunityDetail: () => ({ data: communityResponse, isLoading: !communityResponse }),
   useCommunityRatings: () => ({ data: ratingsResponse }),
@@ -78,6 +79,7 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCancelCommunityInvite: () => ({ mutate: cancelInvite, isPending: false }),
   useAcceptCommunityInvite: () => ({ mutate: acceptInvite, isPending: false }),
   useDeclineCommunityInvite: () => ({ mutate: declineInvite, isPending: false }),
+  useAnswerJoinRequest: () => ({ mutate: answerRequest, isPending: false }),
 }));
 
 let experiences: unknown[] = [];
@@ -593,7 +595,8 @@ describe('CommunityDrawer', () => {
       expect(screen.queryByRole('button', { name: 'Share moment' })).not.toBeInTheDocument();
     });
 
-    it('turns into the closed state when the invite is declined', async () => {
+    // DEV-447: declining leaves the way to ask later
+    it('turns into the closed state, with a request, when the invite is declined', async () => {
       communityResponse = community({
         isPublic: false,
         members: [
@@ -611,7 +614,40 @@ describe('CommunityDrawer', () => {
 
       expect(declineInvite).toHaveBeenCalledWith('c1', expect.anything());
       expect(screen.getByText('This community is private')).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'Private community' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Request to join' })).toBeInTheDocument();
+    });
+
+    it('lets someone who was turned down ask again, as a request', async () => {
+      communityResponse = community({
+        isPublic: false,
+        members: [
+          ownerRecord(),
+          { id: 'm1', role: 'regular', inviteStatus: 'rejected', user: { id: 'u1' } },
+        ],
+      });
+      renderDrawer();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Request to join' }));
+
+      expect(joinCommunity).toHaveBeenCalledWith('c1', expect.anything());
+      expect(acceptInvite).not.toHaveBeenCalled();
+    });
+
+    it('shows a waiting request as Requested, and withdraws it', async () => {
+      communityResponse = community({
+        isPublic: false,
+        members: [
+          ownerRecord(),
+          { id: 'm1', role: 'regular', inviteStatus: 'requested', user: { id: 'u1' } },
+        ],
+      });
+      renderDrawer();
+
+      expect(screen.getByText('Requested')).toBeInTheDocument();
+      expect(screen.queryByRole('navigation', { name: 'Sections' })).not.toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Withdraw request' }));
+
+      expect(leaveCommunity).toHaveBeenCalledWith({ communityId: 'c1' }, expect.anything());
     });
 
     it('joins from the invite', async () => {
@@ -655,6 +691,7 @@ describe('CommunityDrawer', () => {
       renderDrawer();
 
       expect(screen.getByText('This community is private')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Request to join' })).not.toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Private community' })).toBeInTheDocument();
       expect(screen.queryByText('Nairobi Trail Runners')).not.toBeInTheDocument();
     });

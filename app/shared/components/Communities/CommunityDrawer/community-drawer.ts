@@ -46,6 +46,10 @@ export const ownerOf = (members: CommunityMember[]): CommunityMember | undefined
 export const acceptedMembers = (members: CommunityMember[]): CommunityMember[] =>
   members.filter((member) => member.role === 'owner' || membershipOf(member) === 'member');
 
+/** People asking to join a private community, for its hosts to answer (DEV-447). */
+export const joinRequests = (members: CommunityMember[]): CommunityMember[] =>
+  members.filter((member) => member.inviteStatus === 'requested' && member.user?.id);
+
 /** Invites an owner sent that nobody has answered yet. */
 export const pendingInvites = (members: CommunityMember[]): CommunityMember[] =>
   members.filter((member) => member.role !== 'owner' && member.inviteStatus === 'pending');
@@ -57,7 +61,19 @@ export const pendingInvites = (members: CommunityMember[]): CommunityMember[] =>
  * and anyone else - including someone who opens a forwarded link - the closed
  * one. A public community is open to everybody.
  */
-export type CommunityAccess = 'owner' | 'member' | 'guest' | 'invited' | 'closed';
+/**
+ * `requested`: asked to join a private community, waiting on its hosts.
+ * `requestable`: may ask - it declined an invite, or a request was turned
+ * down, so it still has a record that lets it see the community (DEV-447).
+ */
+export type CommunityAccess =
+  | 'owner'
+  | 'member'
+  | 'guest'
+  | 'invited'
+  | 'requested'
+  | 'requestable'
+  | 'closed';
 
 export const accessOf = (
   community: Community,
@@ -72,6 +88,10 @@ export const accessOf = (
   if (membershipOf(self) === 'member') return 'member';
   if (community.isPublic) return 'guest';
   if (self?.inviteStatus === 'pending' && !hasDeclined) return 'invited';
+  if (self?.inviteStatus === 'requested') return 'requested';
+  // A private community is only visible to someone with a record, so anyone
+  // left here has declined an invite or been turned down - and may ask
+  if (self || hasDeclined) return 'requestable';
   return 'closed';
 };
 
