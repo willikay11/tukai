@@ -5,12 +5,21 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { attendedAgo } from '@/app/(profile)/hooks/calendar-agenda';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { SelectablePill } from '@/app/shared/components/Places/WeekdayPills';
 import { TukaiReviewHelper } from '@/app/shared/components/TukAI/TukaiReviewHelper';
-import { useCreateExperienceRating } from '@/app/shared/hooks/useExperiences';
+import {
+  useCreateExperienceRating,
+  useUpdateExperienceRating,
+} from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Drawer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
-import { RATING_MAX } from '@/types/experienceRating';
+import {
+  ExperienceRating,
+  RATING_HIGHLIGHTS,
+  RATING_MAX,
+  ratingPhotoUrl,
+} from '@/types/experienceRating';
 
 const RATING_LABEL: Record<number, string> = {
   0: 'Tap a star to rate',
@@ -37,13 +46,11 @@ const missingHint = (score: number, text: string): string | null => {
 const Divider = () => <div aria-hidden="true" className="h-px flex-shrink-0 bg-line-shell" />;
 
 /**
- * Leaving a review.
- *
- * There is no edit mode: the API has no way to update or delete a rating once
- * posted (only `POST .../ratings/` exists), so a written review never opens
- * this composer again - the Reviews tab leaves it read-only. For the same
- * reason there is no "What stood out?" (the API has no field for it) and no
- * TukAI writing help (there is no endpoint that writes one).
+ * Leaving a review, or - given `existing` - editing one already posted
+ * (DEV-394): it opens with the score, words, highlights and photos as saved,
+ * and Save changes sends them back. "What stood out?" is the API's own list of
+ * highlights (DEV-421); the design has the question only as a placeholder, so
+ * the chips borrow the app's selectable pill.
  */
 export const LeaveReviewDrawer = ({
   experienceId,
@@ -54,6 +61,7 @@ export const LeaveReviewDrawer = ({
   isOpen,
   onClose,
   initialScore = 0,
+  existing,
 }: {
   experienceId: string;
   experienceTitle: string;
@@ -64,14 +72,34 @@ export const LeaveReviewDrawer = ({
   onClose: () => void;
   /** Preset when a caller already knows the score, such as a tapped star. */
   initialScore?: number;
+  /** The reader's own review, to edit rather than write anew (DEV-394). */
+  existing?: ExperienceRating;
 }) => {
   const { toast } = useToast();
-  const [score, setScore] = useState(initialScore);
-  const [text, setText] = useState('');
+  const isEditing = Boolean(existing);
+  const [score, setScore] = useState(existing?.rating ?? initialScore);
+  const [text, setText] = useState(existing?.review ?? '');
+  const [highlights, setHighlights] = useState<string[]>(existing?.highlights ?? []);
   const [photos, setPhotos] = useState<File[]>([]);
+  // Saved photos the reader took off; removed on Save, not before
+  const [removedPhotoIds, setRemovedPhotoIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const { mutate: createRating, isPending } = useCreateExperienceRating(experienceId);
+  const { mutate: createRating, isPending: isCreating } = useCreateExperienceRating(experienceId);
+  const { mutate: updateRating, isPending: isUpdating } = useUpdateExperienceRating(experienceId);
+  const isPending = isCreating || isUpdating;
+
+  const savedPhotos = (existing?.photos ?? []).filter(
+    (photo) => !removedPhotoIds.includes(photo.id),
+  );
+  const photosLeft = PHOTOS_MAX - savedPhotos.length;
+
+  const toggleHighlight = (value: string) => {
+    setHighlights((current) =>
+      current.includes(value) ? current.filter((one) => one !== value) : [...current, value],
+    );
+    setError(null);
+  };
 
   const ready = score > 0 && text.trim().length > 0;
   const hint = missingHint(score, text);
@@ -92,7 +120,9 @@ export const LeaveReviewDrawer = ({
   const close = () => {
     setScore(0);
     setText('');
+    setHighlights([]);
     setPhotos([]);
+    setRemovedPhotoIds([]);
     setError(null);
     onClose();
   };
@@ -101,8 +131,29 @@ export const LeaveReviewDrawer = ({
     if (!ready) return;
     setError(null);
 
+    if (existing) {
+      updateRating(
+        {
+          ratingId: existing.id,
+          rating: score,
+          review: text.trim(),
+          highlights,
+          photos,
+          removedPhotoIds,
+        },
+        {
+          onSuccess: () => {
+            toast({ title: 'Review updated', variant: 'success' });
+            close();
+          },
+          onError: (failure: Error) => setError(failure.message),
+        },
+      );
+      return;
+    }
+
     createRating(
-      { rating: score, review: text.trim(), photos },
+      { rating: score, review: text.trim(), photos, highlights },
       {
         onSuccess: () => {
           toast({
@@ -120,11 +171,15 @@ export const LeaveReviewDrawer = ({
   };
 
   return (
-    <Drawer isOpen={isOpen} setIsOpen={(open) => !open && close()} ariaLabel="New review">
+    <Drawer
+      isOpen={isOpen}
+      setIsOpen={(open) => !open && close()}
+      ariaLabel={isEditing ? 'Edit review' : 'New review'}
+    >
       <div className="flex min-h-full flex-col">
         <div className="flex h-[68px] flex-shrink-0 items-center gap-2 border-b border-surface-muted px-4">
           <h2 className="min-w-0 flex-1 truncate px-1.5 text-[24px] font-bold tracking-[-0.4px] text-gray-900">
-            New review
+            {isEditing ? 'Edit review' : 'New review'}
           </h2>
           <button
             type="button"
@@ -195,6 +250,24 @@ export const LeaveReviewDrawer = ({
 
           <Divider />
 
+          <div className="flex flex-col gap-3">
+            <h3 className="text-[15px] font-semibold text-gray-900">
+              What stood out? <span className="font-normal text-ink-muted">(optional)</span>
+            </h3>
+            <div role="group" aria-label="What stood out?" className="flex flex-wrap gap-2">
+              {RATING_HIGHLIGHTS.map((highlight) => (
+                <SelectablePill
+                  key={highlight.value}
+                  label={highlight.label}
+                  isSelected={highlights.includes(highlight.value)}
+                  onClick={() => toggleHighlight(highlight.value)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <Divider />
+
           <div className="flex flex-col gap-2.5">
             <div className="flex items-baseline gap-2.5">
               <label htmlFor="review-text" className="text-[15px] font-semibold text-gray-900">
@@ -236,6 +309,28 @@ export const LeaveReviewDrawer = ({
             </span>
 
             <div className="flex flex-wrap gap-2">
+              {savedPhotos.map((photo) => (
+                <span
+                  key={photo.id}
+                  className="relative h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-xl bg-surface"
+                >
+                  <PhotoImage
+                    src={ratingPhotoUrl(photo, 'thumb')}
+                    alt=""
+                    fill
+                    sizes="72px"
+                    className="object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setRemovedPhotoIds((current) => [...current, photo.id])}
+                    aria-label="Remove this photo"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/55 text-white"
+                  >
+                    <IconComponent iconName="Cancel01Icon" size={12} color="currentColor" />
+                  </button>
+                </span>
+              ))}
               {photos.map((photo, index) => (
                 <span
                   key={`${photo.name}-${index}`}
@@ -266,7 +361,7 @@ export const LeaveReviewDrawer = ({
                 </span>
               ))}
 
-              {photos.length < PHOTOS_MAX && (
+              {photos.length < photosLeft && (
                 <label
                   className={cn(
                     'flex h-[72px] w-[72px] flex-shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-line text-ink-muted transition-colors hover:bg-surface',
@@ -281,7 +376,7 @@ export const LeaveReviewDrawer = ({
                     className="hidden"
                     onChange={(event) =>
                       setPhotos((current) =>
-                        [...current, ...Array.from(event.target.files ?? [])].slice(0, PHOTOS_MAX),
+                        [...current, ...Array.from(event.target.files ?? [])].slice(0, photosLeft),
                       )
                     }
                   />
@@ -331,7 +426,13 @@ export const LeaveReviewDrawer = ({
             aria-disabled={!ready}
             className="h-12 whitespace-nowrap rounded-full bg-lime px-6 text-[15px] font-semibold text-brand-ink enabled:hover:bg-lime-dark disabled:bg-[#E4F4B5] disabled:text-[#5E7A45]"
           >
-            {isPending ? 'Posting…' : 'Post review'}
+            {isEditing
+              ? isPending
+                ? 'Saving…'
+                : 'Save changes'
+              : isPending
+                ? 'Posting…'
+                : 'Post review'}
           </button>
         </div>
       </div>

@@ -15,6 +15,26 @@ export type ExperienceRatingPhoto = {
   caption?: string | null;
 };
 
+/** "What stood out?" - the API's fixed list, in its order and words (DEV-421). */
+export const RATING_HIGHLIGHTS = [
+  { value: 'great_host', label: 'Great host' },
+  { value: 'well_organised', label: 'Well organised' },
+  { value: 'good_value', label: 'Good value' },
+  { value: 'great_location', label: 'Great location' },
+  { value: 'great_atmosphere', label: 'Great atmosphere' },
+  { value: 'good_pace', label: 'Good pace' },
+  { value: 'friendly_people', label: 'Friendly people' },
+  { value: 'good_food', label: 'Good food and drinks' },
+  { value: 'felt_safe', label: 'Felt safe' },
+  { value: 'memorable', label: 'Memorable moments' },
+] as const;
+
+export type RatingHighlight = (typeof RATING_HIGHLIGHTS)[number]['value'];
+
+/** A highlight's words, or nothing for a value this list does not know yet. */
+export const highlightLabel = (value: string): string | undefined =>
+  RATING_HIGHLIGHTS.find((one) => one.value === value)?.label;
+
 export type ExperienceRating = {
   id: string;
   experience?: string;
@@ -22,6 +42,8 @@ export type ExperienceRating = {
   /** One to five. */
   rating: number;
   review?: string | null;
+  /** What stood out (DEV-421) */
+  highlights?: string[];
   photos?: ExperienceRatingPhoto[];
   dateCreated?: string;
 };

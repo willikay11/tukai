@@ -13,6 +13,7 @@ let isLoading = false;
 jest.mock('@/app/shared/hooks/useExperiences', () => ({
   useExperienceRatings: () => ({ data: { data: ratings }, isLoading }),
   useCreateExperienceRating: () => ({ mutate: jest.fn(), isPending: false }),
+  useUpdateExperienceRating: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
@@ -53,6 +54,16 @@ describe('reviews on an experience', () => {
 
     expect(screen.getByText('Amina')).toBeInTheDocument();
     expect(screen.getByText('Worth the early start.')).toBeInTheDocument();
+  });
+
+  // DEV-421
+  it('shows what stood out for each reviewer', () => {
+    ratings = [rating(5, { highlights: ['great_host', 'good_value'] })];
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
+
+    const list = screen.getByRole('list', { name: 'What stood out' });
+    expect(list).toHaveTextContent('Great host');
+    expect(list).toHaveTextContent('Good value');
   });
 
   it('copes with a score left without any words', () => {

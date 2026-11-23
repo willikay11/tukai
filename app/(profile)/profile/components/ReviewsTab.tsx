@@ -9,8 +9,26 @@ import { ReviewToWrite, WrittenReview } from '@/app/(profile)/hooks/useMyReviews
 import { LeaveReviewDrawer } from '@/app/shared/components/Experiences';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { useDeleteExperienceRating } from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
-import { ExperienceRatingPhoto, RATING_MAX, ratingPhotoUrl } from '@/types/experienceRating';
+import {
+  ExperienceRating,
+  ExperienceRatingPhoto,
+  RATING_MAX,
+  highlightLabel,
+  ratingPhotoUrl,
+} from '@/types/experienceRating';
 
 /** "Attended yesterday, {organiser}", or without one when there is none. */
 const attendedLine = (when: string, organiser?: string): string => {
@@ -34,18 +52,16 @@ const ToReviewCard = ({
         <div className="truncate text-[15px] font-semibold leading-[1.3] text-brand-ink">
           {review.title}
         </div>
-        <div className="truncate text-13 text-ink">{attendedLine(review.when, review.organiser)}</div>
+        <div className="truncate text-13 text-ink">
+          {attendedLine(review.when, review.organiser)}
+        </div>
       </div>
       <span className="flex-shrink-0 self-start rounded-full bg-lime px-[9px] text-[11.5px] font-bold leading-6 text-brand-ink">
         To review
       </span>
     </div>
 
-    <div
-      role="group"
-      aria-label={`Rate ${review.title}`}
-      className="-ml-2.5 flex items-center"
-    >
+    <div role="group" aria-label={`Rate ${review.title}`} className="-ml-2.5 flex items-center">
       {Array.from({ length: RATING_MAX }).map((_, index) => {
         const value = index + 1;
 
@@ -63,7 +79,9 @@ const ToReviewCard = ({
       })}
     </div>
 
-    <p className="-mt-1 text-sm leading-[1.5] text-ink">How was it? Tap a star to start your review.</p>
+    <p className="-mt-1 text-sm leading-[1.5] text-ink">
+      How was it? Tap a star to start your review.
+    </p>
   </article>
 );
 
@@ -90,7 +108,8 @@ const PhotoGalleryModal = ({
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
-      if (event.key === 'ArrowLeft') setCurrent((value) => (value - 1 + photos.length) % photos.length);
+      if (event.key === 'ArrowLeft')
+        setCurrent((value) => (value - 1 + photos.length) % photos.length);
       if (event.key === 'ArrowRight') setCurrent((value) => (value + 1) % photos.length);
     };
 
@@ -155,11 +174,37 @@ const PhotoGalleryModal = ({
   );
 };
 
-const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
+/**
+ * A review the reader wrote, with Edit and Delete - the API lets you change
+ * or remove your own (DEV-394). Deleting puts the experience back to review.
+ */
+const WrittenReviewCard = ({ review, onEdit }: { review: WrittenReview; onEdit: () => void }) => {
   const experienceDrawer = useExperienceDrawer();
+  const { toast } = useToast();
   const photos = review.rating.photos ?? [];
   const rating = review.rating.rating;
+  const highlights = (review.rating.highlights ?? [])
+    .map(highlightLabel)
+    .filter((label): label is string => Boolean(label));
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { mutate: deleteRating, isPending: isDeleting } = useDeleteExperienceRating(
+    review.experienceId,
+  );
+
+  const confirmDelete = () =>
+    deleteRating(review.rating.id, {
+      onSuccess: () => {
+        setIsDeleteOpen(false);
+        toast({ description: `Your review of ${review.title} is deleted.` });
+      },
+      onError: (error: Error) =>
+        toast({
+          title: 'Could not delete the review',
+          description: error.message,
+          variant: 'destructive',
+        }),
+    });
 
   return (
     <article className="flex flex-col gap-3 rounded-xl bg-surface px-4 pb-4 pt-3.5">
@@ -182,7 +227,11 @@ const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
       </button>
 
       <div className="flex items-center gap-2">
-        <span role="img" aria-label={`You rated it ${rating} out of 5`} className="flex items-center gap-0.5">
+        <span
+          role="img"
+          aria-label={`You rated it ${rating} out of 5`}
+          className="flex items-center gap-0.5"
+        >
           {Array.from({ length: RATING_MAX }).map((_, index) => (
             <IconComponent
               key={index}
@@ -201,6 +250,19 @@ const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
         <p className="text-[14.5px] leading-[1.55] text-gray-900">{review.rating.review}</p>
       )}
 
+      {highlights.length > 0 && (
+        <ul aria-label="What stood out" className="flex flex-wrap gap-1.5">
+          {highlights.map((label) => (
+            <li
+              key={label}
+              className="rounded-full bg-white px-3 py-1 text-[12.5px] font-medium text-brand-ink"
+            >
+              {label}
+            </li>
+          ))}
+        </ul>
+      )}
+
       {photos.length > 0 && (
         <div className="flex gap-2">
           {photos.slice(0, 3).map((photo, index) => {
@@ -211,10 +273,20 @@ const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
                 key={photo.id}
                 type="button"
                 onClick={() => setGalleryIndex(index)}
-                aria-label={overflow ? `See all ${photos.length} photos` : `Open photo ${index + 1} of ${photos.length}`}
+                aria-label={
+                  overflow
+                    ? `See all ${photos.length} photos`
+                    : `Open photo ${index + 1} of ${photos.length}`
+                }
                 className="relative h-[76px] w-[76px] flex-shrink-0 cursor-zoom-in overflow-hidden rounded-[8px] bg-surface-brand"
               >
-                <PhotoImage src={ratingPhotoUrl(photo, 'thumb')} alt="" fill sizes="76px" className="object-cover" />
+                <PhotoImage
+                  src={ratingPhotoUrl(photo, 'thumb')}
+                  alt=""
+                  fill
+                  sizes="76px"
+                  className="object-cover"
+                />
                 {overflow && (
                   <span className="absolute inset-0 flex items-center justify-center bg-[rgba(1,26,27,0.55)] text-[15px] font-bold text-white">
                     +{photos.length - 3}
@@ -225,6 +297,54 @@ const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
           })}
         </div>
       )}
+
+      <div className="mt-auto flex gap-2 pt-1">
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={`Edit your review of ${review.title}`}
+          className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold text-brand-ink hover:bg-surface-brand"
+        >
+          <IconComponent iconName="PencilEdit02Icon" size={16} color="currentColor" />
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsDeleteOpen(true)}
+          aria-label={`Delete your review of ${review.title}`}
+          className="inline-flex h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-danger hover:bg-danger-surface"
+        >
+          <IconComponent iconName="Delete02Icon" size={16} color="currentColor" />
+          Delete
+        </button>
+      </div>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent className="max-w-md gap-5 rounded-2xl p-6">
+          <AlertDialogHeader className="space-y-2 text-left sm:text-left">
+            <AlertDialogTitle className="text-lg font-bold text-gray-900">
+              Delete your review?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-relaxed text-gray-500">
+              Your review of {review.title} and its photos will be removed for good. You can write a
+              new one afterwards.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-3">
+            <AlertDialogCancel className="border-0 bg-transparent font-medium text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900">
+              Keep it
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              isLoading={isDeleting}
+              onClick={confirmDelete}
+              className="rounded-lg px-5"
+            >
+              Delete review
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {galleryIndex !== null && (
         <PhotoGalleryModal
@@ -245,10 +365,16 @@ export const ReviewsTab = ({
   toReview: ReviewToWrite[];
   written: WrittenReview[];
 }) => {
-  const [target, setTarget] = useState<
-    | { experienceId: string; title: string; image?: string; organiser?: string; when: string; score: number }
-    | null
-  >(null);
+  const [target, setTarget] = useState<{
+    experienceId: string;
+    title: string;
+    image?: string;
+    organiser?: string;
+    when: string;
+    score: number;
+    /** Set when editing a review already written (DEV-394) */
+    existing?: ExperienceRating;
+  } | null>(null);
 
   return (
     <section aria-label="Reviews" className="flex min-w-0 flex-col gap-4">
@@ -278,7 +404,21 @@ export const ReviewsTab = ({
             />
           ))}
           {written.map((review) => (
-            <WrittenReviewCard key={review.experienceId} review={review} />
+            <WrittenReviewCard
+              key={review.experienceId}
+              review={review}
+              onEdit={() =>
+                setTarget({
+                  experienceId: review.experienceId,
+                  title: review.title,
+                  image: review.image,
+                  organiser: review.organiser,
+                  when: review.when,
+                  score: review.rating.rating,
+                  existing: review.rating,
+                })
+              }
+            />
           ))}
         </div>
       )}
@@ -291,6 +431,7 @@ export const ReviewsTab = ({
           organiser={target.organiser}
           attendedWhen={target.when}
           initialScore={target.score}
+          existing={target.existing}
           isOpen={Boolean(target)}
           onClose={() => setTarget(null)}
         />

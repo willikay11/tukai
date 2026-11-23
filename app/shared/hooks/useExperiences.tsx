@@ -18,6 +18,8 @@ import {
   createItineraryDay,
   createSlotTemplate,
   deleteExperiencePhoto,
+  deleteExperienceRating,
+  deleteExperienceRatingPhoto,
   deleteExperienceTicket,
   deleteItineraryDay,
   deleteSlotTemplate,
@@ -41,6 +43,7 @@ import {
   resumeTicketSales,
   searchUsers,
   updateExperience,
+  updateExperienceRating,
   updateExperienceTicket,
   updateItineraryDay,
   updateSlotTemplate,
@@ -292,8 +295,56 @@ export const useCreateExperienceRating = (experienceId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { rating: number; review?: string; photos?: File[] }) =>
-      await createExperienceRating(experienceId, data),
+    mutationFn: async (data: {
+      rating: number;
+      review?: string;
+      photos?: File[];
+      highlights?: string[];
+    }) => await createExperienceRating(experienceId, data),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['experience-ratings', experienceId] }),
+  });
+};
+
+/**
+ * Saves an edited review (DEV-394): its score, words and highlights, any new
+ * photos, then takes off the photos the reader removed.
+ */
+export const useUpdateExperienceRating = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      ratingId,
+      removedPhotoIds = [],
+      ...data
+    }: {
+      ratingId: string;
+      rating: number;
+      review: string;
+      highlights: string[];
+      photos?: File[];
+      removedPhotoIds?: string[];
+    }) => {
+      const saved = await updateExperienceRating(experienceId, ratingId, data);
+      await Promise.all(
+        removedPhotoIds.map((photoId) =>
+          deleteExperienceRatingPhoto(experienceId, ratingId, photoId),
+        ),
+      );
+      return saved;
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ['experience-ratings', experienceId] }),
+  });
+};
+
+/** Deletes your own review (DEV-394); the experience goes back to "To review". */
+export const useDeleteExperienceRating = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ratingId: string) => await deleteExperienceRating(experienceId, ratingId),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ['experience-ratings', experienceId] }),
   });
