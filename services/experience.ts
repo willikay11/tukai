@@ -606,7 +606,7 @@ export const fetchExperienceRatings = async (experienceId: string): Promise<ApiR
  */
 export const createExperienceRating = async (
   experienceId: string,
-  data: { rating: number; review?: string; photos?: File[] },
+  data: { rating: number; review?: string; photos?: File[]; highlights?: string[] },
 ) => {
   try {
     const axiosInstance = await apiWithToken();
@@ -614,6 +614,8 @@ export const createExperienceRating = async (
 
     formData.append('rating', String(data.rating));
     if (data.review) formData.append('review', data.review);
+    // A list field: one entry per highlight (DEV-421)
+    (data.highlights ?? []).forEach((highlight) => formData.append('highlights', highlight));
     (data.photos ?? []).forEach((photo) => formData.append('new_photos', photo));
 
     const response = await axiosInstance.post(
@@ -627,6 +629,77 @@ export const createExperienceRating = async (
     console.error('API Error:', error.response?.data || error.message);
 
     throw new Error(parseApiError(error.response?.data, 'Could not post this review'));
+  }
+};
+
+/**
+ * Edits your own review (DEV-394). JSON unless there are new photos, so an
+ * emptied highlights list reaches the API as `[]` - a form cannot say that.
+ */
+export const updateExperienceRating = async (
+  experienceId: string,
+  ratingId: string,
+  data: { rating: number; review: string; highlights: string[]; photos?: File[] },
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const url = `/v1/experiences/${experienceId}/ratings/${ratingId}/`;
+    const photos = data.photos ?? [];
+
+    let response;
+    if (photos.length > 0) {
+      const formData = new FormData();
+      formData.append('rating', String(data.rating));
+      formData.append('review', data.review);
+      data.highlights.forEach((highlight) => formData.append('highlights', highlight));
+      photos.forEach((photo) => formData.append('new_photos', photo));
+      response = await axiosInstance.patch(url, formData, {
+        headers: { 'Content-Type': undefined },
+      });
+    } else {
+      response = await axiosInstance.patch(url, {
+        rating: data.rating,
+        review: data.review,
+        highlights: data.highlights,
+      });
+    }
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Could not save this review'));
+  }
+};
+
+/** Deletes your own review (DEV-394). */
+export const deleteExperienceRating = async (experienceId: string, ratingId: string) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.delete(
+      `/v1/experiences/${experienceId}/ratings/${ratingId}/`,
+    );
+    return { status: response.status, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Could not delete this review'));
+  }
+};
+
+/** Takes one photo off your own review. */
+export const deleteExperienceRatingPhoto = async (
+  experienceId: string,
+  ratingId: string,
+  photoId: string,
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    await axiosInstance.delete(
+      `/v1/experiences/${experienceId}/ratings/${ratingId}/photos/${photoId}/`,
+    );
+    return { success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Could not remove this photo'));
   }
 };
 

@@ -13,6 +13,13 @@ jest.mock('@/context/ExperienceDrawerContext', () => ({
   useExperienceDrawer: () => ({ openExperience }),
 }));
 
+const deleteRating = jest.fn();
+jest.mock('@/app/shared/hooks/useExperiences', () => ({
+  useDeleteExperienceRating: () => ({ mutate: deleteRating, isPending: false }),
+}));
+const toast = jest.fn();
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
+
 const leaveReviewProps = jest.fn();
 jest.mock('@/app/shared/components/Experiences', () => ({
   LeaveReviewDrawer: (props: Record<string, unknown>) => {
@@ -21,7 +28,10 @@ jest.mock('@/app/shared/components/Experiences', () => ({
   },
 }));
 
-const aPhoto = (id: string): ExperienceRatingPhoto => ({ id, photoWebpMdUrl: `https://cdn.example.com/${id}.jpg` });
+const aPhoto = (id: string): ExperienceRatingPhoto => ({
+  id,
+  photoWebpMdUrl: `https://cdn.example.com/${id}.jpg`,
+});
 
 const toReview = (overrides: Partial<ReviewToWrite> = {}): ReviewToWrite => ({
   experienceId: 'e1',
@@ -78,7 +88,7 @@ describe('reviews tab', () => {
   it('opens the past booking when the header is clicked', async () => {
     render(<ReviewsTab toReview={[]} written={[written()]} />);
 
-    await userEvent.click(screen.getByRole('button', { name: /Intro to wheel throwing/ }));
+    await userEvent.click(screen.getByRole('button', { name: /^Intro to wheel throwing/ }));
 
     expect(openExperience).toHaveBeenCalledWith('e2');
   });
@@ -112,7 +122,9 @@ describe('reviews tab', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Open photo 1 of 2' }));
 
-    expect(screen.getByRole('dialog', { name: 'Your photos from Intro to wheel throwing' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('dialog', { name: 'Your photos from Intro to wheel throwing' }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/1 of 2/)).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Next photo' }));
@@ -122,5 +134,72 @@ describe('reviews tab', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  // DEV-421
+  it('shows what stood out', () => {
+    render(
+      <ReviewsTab
+        toReview={[]}
+        written={[
+          written({
+            rating: {
+              id: 'r1',
+              rating: 5,
+              highlights: ['great_host', 'unknown_value'],
+              photos: [],
+            },
+          }),
+        ]}
+      />,
+    );
+
+    expect(screen.getByRole('list', { name: 'What stood out' })).toHaveTextContent('Great host');
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+  });
+
+  // DEV-394
+  it('opens the composer on the saved review to edit it', async () => {
+    const review = written();
+    render(<ReviewsTab toReview={[]} written={[review]} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Edit your review of Intro to wheel throwing' }),
+    );
+
+    expect(leaveReviewProps).toHaveBeenCalledWith(
+      expect.objectContaining({ experienceId: 'e2', existing: review.rating, initialScore: 5 }),
+    );
+  });
+
+  it('asks before deleting, then deletes by id', async () => {
+    deleteRating.mockImplementation((_id, { onSuccess }) => onSuccess());
+    render(<ReviewsTab toReview={[]} written={[written()]} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Delete your review of Intro to wheel throwing' }),
+    );
+    expect(deleteRating).not.toHaveBeenCalled();
+    expect(screen.getByText('Delete your review?')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete review' }));
+
+    expect(deleteRating).toHaveBeenCalledWith('r1', expect.anything());
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: 'Your review of Intro to wheel throwing is deleted.',
+      }),
+    );
+  });
+
+  it('keeps the review when deleting is cancelled', async () => {
+    render(<ReviewsTab toReview={[]} written={[written()]} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Delete your review of Intro to wheel throwing' }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Keep it' }));
+
+    expect(deleteRating).not.toHaveBeenCalled();
   });
 });

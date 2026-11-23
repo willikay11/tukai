@@ -6,7 +6,11 @@ import { useSession } from 'next-auth/react';
 
 import moment from 'moment';
 
-import { canOfferReviewForm, LeaveReviewDrawer, ownReview } from '@/app/shared/components/Experiences';
+import {
+  LeaveReviewDrawer,
+  canOfferReviewForm,
+  ownReview,
+} from '@/app/shared/components/Experiences';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useExperienceRatings } from '@/app/shared/hooks/useExperiences';
@@ -15,6 +19,7 @@ import {
   ExperienceRating,
   RATING_MAX,
   averageRating,
+  highlightLabel,
   ratingBreakdown,
   ratingPhotoUrl,
   ratingSummary,
@@ -69,6 +74,23 @@ const ReviewRow = ({ review }: { review: ExperienceRating }) => {
 
       {review.review && (
         <p className="mt-2 text-sm leading-relaxed text-gray-600">{review.review}</p>
+      )}
+
+      {/* What stood out (DEV-421) */}
+      {(review.highlights ?? []).some((value) => highlightLabel(value)) && (
+        <ul aria-label="What stood out" className="mt-2 flex flex-wrap gap-1.5">
+          {(review.highlights ?? [])
+            .map(highlightLabel)
+            .filter((label): label is string => Boolean(label))
+            .map((label) => (
+              <li
+                key={label}
+                className="rounded-full bg-surface px-3 py-1 text-xs font-medium text-brand-ink"
+              >
+                {label}
+              </li>
+            ))}
+        </ul>
       )}
 
       {photos.length > 0 && (
