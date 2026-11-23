@@ -44,7 +44,11 @@ import { CommunityDrawerTabs } from './CommunityDrawerTabs';
 import { CommunityMembersSection } from './CommunityMembersSection';
 import { CommunityMoments } from './CommunityMoments';
 import { CommunityPlaces } from './CommunityPlaces';
-import { CommunityClosedState, CommunityInvitedState } from './CommunityPrivateState';
+import {
+  CommunityClosedState,
+  CommunityInvitedState,
+  CommunityRequestedState,
+} from './CommunityPrivateState';
 import { CommunityReviews } from './CommunityReviews';
 import { CommunityUpcomingExperiences, UPCOMING_PAGE_SIZE } from './CommunityUpcomingExperiences';
 import {
@@ -210,10 +214,25 @@ const CommunityBody = ({
     );
   }
 
-  if (access === 'closed') {
+  if (access === 'requested') {
     return (
       <div className="px-6 pb-9 pt-5">
-        <CommunityClosedState />
+        <CommunityRequestedState
+          community={community}
+          isWithdrawing={actions.isLeaving}
+          onWithdraw={actions.withdrawRequest}
+        />
+      </div>
+    );
+  }
+
+  if (access === 'closed' || access === 'requestable') {
+    return (
+      <div className="px-6 pb-9 pt-5">
+        <CommunityClosedState
+          onRequest={access === 'requestable' ? actions.requestToJoin : undefined}
+          isRequesting={actions.isJoining}
+        />
       </div>
     );
   }
@@ -247,6 +266,7 @@ const CommunityBody = ({
           memberCount={memberCount}
           currentUserId={currentUserId}
           isOwnerSelf={isOwnerSelf}
+          isHostSelf={isHostSelf}
           coHostIds={coHostIdsOf(community)}
         />
         <Divider />

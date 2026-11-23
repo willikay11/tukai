@@ -66,6 +66,37 @@ export const useCommunityActions = (community: Community, currentUserId?: string
         onError: (error: Error) =>
           toast({ title: 'Could not decline', description: error.message, variant: 'destructive' }),
       }),
+    /** A private community: a request its hosts answer (DEV-447). */
+    requestToJoin: () =>
+      withAccount(() =>
+        joinCommunity(community.id, {
+          onSuccess: () =>
+            toast({
+              description: `Request sent. ${community.title}'s admins will let you know.`,
+              variant: 'success',
+            }),
+          onError: (error: Error) =>
+            toast({
+              title: 'Could not send the request',
+              description: error.message,
+              variant: 'destructive',
+            }),
+        }),
+      ),
+    /** Takes back a request still waiting on its hosts - `leave` does both (DEV-447). */
+    withdrawRequest: () =>
+      leaveCommunity(
+        { communityId: community.id },
+        {
+          onSuccess: () => toast({ description: `Request to join ${community.title} withdrawn.` }),
+          onError: (error: Error) =>
+            toast({
+              title: 'Could not withdraw',
+              description: error.message,
+              variant: 'destructive',
+            }),
+        },
+      ),
     leave: () =>
       leaveCommunity(
         { communityId: community.id },

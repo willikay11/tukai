@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   acceptCommunityInvite,
+  answerJoinRequest,
   createCommunity,
   createCommunityPhotos,
   declineCommunityInvite,
@@ -221,6 +222,25 @@ export const useLeaveCommunity = () => {
     // who is leaving from the session
     mutationFn: async ({ communityId }: { communityId: string; userId?: string }) =>
       await leaveCommunity(communityId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+/** A host letting someone in, or turning their request down (DEV-447). */
+export const useAnswerJoinRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['answerJoinRequest'],
+    mutationFn: async ({
+      communityId,
+      userId,
+      answer,
+    }: {
+      communityId: string;
+      userId: string;
+      answer: 'accepted' | 'rejected';
+    }) => await answerJoinRequest(communityId, userId, answer),
     onSuccess: () => invalidateCommunity(queryClient),
   });
 };

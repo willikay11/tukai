@@ -14,8 +14,10 @@ jest.mock('@/app/shared/components/Images', () => ({
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
+const answerRequest = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCancelCommunityInvite: () => ({ mutate: jest.fn(), isPending: false }),
+  useAnswerJoinRequest: () => ({ mutate: answerRequest, isPending: false }),
 }));
 
 const member = (
@@ -90,5 +92,60 @@ describe('CommunityMembersSection', () => {
     renderSection([member('1', 'Amina', 'owner'), member('2', 'Baraka')], { memberCount: 1 });
 
     expect(chipNames()).toHaveLength(1);
+  });
+
+  // DEV-447: hosts answer requests to join a private community
+  describe('join requests', () => {
+    const asking = () => [
+      member('1', 'Amina', 'owner'),
+      member('2', 'Baraka', 'regular', 'requested'),
+    ];
+
+    it('shows them to a host, with Approve and Decline', () => {
+      renderSection(asking(), { isOwnerSelf: true });
+
+      expect(screen.getByText('Asking to join (1)')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Approve the request from Baraka' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Decline the request from Baraka' })).toBeEnabled();
+    });
+
+    it('shows them to a co-host too', () => {
+      renderSection(asking(), { isHostSelf: true });
+
+      expect(screen.getByText('Asking to join (1)')).toBeInTheDocument();
+    });
+
+    it('keeps them from everyone else, and off the member chips', () => {
+      renderSection(asking());
+
+      expect(screen.queryByText('Asking to join (1)')).not.toBeInTheDocument();
+      expect(chipNames()).toEqual(['Amina']);
+    });
+
+    it('approves by user id', async () => {
+      renderSection(asking(), { isOwnerSelf: true });
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Approve the request from Baraka' }),
+      );
+
+      expect(answerRequest).toHaveBeenCalledWith(
+        { communityId: 'c1', userId: 'u-2', answer: 'accepted' },
+        expect.anything(),
+      );
+    });
+
+    it('declines by user id', async () => {
+      renderSection(asking(), { isOwnerSelf: true });
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Decline the request from Baraka' }),
+      );
+
+      expect(answerRequest).toHaveBeenCalledWith(
+        { communityId: 'c1', userId: 'u-2', answer: 'rejected' },
+        expect.anything(),
+      );
+    });
   });
 });

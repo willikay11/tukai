@@ -11,7 +11,12 @@ import {
 import { AVATAR_LIMIT } from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { useJoinCommunity, useLeaveCommunity } from '@/app/shared/hooks/useCommunities';
+import {
+  useAcceptCommunityInvite,
+  useDeclineCommunityInvite,
+  useJoinCommunity,
+  useLeaveCommunity,
+} from '@/app/shared/hooks/useCommunities';
 import { useToast } from '@/app/shared/hooks/useToast';
 import {
   AlertDialog,
@@ -27,7 +32,7 @@ import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
 import { Community, CommunityMember } from '@/types/community';
 
-type Membership = 'none' | 'pending' | 'member';
+type Membership = 'none' | 'invited' | 'requested' | 'member';
 
 const nameOf = (member: CommunityMember) =>
   member.user?.displayName ||
@@ -36,9 +41,10 @@ const nameOf = (member: CommunityMember) =>
 
 /**
  * A join request on a public community is accepted immediately; on a private
- * one it is only recorded as `requested` until a host approves it. The three
- * states are kept apart so the button never offers to leave a community the
- * reader has not actually been let into yet.
+ * one it is only recorded as `requested` until a host approves it (DEV-447).
+ * An invite (`pending`) is the host's offer, answered with accept or decline.
+ * The states are kept apart so the button never offers to leave a community
+ * the reader has not actually been let into yet.
  *
  * A record whose status the API leaves out counts as a member - membership is
  * what having the record means, and the alternative would strand the reader on
@@ -46,7 +52,8 @@ const nameOf = (member: CommunityMember) =>
  */
 const membershipOf = (member?: CommunityMember): Membership => {
   if (!member) return 'none';
-  if (member.inviteStatus === 'requested' || member.inviteStatus === 'pending') return 'pending';
+  if (member.inviteStatus === 'pending') return 'invited';
+  if (member.inviteStatus === 'requested') return 'requested';
   if (member.inviteStatus === 'rejected' || member.inviteStatus === 'ignored') return 'none';
   return 'member';
 };
@@ -63,6 +70,8 @@ export const JoinCommunityPanel = ({
   const { needAuth } = useAuthDialog();
   const { mutate: joinCommunity, isPending: isJoining } = useJoinCommunity();
   const { mutate: leaveCommunity, isPending: isLeaving } = useLeaveCommunity();
+  const { mutate: acceptInvite, isPending: isAccepting } = useAcceptCommunityInvite();
+  const { mutate: declineInvite, isPending: isDeclining } = useDeclineCommunityInvite();
 
   const members: CommunityMember[] = community.members ?? [];
   const memberCount = community.membersCount ?? members.length;
@@ -86,7 +95,7 @@ export const JoinCommunityPanel = ({
   const join = () => {
     joinCommunity(community.id, {
       onSuccess: () => {
-        setPendingMembership(community.isPublic ? 'member' : 'pending');
+        setPendingMembership(community.isPublic ? 'member' : 'requested');
         router.refresh();
         toast({
           title: community.isPublic ? 'Joined' : 'Request sent',
@@ -108,6 +117,49 @@ export const JoinCommunityPanel = ({
   // without an account. `join` is handed over rather than this handler: the
   // callback runs with the closure it was made in, where there is still no id.
   const handleJoin = () => (currentUserId ? join() : needAuth('join', join));
+
+  const onError = (title: string) => (error: Error) =>
+    toast({ title, description: error.message, variant: 'destructive' });
+
+  // An invite joins straight away, a private community included - the host
+  // already chose them (accept-invite, DEV-381)
+  const handleAcceptInvite = () =>
+    acceptInvite(community.id, {
+      onSuccess: () => {
+        setPendingMembership('member');
+        router.refresh();
+        toast({
+          title: 'Joined',
+          description: `You are now a member of ${community.title}. Membership does not reserve a seat.`,
+          variant: 'success',
+        });
+      },
+      onError: onError('Could not join'),
+    });
+
+  const handleDeclineInvite = () =>
+    declineInvite(community.id, {
+      onSuccess: () => {
+        setPendingMembership('none');
+        router.refresh();
+        toast({ description: `Invite to ${community.title} declined.` });
+      },
+      onError: onError('Could not decline'),
+    });
+
+  // `leave` also takes back a request still waiting on a host (DEV-447)
+  const handleWithdraw = () =>
+    leaveCommunity(
+      { communityId: community.id, userId: currentUserId },
+      {
+        onSuccess: () => {
+          setPendingMembership('none');
+          router.refresh();
+          toast({ description: `Request to join ${community.title} withdrawn.` });
+        },
+        onError: onError('Could not withdraw'),
+      },
+    );
 
   const handleLeave = () => {
     leaveCommunity(
@@ -175,9 +227,11 @@ export const JoinCommunityPanel = ({
       <p className="text-sm text-gray-500">
         {membership === 'member'
           ? 'You have first access to experiences, the moments feed and the group chat.'
-          : membership === 'pending'
+          : membership === 'requested'
             ? 'An administrator is reviewing your request. You will be notified once it is approved.'
-            : 'Members get first access to experiences, the moments feed and the group chat.'}
+            : membership === 'invited'
+              ? 'You have been invited. Accept to join straight away.'
+              : 'Members get first access to experiences, the moments feed and the group chat.'}
       </p>
 
       {membership === 'member' ? (
@@ -192,17 +246,46 @@ export const JoinCommunityPanel = ({
             Leave community
           </span>
         </Button>
+      ) : membership === 'invited' ? (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleDeclineInvite}
+            disabled={isDeclining || isAccepting}
+            className="flex-1 rounded-full font-semibold"
+          >
+            Decline
+          </Button>
+          <Button
+            onClick={handleAcceptInvite}
+            disabled={isAccepting || isDeclining}
+            className="flex-1 rounded-full bg-lime font-semibold text-primary hover:bg-lime/90"
+          >
+            Accept invite
+          </Button>
+        </div>
+      ) : membership === 'requested' ? (
+        <div className="space-y-2">
+          <p className="flex items-center justify-center gap-2 rounded-full bg-white py-2.5 text-sm font-semibold text-brand-ink">
+            <IconComponent iconName="Clock01Icon" size={16} color="currentColor" />
+            Requested
+          </p>
+          <Button
+            variant="outline"
+            onClick={handleWithdraw}
+            disabled={isLeaving}
+            className="w-full rounded-full font-semibold"
+          >
+            Withdraw request
+          </Button>
+        </div>
       ) : (
         <Button
           onClick={handleJoin}
-          disabled={isJoining || membership === 'pending'}
+          disabled={isJoining}
           className="w-full rounded-full bg-lime font-semibold text-primary hover:bg-lime/90"
         >
-          {membership === 'pending'
-            ? 'Request pending'
-            : community.isPublic
-              ? 'Join Community'
-              : 'Request to Join'}
+          {community.isPublic ? 'Join Community' : 'Request to Join'}
         </Button>
       )}
 
